@@ -155,13 +155,14 @@ try {
     $senhaHash = password_hash($senhaOriginal, PASSWORD_DEFAULT);
     $categoria = "professor";
     $stmt = $pdo->prepare("
-    INSERT INTO users (email, senha, categoria)
-    VALUES (:email, :senha, :categoria)
+    INSERT INTO users (email, senha, categoria, foto)
+    VALUES (:email, :senha, :categoria, :foto)
     ");
     $stmt->execute([
         ':email' => $email,
         ':senha' => $senhaHash,
-        ':categoria' => $categoria
+        ':categoria' => $categoria,
+        'foto' => $fotoPath
     ]);
 
     $userId = (int) $pdo->lastInsertId();

@@ -98,25 +98,7 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
 
 
 try {
-    $sql = "
-        INSERT INTO encarregado
-        (nome, email, bi, morada, contato, genero, distrito, freguesia)
-        VALUES
-        (:nome, :email, :bi, :morada, :contato, :genero, :distrito, :freguesia)
-    ";
-
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([
-        ':nome' => $nome,
-        ':email' => $email,
-        ':bi' => $bi,
-        ':morada' => $morada,
-        ':contato' => $contato,
-        ':genero' => $genero,
-        ':distrito' => $distrito,
-        ':freguesia' => $freguesia
-    ]);
-
+    
     $partesNome = explode(' ', trim($nome));
     $apelido = end($partesNome);
 
@@ -133,16 +115,38 @@ try {
     $senhaHash = password_hash($senhaOriginal, PASSWORD_DEFAULT);
     $categoria = "encarregado";
     $stmt = $pdo->prepare("
-    INSERT INTO users (email, senha, categoria)
-    VALUES (:email, :senha, :categoria)
+    INSERT INTO users (email, senha, categoria, foto)
+    VALUES (:email, :senha, :categoria, :foto)
     ");
     $stmt->execute([
         ':email' => $email,
         ':senha' => $senhaHash,
-        ':categoria' => $categoria
+        ':categoria' => $categoria,
+        ':foto' => $fotoPath
     ]);
 
     $userId = (int) $pdo->lastInsertId();
+
+    $sql = "
+        INSERT INTO encarregado
+        (user_id, nome, email, bi, morada, contato, genero, distrito, freguesia)
+        VALUES
+        (:user_id, :nome, :email, :bi, :morada, :contato, :genero, :distrito, :freguesia)
+    ";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([
+        'user_id' => $userId,
+        ':nome' => $nome,
+        ':email' => $email,
+        ':bi' => $bi,
+        ':morada' => $morada,
+        ':contato' => $contato,
+        ':genero' => $genero,
+        ':distrito' => $distrito,
+        ':freguesia' => $freguesia
+    ]);
+
 
     $_SESSION['alerta'] = [
         'tipo' => 'success',

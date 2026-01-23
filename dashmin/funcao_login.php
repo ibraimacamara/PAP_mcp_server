@@ -110,16 +110,20 @@ try {
  
     switch ($user['categoria']) {
         case 'admin':
-            header('Location: admin/dashboard.php');
+            header('Location: admin/home.php');
             break;
 
         case 'aluno':
-            header('Location: home.php');
+            header('Location: aluno/home.php');
             break;
 
         case 'professor':
-            header('Location: professor/dashboard.php');
+            header('Location: professor/home.php');
             break;
+        case 'funcionario':
+            header('Location: professor/home.php');
+            break;
+
 
         default:
             logErro('Categoria inválida para user ID ' . $user['id']);

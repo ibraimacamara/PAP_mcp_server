@@ -135,35 +135,6 @@ if (!empty($_FILES['foto']['name'])) {
 try {
     $pdo->beginTransaction();
 
-    // Inserir aluno
-    $stmt = $pdo->prepare("
-        INSERT INTO aluno 
-        (nome, data_nascimento, contato, bi, email, morada, genero, distrito, freguesia, foto)
-        VALUES (:nome, :data, :contato, :bi, :email, :morada, :genero, :distrito, :freguesia, :foto)
-    ");
-    $stmt->execute([
-        ':nome' => $nome,
-        ':data' => $dataNasc,
-        ':contato' => $contato,
-        ':bi' => $bi,
-        ':email' => $email,
-        ':morada' => $morada,
-        ':genero' => $genero,
-        ':distrito' => $distrito,
-        ':freguesia' => $freguesia,
-        ':foto' => $fotoPath
-    ]);
-    $alunoId = (int) $pdo->lastInsertId();
-
-    // Relação com curso
-    $stmt = $pdo->prepare("INSERT INTO aluno_curso (numero_aluno, curso_id) VALUES (:aluno, :curso)");
-    $stmt->execute([':aluno' => $alunoId, ':curso' => $cursoId]);
-
-    // Relação com turma
-    $stmt = $pdo->prepare("INSERT INTO aluno_turma (numero_aluno, turma_id) VALUES (:aluno, :turma)");
-    $stmt->execute([':aluno' => $alunoId, ':turma' => $turmaId]);
-
-
     // users
     $partesNome = explode(' ', trim($nome));
     $apelido = end($partesNome);
@@ -181,14 +152,48 @@ try {
     $senhaHash = password_hash($senhaOriginal, PASSWORD_DEFAULT);
     $categoria = "aluno";
     $stmt = $pdo->prepare("
-    INSERT INTO users (email, senha, categoria)
-    VALUES (:email, :senha, :categoria)
+    INSERT INTO users (email, senha, categoria, foto)
+    VALUES (:email, :senha, :categoria, :foto)
     ");
     $stmt->execute([
         ':email' => $email,
         ':senha' => $senhaHash,
-        ':categoria' => $categoria
+        ':categoria' => $categoria,
+        ':foto' => $fotoPath
     ]);
+    $userId = (int) $pdo->lastInsertId();
+
+    // Inserir aluno
+    $stmt = $pdo->prepare("
+        INSERT INTO aluno 
+        (user_id, nome, data_nascimento, contato, bi, email, morada, genero, distrito, freguesia)
+        VALUES (:user_id, :nome, :data, :contato, :bi, :email, :morada, :genero, :distrito, :freguesia )
+    ");
+    $stmt->execute([
+        'user_id' => $userId,
+        ':nome' => $nome,
+        ':data' => $dataNasc,
+        ':contato' => $contato,
+        ':bi' => $bi,
+        ':email' => $email,
+        ':morada' => $morada,
+        ':genero' => $genero,
+        ':distrito' => $distrito,
+        ':freguesia' => $freguesia,
+        
+    ]);
+    $alunoId = (int) $pdo->lastInsertId();
+
+    // Relação com curso
+    $stmt = $pdo->prepare("INSERT INTO aluno_curso (numero_aluno, curso_id) VALUES (:aluno, :curso)");
+    $stmt->execute([':aluno' => $alunoId, ':curso' => $cursoId]);
+
+    // Relação com turma
+    $stmt = $pdo->prepare("INSERT INTO aluno_turma (numero_aluno, turma_id) VALUES (:aluno, :turma)");
+    $stmt->execute([':aluno' => $alunoId, ':turma' => $turmaId]);
+
+
+
 
     $userId = (int) $pdo->lastInsertId();
 
