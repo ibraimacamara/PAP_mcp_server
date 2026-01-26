@@ -37,12 +37,12 @@ if (empty($_SESSION['csrf_token'])) {
         </div>
 
         <!-- FORM CURSO -->
- 
+
         <div class="col-lg-6 col-12">
             <div class="bg-white shadow rounded h-100 p-4 d-flex flex-column">
                 <h5 class="mb-4">Curso</h5>
 
-                <form action="salvar_curso.php" method="POST" class="d-flex flex-column flex-grow-1">
+                <form action="salvar_curso.php" method="POST" enctype="multipart/form-data" class="d-flex flex-column flex-grow-1">
                     <input type="hidden" name="csrf_token"
                         value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
 
@@ -54,6 +54,11 @@ if (empty($_SESSION['csrf_token'])) {
                     <div class="mb-3">
                         <label class="form-label">Descrição</label>
                         <input type="text" name="descricao" class="form-control">
+                    </div>
+                    <div class=" mb-3">
+                        <label for="formFile" class="form-label">Foto</label>
+                        <input class="form-control" name="foto" type="file"
+                            accept="image/png, image/jpeg, image/jpg, image/webp" required>
                     </div>
 
                     <!-- empurra o botão para baixo -->

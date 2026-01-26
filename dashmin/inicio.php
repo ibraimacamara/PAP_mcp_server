@@ -85,10 +85,13 @@ require_once "conexao.php";
                             <a href="element.html" class="dropdown-item">Other Elements</a>
                         </div>
                     </div-->
-                    <a href="form_aluno.php" class="nav-item nav-link <?= isActive('form_aluno.php'); ?> "><i class="fa fa-user-plus  me-2"></i>Aluno</a>
-                    <a href="form_encarregado.php " class="nav-item nav-link <?= isActive('form_encarregado.php'); ?> "><i
+                    <a href="form_aluno.php" class="nav-item nav-link <?= isActive('form_aluno.php'); ?> "><i
+                            class="fa fa-user-plus  me-2"></i>Aluno</a>
+                    <a href="form_encarregado.php "
+                        class="nav-item nav-link <?= isActive('form_encarregado.php'); ?> "><i
                             class="fa fa-user-tie me-2"></i>Encarregado</a>
-                    <a href="forms.php" class="nav-item nav-link <?= isActive('forms.php'); ?>"><i class="fa fa-book-open me-2"></i>Curso Turma</a>
+                    <a href="forms.php" class="nav-item nav-link <?= isActive('forms.php'); ?>"><i
+                            class="fa fa-book-open me-2"></i>Curso Turma</a>
                     <a href="form_professor.php" class="nav-item nav-link <?= isActive('form_professor.php'); ?>"><i
                             class="fa fa-chalkboard-teacher me-2"></i>Professor</a>
 
@@ -202,3 +205,8 @@ require_once "conexao.php";
                 </div>
             </nav>
             <!-- Navbar End -->
+
+<?php
+require("chatbox.php");
+
+?>

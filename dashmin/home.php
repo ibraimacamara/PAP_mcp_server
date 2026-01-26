@@ -1,6 +1,7 @@
 <?php
-require_once "conexao.php";
-require_once "inicio.php";
+require("conexao.php");
+require("inicio.php");
+
 
 $stmt = $pdo->query("SELECT COUNT(*) AS total FROM aluno");
 $totalAlunos = $stmt->fetch(PDO::FETCH_ASSOC)['total'];

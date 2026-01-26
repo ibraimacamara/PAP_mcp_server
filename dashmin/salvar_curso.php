@@ -67,6 +67,49 @@ $descricao    = trim($_POST['descricao'] ?? '');
 
 
 
+
+$fotoPath = null;
+
+if (!empty($_FILES['foto']['name'])) {
+    $foto = $_FILES['foto'];
+
+    if ($foto['error'] !== UPLOAD_ERR_OK) {
+        erroUtilizador('Erro no upload da foto.');
+    }
+
+    $tiposPermitidos = [
+        'image/jpeg' => 'jpg',
+        'image/png'  => 'png',
+        'image/gif'  => 'gif'
+    ];
+
+    if (!array_key_exists($foto['type'], $tiposPermitidos)) {
+        erroUtilizador('Apenas imagens JPEG, PNG ou GIF são permitidas.');
+    }
+
+    $uploadDir = __DIR__ . '/../uploads_curso';
+    if (!is_dir($uploadDir)) {
+        erroUtilizador('A pasta de uploads não existe.');
+    }
+
+    // Normalizar nome do curso
+    $slugCurso = strtolower(trim(preg_replace('/[^A-Za-z0-9]+/', '-', $nome)));
+
+    // Adiciona timestamp para evitar sobrescrita
+    $extensao = $tiposPermitidos[$foto['type']];
+    $novoNome = 'curso_' . $slugCurso . '_' . time() . '.' . $extensao;
+
+    $destino = $uploadDir . '/' . $novoNome;
+
+    if (!move_uploaded_file($foto['tmp_name'], $destino)) {
+        erroUtilizador('Falha ao guardar a foto.');
+    }
+
+    $fotoPath = $novoNome;
+}
+
+
+
 if ($nome === ''  ) {
     erroUtilizador('Inseri o nome de curso.');
 }
@@ -80,15 +123,15 @@ if (mb_strlen($nome) < 3) {
 
 try {
     $sql = "
-        INSERT INTO curso (nome, descricao )
-        VALUES (:nome, :descricao)
+        INSERT INTO curso (nome, descricao, imagem )
+        VALUES (:nome, :descricao, :imagem)
     ";
 
     $stmt = $pdo->prepare($sql);
     $stmt->execute([
         ':nome'      => $nome,
-        ':descricao'    => $descricao
-       
+        ':descricao'    => $descricao,
+        ':imagem'    => $fotoPath
     ]);
 
     $_SESSION['alerta'] = [

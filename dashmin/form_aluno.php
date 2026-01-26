@@ -21,6 +21,7 @@ $turma = $pdo->query(
     "SELECT id, codigo FROM turma ORDER BY codigo"
 )->fetchAll(PDO::FETCH_ASSOC);
 ?>
+
 <!-- Form Start -->
 <div class="col-12">
     <?php if (!empty($_SESSION['alerta'])): ?>
