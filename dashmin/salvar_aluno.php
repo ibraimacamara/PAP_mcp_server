@@ -227,9 +227,18 @@ try {
         unlink(__DIR__ . '/' . $fotoPath);
     }
 
+    // if ($e->getCode() === '23000') {
+    //     erroUtilizador('Aluno já registado.');
+    // }
     if ($e->getCode() === '23000') {
-        erroUtilizador('Aluno já registado.');
+    if (str_contains($e->getMessage(), 'users.email')) {
+        erroUtilizador('Email já registado.');
     }
+    if (str_contains($e->getMessage(), 'curso_id')) {
+        erroUtilizador('Curso inválido.');
+    }
+}
+
 
     erroTecnico('Erro BD: ' . $e->getMessage());
 }

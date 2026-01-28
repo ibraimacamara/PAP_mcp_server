@@ -77,14 +77,29 @@ require_once "conexao.php";
                 <div class="navbar-nav w-100">
                     <a href="home.php" class="nav-item nav-link <?= isActive('home.php'); ?>"><i
                             class="fa fa-tachometer-alt me-2"></i>Painel</a>
-                    <!--div class="nav-item dropdown">
-                        <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"><i class="fa fa-laptop me-2"></i>Elements</a>
+                    <div class="nav-item dropdown">
+                        <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"><i
+                                class="fa fa-laptop me-2"></i>Consultas</a>
                         <div class="dropdown-menu bg-transparent border-0">
-                            <a href="button.html" class="dropdown-item">Buttons</a>
-                            <a href="typography.html" class="dropdown-item">Typography</a>
-                            <a href="element.html" class="dropdown-item">Other Elements</a>
+                            <a href="#" class="dropdown-item ps-4 <?= isActive('form_aluno.php'); ?>">
+                                <i class="fa fa-user-plus me-2 text-primary"></i> Alunos
+                            </a>
+                            <a href="lista_curso.php" class="dropdown-item ps-4 <?= isActive('lista_curso.php'); ?> "><i
+                                    class="fa fa-book-open me-2 text-primary"></i> Cursos</a>
+                            <a href="lista_curso.php"
+                                class="dropdown-item ps-4 <?= isActive('lista_encarregado.php'); ?> "><i
+                                    class="fa fa-user-tie me-2 text-primary"></i> Encarregado</a>
+                            <a href="lista_curso.php"
+                                class="dropdown-item ps-4 <?= isActive('lista_funcionário.php'); ?> "><i
+                                    class="fa fa-chalkboard-teacher me-2 text-primary"></i> Funcionário</a>
+                            <a href="lista_curso.php"
+                                class="dropdown-item ps-4 <?= isActive('lista_professor.php'); ?> "><i
+                                    class="fa fa-book-open me-2 text-primary"></i> Professores</a>
+                            <a href="lista_curso.php" class="dropdown-item ps-4<?= isActive('lista_turma.php'); ?> "><i
+                                    class="fa fa-book-open me-2 text-primary"></i> Turmas</a>
+
                         </div>
-                    </div-->
+                    </div>
                     <a href="form_aluno.php" class="nav-item nav-link <?= isActive('form_aluno.php'); ?> "><i
                             class="fa fa-user-plus  me-2"></i>Aluno</a>
                     <a href="form_encarregado.php "
@@ -206,7 +221,7 @@ require_once "conexao.php";
             </nav>
             <!-- Navbar End -->
 
-<?php
-require("chatbox.php");
+            <?php
+            require("chatbox.php");
 
-?>
+            ?>

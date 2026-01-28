@@ -1,1 +1,2 @@
 
+[2026-01-28 09:42:11] Erro BD: SQLSTATE[23000]: Integrity constraint violation: 1452 Cannot add or update a child row: a foreign key constraint fails (`gestor_escola`.`aluno_curso`, CONSTRAINT `aluno_curso_ibfk_1` FOREIGN KEY (`numero_aluno`) REFERENCES `aluno_teste` (`numero_aluno`))
