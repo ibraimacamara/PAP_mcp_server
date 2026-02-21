@@ -81,7 +81,7 @@ require_once "conexao.php";
                         <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"><i
                                 class="fa fa-laptop me-2"></i>Consultas</a>
                         <div class="dropdown-menu bg-transparent border-0">
-                            <a href="#" class="dropdown-item ps-4 <?= isActive('form_aluno.php'); ?>">
+                            <a href="lista_aluno.php" class="dropdown-item ps-4 <?= isActive('form_aluno.php'); ?>">
                                 <i class="fa fa-user-plus me-2 text-primary"></i> Alunos
                             </a>
                             <a href="lista_curso.php" class="dropdown-item ps-4 <?= isActive('lista_curso.php'); ?> "><i
@@ -95,7 +95,7 @@ require_once "conexao.php";
                             <a href="lista_curso.php"
                                 class="dropdown-item ps-4 <?= isActive('lista_professor.php'); ?> "><i
                                     class="fa fa-book-open me-2 text-primary"></i> Professores</a>
-                            <a href="lista_curso.php" class="dropdown-item ps-4<?= isActive('lista_turma.php'); ?> "><i
+                            <a href="lista_turma.php" class="dropdown-item ps-4<?= isActive('lista_turma.php'); ?> "><i
                                     class="fa fa-book-open me-2 text-primary"></i> Turmas</a>
 
                         </div>

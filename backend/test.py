@@ -1,142 +1,268 @@
-####__ferramenta de buscat encarregado na tabela alunos encarregados
+from fastmcp import FastMCP
+from typing import Union
+import json
+from conexao import get_connection
 
+mcp = FastMCP("Gestor Escolar Inteligente MCP")
+
+
+# ==========================================================
+# 🔹 UTILITÁRIOS
+# ==========================================================
+
+def _consume_meta(*args, **kwargs):
+    pass
+
+
+def get_all_tables(cur):
+    cur.execute("SHOW TABLES")
+    return [list(t.values())[0] for t in cur.fetchall()]
+
+
+def get_foreign_keys(cur, table_name: str):
+    cur.execute("""
+        SELECT
+            COLUMN_NAME,
+            REFERENCED_TABLE_NAME,
+            REFERENCED_COLUMN_NAME
+        FROM information_schema.KEY_COLUMN_USAGE
+        WHERE TABLE_NAME = %s
+        AND REFERENCED_TABLE_NAME IS NOT NULL
+    """, (table_name,))
+    return cur.fetchall()
+
+
+def format_rows(rows: list[dict]) -> str:
+    if not rows:
+        return "📭 Nenhum registo encontrado."
+
+    # Caso seja apenas uma coluna (ex: SHOW TABLES)
+    if rows and len(rows[0]) == 1:
+        col = list(rows[0].keys())[0]
+        texto = "📋 Resultados encontrados:\n\n"
+        for i, row in enumerate(rows, 1):
+            texto += f"- {row[col]}\n"
+        return texto.strip()
+
+    # Caso geral
+    texto = "📋 Resultados encontrados:\n\n"
+    for i, row in enumerate(rows, 1):
+        texto += f"{i}.\n"
+        for k, v in row.items():
+            texto += f"   {k}: {v}\n"
+        texto += "\n"
+    return texto.strip()
+
+
+# ==========================================================
+# 🔹 LISTAR QUALQUER TABELA
+# ==========================================================
 
 @mcp.tool
-def delete_alunos_encarregados(
-    encarregado_id: int,
+def listar_tabela(
+    table: str,
     sessionId: str | None = None,
     action: str | None = None,
     chatInput: str | None = None,
     toolCallId: str | None = None,
-) -> dict:
+    id: str | None = None,
+    tool: str | None = None
+) -> str:
+    _consume_meta(sessionId, action, chatInput, toolCallId)
+
+    conn = get_connection()
+    if not conn:
+        return "❌ Sem conexão com a base de dados."
+
+    cur = conn.cursor(dictionary=True)
+    try:
+        tabelas = get_all_tables(cur)
+        if table not in tabelas:
+            return f"❌ A tabela '{table}' não existe."
+
+        cur.execute(f"SELECT * FROM `{table}`")
+        rows = cur.fetchall()
+        return format_rows(rows)
+
+    except Exception as e:
+        return f"❌ Erro: {str(e)}"
+    finally:
+        cur.close()
+        conn.close()
+
+
+# ==========================================================
+# 🔹 CONSULTA RELACIONAL AUTOMÁTICA
+# ==========================================================
+
+@mcp.tool
+def buscar_relacionado(
+    table: str,
+    column: str,
+    value: Union[str, int],
+    sessionId: str | None = None,
+    action: str | None = None,
+    chatInput: str | None = None,
+    toolCallId: str | None = None,
+    id: str | None = None,
+    tool: str | None = None
+) -> str:
+    _consume_meta(sessionId, action, chatInput, toolCallId)
+
+    conn = get_connection()
+    if not conn:
+        return "❌ Sem conexão."
+
+    cur = conn.cursor(dictionary=True)
+    try:
+        # Buscar registo principal
+        sql = f"SELECT * FROM `{table}` WHERE `{column}` = %s LIMIT 1"
+        cur.execute(sql, (value,))
+        principal = cur.fetchone()
+        if not principal:
+            return "❌ Registo não encontrado."
+
+        resultado = f"📌 Dados de {table}:\n\n"
+        for k, v in principal.items():
+            resultado += f"{k}: {v}\n"
+
+        # Buscar relações
+        foreign_keys = get_foreign_keys(cur, table)
+        for fk in foreign_keys:
+            col = fk["COLUMN_NAME"]
+            ref_table = fk["REFERENCED_TABLE_NAME"]
+            ref_col = fk["REFERENCED_COLUMN_NAME"]
+
+            if col in principal and principal[col] is not None:
+                cur.execute(
+                    f"SELECT * FROM `{ref_table}` WHERE `{ref_col}` = %s",
+                    (principal[col],)
+                )
+                relacionados = cur.fetchall()
+                if relacionados:
+                    resultado += f"\n🔗 Relacionado com {ref_table}:\n"
+                    for r in relacionados:
+                        for k, v in r.items():
+                            resultado += f"   {k}: {v}\n"
+                        resultado += "\n"
+
+        return resultado.strip()
+
+    except Exception as e:
+        return f"❌ Erro: {str(e)}"
+    finally:
+        cur.close()
+        conn.close()
+
+
+# ==========================================================
+# 🔹 CONSULTA ESPECÍFICA: ENCARREGADO DO ALUNO
+# ==========================================================
+
+@mcp.tool
+def encarregado_do_aluno(
+    numero_aluno: int,
+    sessionId: str | None = None,
+    action: str | None = None,
+    chatInput: str | None = None,
+    toolCallId: str | None = None,
+    id: str | None = None,
+    tool: str | None = None
+) -> str:
     """
-    Remove um encarregado da tabela 'alunos_encarregados' pelo ID.
+    Busca os encarregados de um aluno pelo numero_aluno.
+    Retorna apenas os dados da tabela 'encarregados', com laco_familiar da relação.
     """
     _consume_meta(sessionId, action, chatInput, toolCallId)
 
     conn = get_connection()
     if not conn:
-        return {"success": False, "message": "Sem conexão ao banco"}
+        return "❌ Sem conexão com o banco de dados."
 
-    cur = conn.cursor()
+    cur = conn.cursor(dictionary=True)
     try:
-        sql = "DELETE FROM `alunos_encarregados` WHERE id = %s"
-        cur.execute(sql, (encarregado_id,))
-        conn.commit()
+        # Busca o aluno
+        cur.execute("SELECT * FROM aluno WHERE numero_aluno = %s", (numero_aluno,))
+        aluno = cur.fetchone()
+        if not aluno:
+            return "❌ Aluno não encontrado."
 
-        return {
-            "success": True,
-            "message": "encarregado removido com sucesso",
-            "rows_affected": cur.rowcount,
-            "error": None
-        }
+        # Busca os IDs dos encarregados na tabela de relação
+        cur.execute("""
+            SELECT id_encarregado, laco_familiar
+            FROM aluno_encarregados
+            WHERE numero_aluno = %s
+        """, (numero_aluno,))
+        relacoes = cur.fetchall()
+        if not relacoes:
+            return f"📌 O aluno {aluno['nome']} não possui encarregado registado."
+
+        # Buscar dados completos da tabela encarregados
+        ids = [r["id_encarregado"] for r in relacoes]
+        placeholders = ", ".join(["%s"] * len(ids))
+        cur.execute(f"SELECT * FROM encarregado WHERE id IN ({placeholders})", tuple(ids))
+        encarregados = cur.fetchall()
+
+        # Combinar laco_familiar da relação com dados do encarregado
+        texto = f"👨‍👩‍👧 Encarregado(s) de {aluno['nome']}:\n\n"
+        for enc in encarregados:
+            # Encontrar laço familiar
+            laco = next((r["laco_familiar"] for r in relacoes if r["id_encarregado"] == enc["id"]), "Desconhecido")
+            texto += f"Nome: {enc.get('nome')}\n"
+            texto += f"Email: {enc.get('email')}\n"
+            texto += f"Laço Familiar: {laco}\n"
+            texto += "\n"
+
+        return texto.strip()
 
     except Exception as e:
-        conn.rollback()
-        return {"success": False, "message": "Erro ao remover encarregado", "error": str(e)}
-
+        return f"❌ Erro: {str(e)}"
     finally:
         cur.close()
         conn.close()
 
 
-    
+# ==========================================================
+# 🔹 EXECUTOR SQL SEGURO
+# ==========================================================
+
 @mcp.tool
-def get_aluno_encarregado(
-    aluno_nome: str | None = None,
-    numero_aluno: int | None = None,
+def safe_sql_executor(
+    sql: str,
     sessionId: str | None = None,
     action: str | None = None,
     chatInput: str | None = None,
     toolCallId: str | None = None,
-) -> dict:
-
+    id: str | None = None,
+    tool: str | None = None
+) -> str:
     _consume_meta(sessionId, action, chatInput, toolCallId)
 
-    if not aluno_nome and not numero_aluno:
-        return {
-            "success": False,
-            "message": "É necessário informar aluno_nome ou numero_aluno.",
-            "error": "missing_parameters"
-        }
+    forbidden = ["DROP", "TRUNCATE", "ALTER", "CREATE"]
+    if any(word in sql.upper() for word in forbidden):
+        return "❌ Comando não permitido."
 
     conn = get_connection()
-    if conn is None:
-        return {
-            "success": False,
-            "message": "Sem conexão ao banco",
-            "error": "get_connection retornou None",
-        }
+    if not conn:
+        return "❌ Sem conexão com a base de dados."
 
     cur = conn.cursor(dictionary=True)
-
     try:
-        # 1️⃣ Buscar o aluno
-        if aluno_nome:
-            cur.execute("SELECT * FROM alunos WHERE nome = %s", (aluno_nome,))
-        else:
-            cur.execute("SELECT * FROM alunos WHERE numero_aluno = %s", (numero_aluno,))
+        cur.execute(sql)
+        if sql.strip().upper().startswith("SELECT"):
+            rows = cur.fetchall()
+            return format_rows(rows)
 
-        aluno = cur.fetchone()
-
-        if not aluno:
-            return {
-                "success": False,
-                "message": "Aluno não encontrado.",
-                "error": None
-            }
-
-        aluno_id = aluno["numero_aluno"]
-
-        # 2️⃣ Buscar relações na tabela ALUNOS_ENCARREGADOS (COLUNA CORRETA!)
-        cur.execute(
-            "SELECT id_encarregado, laco_familiar FROM alunos_encarregados WHERE numero_aluno = %s",
-            (aluno_id,)
-        )
-        relacoes = cur.fetchall()
-
-        if not relacoes:
-            return {
-                "success": True,
-                "message": "O aluno existe, mas não possui encarregados associados.",
-                "aluno": aluno,
-                "encarregados": [],
-                "error": None
-            }
-
-        ids = [r["id_encarregado"] for r in relacoes]
-
-        # 3️⃣ Buscar encarregados pelo ID
-        placeholders = ", ".join(["%s"] * len(ids))
-        cur.execute(
-            f"SELECT * FROM encarregados WHERE id IN ({placeholders})",
-            tuple(ids)
-        )
-        encarregados = cur.fetchall()
-
-        # anexar laço familiar
-        for enc in encarregados:
-            for rel in relacoes:
-                if rel["id_encarregado"] == enc["id"]:
-                    enc["laco_familiar"] = rel["laco_familiar"]
-
-        return {
-            "success": True,
-            "message": "Consulta realizada com sucesso.",
-            "aluno": aluno,
-            "encarregados": encarregados,
-            "error": None
-        }
+        conn.commit()
+        return f"✅ Operação concluída. Registos afetados: {cur.rowcount}"
 
     except Exception as e:
-        return {
-            "success": False,
-            "message": "Erro ao consultar encarregados do aluno.",
-            "error": str(e)
-        }
-
+        conn.rollback()
+        return f"❌ Erro ao executar comando: {str(e)}"
     finally:
         cur.close()
         conn.close()
 
 
+if __name__ == "__main__":
+    mcp.run()

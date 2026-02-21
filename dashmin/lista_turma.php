@@ -15,11 +15,23 @@ $totalTurma = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
 $stmt = $pdo->query("SELECT COUNT(*) AS total FROM professor");
 $totalProfessor = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
 
-$sql = "SELECT id, nome, descricao, imagem FROM curso";
+$sql = "
+    SELECT 
+        t.id,
+        t.curso_id,
+        c.nome AS nome_curso,
+        c.imagem,
+        c.descricao,
+        t.codigo,
+        t.ciclo_formacao,
+        t.statu
+    FROM turma t
+    INNER JOIN curso c ON c.id = t.curso_id
+";
+
 $stmt = $pdo->prepare($sql);
 $stmt->execute();
-
-$curso = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$turma = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 ?>
 <style>
@@ -146,22 +158,23 @@ $curso = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 </div>
             </a>
         </div> -->
-        <?php foreach ($curso as $c): ?>
+            <?php foreach ($turma as $t): ?>
             <div class="col-sm-12 col-xl-4">
-                <a href="lista_turma.php?id=<?= $c['id'] ?>" class="text-decoration-none text-dark">
-                    <div class="bg-white shadow rounded overflow-hidden h-100">
+                <a href="lista_turma.php?id=<?= $t['id'] ?>" class="text-decoration-none text-dark">
+                    <div class="course-card">
 
-                        <!-- Imagem -->
+                        <div class="course-image">
+                            <img src="uploads_curso/<?= htmlspecialchars($t['imagem'] ?? 'default.jpg') ?>" alt="Curso">
+                        </div>
 
-                        <div class="course-card">
-                            <div class="course-image">
-                                <img src="../uploads_curso/<?= htmlspecialchars($c['imagem'] ?? 'default.jpg') ?>"
-                                    alt="<?= htmlspecialchars($c['nome']) ?>">
-                            </div>
-                            <div class="course-text">
-                                <h5><?= htmlspecialchars($c['nome']) ?></h5>
-                                <p><?= htmlspecialchars($c['descricao']) ?></p>
-                            </div>
+                        <div class="course-text">
+                            <h5><?= htmlspecialchars($t['nome_curso']) ?></h5>
+                             <small>
+                                Código: <?= htmlspecialchars($t['codigo']) ?><br>
+                                Ciclo: <?= htmlspecialchars($t['ciclo_formacao']) ?>
+                            </small>
+                            
+                           
                         </div>
 
                     </div>

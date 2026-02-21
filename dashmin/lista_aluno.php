@@ -15,11 +15,20 @@ $totalTurma = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
 $stmt = $pdo->query("SELECT COUNT(*) AS total FROM professor");
 $totalProfessor = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
 
-$sql = "SELECT id, nome, descricao, imagem FROM curso";
+$sql = "
+    SELECT 
+        a.numero_aluno AS id,
+        a.nome,
+        a.morada AS descricao,
+        u.foto AS imagem
+    FROM aluno a
+    INNER JOIN users u ON u.id = a.user_id
+";
+
 $stmt = $pdo->prepare($sql);
 $stmt->execute();
 
-$curso = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$alunos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 ?>
 <style>
@@ -146,21 +155,19 @@ $curso = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 </div>
             </a>
         </div> -->
-        <?php foreach ($curso as $c): ?>
+        <?php foreach ($alunos as $a): ?>
             <div class="col-sm-12 col-xl-4">
-                <a href="lista_turma.php?id=<?= $c['id'] ?>" class="text-decoration-none text-dark">
+                <a href="aluno.php?id=<?= $a['id'] ?>" class="text-decoration-none text-dark">
                     <div class="bg-white shadow rounded overflow-hidden h-100">
-
-                        <!-- Imagem -->
 
                         <div class="course-card">
                             <div class="course-image">
-                                <img src="../uploads_curso/<?= htmlspecialchars($c['imagem'] ?? 'default.jpg') ?>"
-                                    alt="<?= htmlspecialchars($c['nome']) ?>">
+                                <img src="../uploads/<?= htmlspecialchars($a['imagem'] ?? 'default.jpg') ?>"
+                                    alt="<?= htmlspecialchars($a['nome']) ?>">
                             </div>
                             <div class="course-text">
-                                <h5><?= htmlspecialchars($c['nome']) ?></h5>
-                                <p><?= htmlspecialchars($c['descricao']) ?></p>
+                                <h5><?= htmlspecialchars($a['nome']) ?></h5>
+                                <p>Número de Mec: <?= htmlspecialchars($a['id']) ?></p>
                             </div>
                         </div>
 
@@ -168,7 +175,6 @@ $curso = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 </a>
             </div>
         <?php endforeach; ?>
-
 
     </div>
 </div>

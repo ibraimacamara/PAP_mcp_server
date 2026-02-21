@@ -7,7 +7,8 @@ mcp = FastMCP("gestor de escola MCP Tool")
 
 
 def _consume_meta(*args, **kwargs):
-    return None
+    pass
+
 @mcp.tool
 def insert_aluno(
     data: Union[str, dict],
@@ -793,4 +794,3 @@ def get_aluno_encarregado(
 
 if __name__ == "__main__":
     mcp.run()
-
