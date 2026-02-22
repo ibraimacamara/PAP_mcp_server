@@ -1,6 +1,6 @@
-  =>  Template Name    : DASHMIN - Bootstrap Admin Template Free
+  =>  Template Name    : MEDINOVA - Hospital Website Template
 
-  =>  Template Link    : https://htmlcodex.com/bootstrap-admin-template-free
+  =>  Template Link    : https://htmlcodex.com/hospital-website-template
 
   =>  Template License : https://htmlcodex.com/license (or read the LICENSE.txt file)
 
