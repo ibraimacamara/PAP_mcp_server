@@ -1,43 +1,44 @@
 <?php
-<<<<<<< HEAD:dashmin/lista_turma.php
-require("conexao.php");
-require("inicio.php");
-=======
 include('../conexao.php');
 include('menu.php');
->>>>>>> 73abeed (novo versão de web-site):frontend/admin/lista_turma.php
 
+// Pegar totais
+$totalAlunos = $pdo->query("SELECT COUNT(*) AS total FROM aluno")->fetch(PDO::FETCH_ASSOC)['total'];
+$totalCurso = $pdo->query("SELECT COUNT(*) AS total FROM curso")->fetch(PDO::FETCH_ASSOC)['total'];
+$totalTurma = $pdo->query("SELECT COUNT(*) AS total FROM turma")->fetch(PDO::FETCH_ASSOC)['total'];
+$totalProfessor = $pdo->query("SELECT COUNT(*) AS total FROM professor")->fetch(PDO::FETCH_ASSOC)['total'];
 
-$stmt = $pdo->query("SELECT COUNT(*) AS total FROM aluno");
-$totalAlunos = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+// Verifica se foi passado um curso_id via GET
+$curso_id = $_GET['curso_id'] ?? null;
 
-$stmt = $pdo->query("SELECT COUNT(*) AS total FROM curso");
-$totalCurso = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
-
-$stmt = $pdo->query("SELECT COUNT(*) AS total FROM turma");
-$totalTurma = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
-
-$stmt = $pdo->query("SELECT COUNT(*) AS total FROM professor");
-$totalProfessor = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
-
-$sql = "
-    SELECT 
-        t.id,
+if ($curso_id !== null) {
+    // Lista apenas as turmas daquele curso
+    $stmt = $pdo->prepare("
+        SELECT 
+        t.id, 
         t.curso_id,
         c.nome AS nome_curso,
         c.imagem,
-        c.descricao,
-        t.codigo,
-        t.ciclo_formacao,
+        t.codigo, 
+        t.ciclo_formacao, 
         t.statu
-    FROM turma t
-    INNER JOIN curso c ON c.id = t.curso_id
-";
-
-$stmt = $pdo->prepare($sql);
-$stmt->execute();
+        FROM turma t
+        INNER JOIN curso c ON c.id = t.curso_id
+        WHERE c.id = ?
+        ORDER BY t.codigo ASC
+    ");
+    $stmt->execute([$curso_id]);
+} else {
+    // Lista todas as turmas ordenadas alfabeticamente pelo nome do curso
+    $stmt = $pdo->query("
+        SELECT t.id, t.curso_id, c.nome AS nome_curso, c.imagem,
+               t.codigo, t.ciclo_formacao, t.statu
+        FROM turma t
+        INNER JOIN curso c ON c.id = t.curso_id
+        ORDER BY c.nome ASC, t.codigo ASC
+    ");
+}
 $turma = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
 ?>
 <style>
     .col-xl-2 {
@@ -89,65 +90,9 @@ $turma = $stmt->fetchAll(PDO::FETCH_ASSOC);
         overflow: hidden;
     }
 </style>
-<!-- Sale & Revenue Start -->
-<div class="container-fluid pt-4 px-4">
-    <div class="row g-4">
-        <div class="col-sm-6 col-xl-3">
-            <a href="lista_aluno.php" class="text-decoration-none text-dark">
-                <div class="bg-white shadow rounded d-flex align-items-center justify-content-between p-4">
-                    <i class="fa fa-chart-line fa-3x text-primary"></i>
-                    <div class="ms-3">
-                        <p class="mb-2">Total de Alunos</p>
-                        <h6 class="mb-0">
-                            <?php echo $totalAlunos; ?>
-                        </h6>
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-sm-6 col-xl-3">
-            <a href="lista_curso.php" class="text-decoration-none text-dark">
-                <div class="bg-white shadow rounded d-flex align-items-center justify-content-between p-4">
-                    <i class="fa fa-chart-bar fa-3x text-primary"></i>
-                    <div class="ms-3">
-                        <p class="mb-2">Total Cursos</p>
-                        <h6 class="mb-0">
-                            <?php echo $totalCurso; ?>
-                        </h6>
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-sm-6 col-xl-3">
-            <a href="lista_turma.php" class="text-decoration-none text-dark">
-                <div class="bg-white shadow rounded d-flex align-items-center justify-content-between p-4">
-                    <i class="fa fa-chart-area fa-3x text-primary"></i>
-                    <div class="ms-3">
-                        <p class="mb-2">Total Turmas</p>
-                        <h6 class="mb-0">
-                            <?php echo $totalTurma; ?>
-                        </h6>
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-sm-6 col-xl-3">
-            <a href="lista_professor.php" class="text-decoration-none text-dark">
-                <div class="bg-white shadow rounded d-flex align-items-center justify-content-between p-4">
-                    <i class="fa fa-chart-pie fa-3x text-primary"></i>
-                    <div class="ms-3">
-                        <p class="mb-2">Professor</p>
-                        <h6 class="mb-0">
-                            <?php echo $totalProfessor; ?>
-                        </h6>
-                    </div>
-                </div>
-            </a>
-        </div>
-    </div>
-</div>
-<!-- Sale & Revenue End -->
-
+<?php
+include 'nav-menu.php';
+?>
 
 <!-- Sales Chart Start -->
 <div class="container-fluid pt-4 px-4">
@@ -163,30 +108,32 @@ $turma = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 </div>
             </a>
         </div> -->
-            <?php foreach ($turma as $t): ?>
+        <?php foreach ($turma as $t): ?>
             <div class="col-sm-12 col-xl-4">
-                <a href="lista_turma.php?id=<?= $t['id'] ?>" class="text-decoration-none text-dark">
-                    <div class="course-card">
+                <div class="course-card">
 
+                    <!-- Imagem do curso como link para filtrar turmas -->
+                    <a href="lista_aluno.php?turma_id=<?= $t['id'] ?>">
                         <div class="course-image">
-                            <img src="uploads_curso/<?= htmlspecialchars($t['imagem'] ?? 'default.jpg') ?>" alt="Curso">
+                            <img src="uploads_curso/<?= htmlspecialchars($t['imagem'] ?? 'default.jpg') ?>"
+                                alt="<?= htmlspecialchars($t['nome_curso']) ?>">
                         </div>
+                    </a>
 
-                        <div class="course-text">
-                            <h5><?= htmlspecialchars($t['nome_curso']) ?></h5>
-                             <small>
-                                Código: <?= htmlspecialchars($t['codigo']) ?><br>
-                                Ciclo: <?= htmlspecialchars($t['ciclo_formacao']) ?>
-                            </small>
-                            
-                           
-                        </div>
+                    <!-- Conteúdo da turma -->
+                    <div class="course-text">
+                        <h5><?= htmlspecialchars($t['nome_curso']) ?></h5>
+                        <h6> Código: <?= htmlspecialchars($t['codigo']) ?><br></h6>
+                        <small>
 
+                            Ciclo: <?= htmlspecialchars($t['ciclo_formacao']) ?><br>
+                            Status: <?= htmlspecialchars($t['statu']) ?>
+                        </small>
                     </div>
-                </a>
+
+                </div>
             </div>
         <?php endforeach; ?>
-
 
     </div>
 </div>

@@ -6,7 +6,7 @@ declare(strict_types=1);
 date_default_timezone_set('Europe/Lisbon');
 session_start();
 
-require_once 'conexao.php';
+include '../conexao.php';
 
 
 
@@ -26,7 +26,7 @@ function erroUtilizador(string $mensagem): void
         'tipo' => 'warning',
         'msg'  => $mensagem
     ];
-    header('Location: forms.php');
+    header('Location: curso_turma.php');
     exit;
 }
 
@@ -43,7 +43,7 @@ function erroTecnico(string $logMsg, int $httpCode = 500): void
         'msg'  => 'Ocorreu um erro interno. Tente novamente mais tarde.'
     ];
 
-    header('Location: forms.php');
+    header('Location: curso_turma.php');
     exit;
 }
 
@@ -109,5 +109,5 @@ try {
 
 
 unset($_SESSION['csrf_token']);
-header('Location: forms.php');
+header('Location: curso_turma.php');
 exit;

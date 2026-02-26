@@ -1,11 +1,12 @@
 <?php
 
+
 declare(strict_types=1);
 
 date_default_timezone_set('Europe/Lisbon');
 session_start();
 
-require_once 'conexao.php';
+include '../conexao.php';
 
 /* =====================================================
    LOG E ERRO
@@ -110,7 +111,7 @@ if (!empty($_FILES['foto']['name'])) {
         erroUtilizador('Apenas imagens JPEG, PNG ou GIF são permitidas.');
     }
 
-    $uploadDir = __DIR__ . '/../uploads/';
+    $uploadDir = 'uploads_aluno/';
     if (!is_dir($uploadDir)) {
         erroUtilizador('A pasta de uploads não existe.');
     }
@@ -139,14 +140,9 @@ try {
     $partesNome = explode(' ', trim($nome));
     $apelido = end($partesNome);
 
-    // Primeira letra maiúscula (suporte a acentos)
-    $apelidoFormatado = mb_convert_case($apelido, MB_CASE_TITLE, 'UTF-8');
-
-    // Ano atual
-    $anoAtual = date('Y');
 
     // Senha final
-    $senhaOriginal = $apelidoFormatado . $anoAtual . '#';
+    $senhaOriginal = 'Epsab00!';
 
     // Hash da senha (RECOMENDADO)
     $senhaHash = password_hash($senhaOriginal, PASSWORD_DEFAULT);
@@ -165,7 +161,7 @@ try {
 
     // Inserir aluno
     $stmt = $pdo->prepare("
-        INSERT INTO aluno 
+        INSERT INTO alunos 
         (user_id, nome, data_nascimento, contato, bi, email, morada, genero, distrito, freguesia)
         VALUES (:user_id, :nome, :data, :contato, :bi, :email, :morada, :genero, :distrito, :freguesia )
     ");

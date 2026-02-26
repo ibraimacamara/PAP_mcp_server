@@ -53,7 +53,7 @@ if (empty($_SESSION['csrf_token'])) {
 
                     <div class="mb-3">
                         <label class="form-label">Descrição</label>
-                        <input type="text" name="descricao" class="form-control">
+                        <textarea type="text" name="descricao" class="form-control"></textarea>
                     </div>
                     <div class=" mb-3">
                         <label for="formFile" class="form-label">Foto</label>

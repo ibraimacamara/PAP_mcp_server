@@ -15,7 +15,7 @@ $totalTurma = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
 $stmt = $pdo->query("SELECT COUNT(*) AS total FROM professor");
 $totalProfessor = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
 
-$sql = "SELECT id, nome, descricao, imagem FROM curso";
+$sql = "SELECT id, nome, descricao, imagem FROM curso ORDER BY nome ASC";
 $stmt = $pdo->prepare($sql);
 $stmt->execute();
 
@@ -72,65 +72,10 @@ $curso = $stmt->fetchAll(PDO::FETCH_ASSOC);
         overflow: hidden;
     }
 </style>
-<!-- Sale & Revenue Start -->
-<div class="container-fluid pt-4 px-4">
-    <div class="row g-4">
-        <div class="col-sm-6 col-xl-3">
-            <a href="lista_aluno.php" class="text-decoration-none text-dark">
-                <div class="bg-white shadow rounded d-flex align-items-center justify-content-between p-4">
-                    <i class="fa fa-chart-line fa-3x text-primary"></i>
-                    <div class="ms-3">
-                        <p class="mb-2">Total de Alunos</p>
-                        <h6 class="mb-0">
-                            <?php echo $totalAlunos; ?>
-                        </h6>
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-sm-6 col-xl-3">
-            <a href="lista_curso.php" class="text-decoration-none text-dark">
-                <div class="bg-white shadow rounded d-flex align-items-center justify-content-between p-4">
-                    <i class="fa fa-chart-bar fa-3x text-primary"></i>
-                    <div class="ms-3">
-                        <p class="mb-2">Total Cursos</p>
-                        <h6 class="mb-0">
-                            <?php echo $totalCurso; ?>
-                        </h6>
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-sm-6 col-xl-3">
-            <a href="lista_turma.php" class="text-decoration-none text-dark">
-                <div class="bg-white shadow rounded d-flex align-items-center justify-content-between p-4">
-                    <i class="fa fa-chart-area fa-3x text-primary"></i>
-                    <div class="ms-3">
-                        <p class="mb-2">Total Turmas</p>
-                        <h6 class="mb-0">
-                            <?php echo $totalTurma; ?>
-                        </h6>
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-sm-6 col-xl-3">
-            <a href="lista_professor.php" class="text-decoration-none text-dark">
-                <div class="bg-white shadow rounded d-flex align-items-center justify-content-between p-4">
-                    <i class="fa fa-chart-pie fa-3x text-primary"></i>
-                    <div class="ms-3">
-                        <p class="mb-2">Professor</p>
-                        <h6 class="mb-0">
-                            <?php echo $totalProfessor; ?>
-                        </h6>
-                    </div>
-                </div>
-            </a>
-        </div>
-    </div>
-</div>
-<!-- Sale & Revenue End -->
 
+<?php
+include 'nav-menu.php';
+?>
 
 <!-- Sales Chart Start -->
 <div class="container-fluid pt-4 px-4">
@@ -147,25 +92,30 @@ $curso = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </a>
         </div> -->
         <?php foreach ($curso as $c): ?>
-            <div class="col-sm-12 col-xl-4">
-                <a href="lista_turma.php?id=<?= $c['id'] ?>" class="text-decoration-none text-dark">
-                    <div class="bg-white shadow rounded overflow-hidden h-100">
+            <div class="col-sm-12 col-xl-4 mb-4">
+                <div class="card h-100 shadow p-2">
 
-                        <!-- Imagem -->
+                    <!-- Imagem -->
+                   <a href="lista_turma.php?curso_id=<?= $c['id'] ?>">
+                        <img src="./uploads_curso/<?= htmlspecialchars($c['imagem'] ?? 'default.jpg') ?>"
+                            class="card-img-top rounded" alt="<?= htmlspecialchars($c['nome']) ?>"
+                            style="height:190px; object-fit:cover; font-family:'Times New Roman', serif;">
+                    </a>
+                    <!-- Conteúdo -->
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title text-truncate" title="<?= htmlspecialchars($c['nome']) ?>">
+                            <?= htmlspecialchars($c['nome']) ?>
+                        </h5>
 
-                        <div class="course-card">
-                            <div class="course-image">
-                                <img src="../uploads_curso/<?= htmlspecialchars($c['imagem'] ?? 'default.jpg') ?>"
-                                    alt="<?= htmlspecialchars($c['nome']) ?>">
-                            </div>
-                            <div class="course-text">
-                                <h5><?= htmlspecialchars($c['nome']) ?></h5>
-                                <p><?= htmlspecialchars($c['descricao']) ?></p>
-                            </div>
-                        </div>
-
+                        <!-- Descrição colapsável no próprio <p> -->
+                        <?php $descId = 'desc' . $c['id']; ?>
+                        <p class="card-text flex-grow-1 mb-0 collapse-text" id="<?= $descId ?>"
+                            style="display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; cursor:pointer;">
+                            <?= htmlspecialchars($c['descricao']) ?>
+                        </p>
                     </div>
-                </a>
+
+                </div>
             </div>
         <?php endforeach; ?>
 
@@ -212,6 +162,20 @@ $curso = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <script src="lib/tempusdominus/js/moment.min.js"></script>
 <script src="lib/tempusdominus/js/moment-timezone.min.js"></script>
 <script src="lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js"></script>
+<script>
+    document.querySelectorAll('.collapse-text').forEach(p => {
+        p.addEventListener('click', function () {
+            const el = this;
+            if (el.style.display === '-webkit-box') {
+                el.style.display = 'block';          // expande
+                el.style.webkitLineClamp = 'unset';  // remove limite de linhas
+            } else {
+                el.style.display = '-webkit-box';    // recolhe
+                el.style.webkitLineClamp = 3;        // volta ao limite
+            }
+        });
+    });
+</script>
 
 <!-- Template Javascript -->
 <script src="js/main.js"></script>

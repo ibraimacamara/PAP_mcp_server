@@ -1,0 +1,2 @@
+[2026-02-24 16:54:56] Erro BD: SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry 'camaraibraima@gmail.com' for key 'email'
+[2026-02-25 09:36:18] Erro BD: SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry 'camaraibraima@gmail.com' for key 'email'

@@ -7,7 +7,7 @@ ini_set('log_errors', '1');
 date_default_timezone_set('Europe/Lisbon');
 session_start();
 
-require_once 'conexao.php';
+include '../conexao.php';
 
 
 

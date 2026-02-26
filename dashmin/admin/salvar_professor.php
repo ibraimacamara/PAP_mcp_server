@@ -5,7 +5,7 @@ declare(strict_types=1);
 date_default_timezone_set('Europe/Lisbon');
 session_start();
 
-require_once 'conexao.php';
+include '../conexao.php';
 
 /* =====================================================
    LOG E ERRO
