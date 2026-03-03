@@ -2,44 +2,24 @@
 include('../conexao.php');
 include('menu.php');
 
-$turma_id = isset($_GET['turma_id']) ? (int) $_GET['turma_id'] : null;
-
-if ($turma_id !== null) {
-
-    $stmt = $pdo->prepare("
+$stmt = $pdo->prepare("
      SELECT 
-    a.numero_aluno AS id,
-    a.nome,
-    a.morada,
-    u.foto AS imagem
-FROM aluno a
-INNER JOIN aluno_turma at ON at.numero_aluno = a.numero_aluno
-INNER JOIN users u ON u.id = a.user_id
-WHERE at.turma_id = ?
-ORDER BY a.nome ASC
+    e.id,
+    e.nome,
+    e.bi,
+    e.email,
+    e.contato,
+    e.morada,
+    e.genero,
+    e.distrito,
+    e.freguesia,
+    e.status,
+    e.registado_em
+FROM encarregado e
+ORDER BY e.nome ASC
     ");
-
-    $stmt->execute([$turma_id]);
-
-} else {
-
-    // Se não passar turma_id, lista todos os alunos
-    $stmt = $pdo->query("
- SELECT 
-    a.numero_aluno AS id,
-    a.nome,
-    a.morada,
-    u.foto AS imagem,
-    t.codigo AS turma
-FROM aluno a
-INNER JOIN users u ON u.id = a.user_id
-INNER JOIN aluno_turma alt ON alt.numero_aluno = a.numero_aluno
-INNER JOIN turma t ON t.id = alt.turma_id
-ORDER BY t.codigo ASC, a.nome ASC"
-    );
-}
-
-$alunos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$stmt->execute();
+$encarregado = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <style>
     .col-xl-2 {
@@ -85,57 +65,59 @@ $alunos = $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     .course-text {
-        padding: 5px;
+        padding: 10px;
         flex: 1;
-        margin: 0px;
         /* ocupa o espaço restante do card */
         overflow: hidden;
     }
- 
 </style>
 <?php
 include 'nav-menu.php';
 ?>
 
-<!-- Sales Chart Start -->
 <div class="container-fluid pt-4 px-4">
     <div class="row g-4">
-        <!-- <div class="col-sm-12 col-xl-4">
-            <a href="#">
-                <div class="bg-white shadow text-center rounded p-4">
-                    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div class="col-12">
+            <div class="bg-white shadow rounded p-4">
+                <h4 class="mb-4">Lista de Encarregados</h4>
+                <table class="table table-striped table-bordered table-responsive">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+               
+                            <th>Email</th>
+                            <th>Contato</th>
+                            <th>Morada</th>
 
-
-                    </div>
-
-                </div>
-            </a>
-        </div> -->
-        <?php foreach ($alunos as $a): ?>
-            <div class="col-sm-12 col-xl-2">
-                <a href="detalhe_aluno.php?id=<?= $a['id'] ?>" class="text-decoration-none text-dark">
-                    <div class="bg-white shadow rounded overflow-hidden h-100">
-
-                        <div class="course-card">
-                            <div class="course-image">
-                                <img src="uploads_aluno/<?= htmlspecialchars($a['imagem'] ?? 'default.jpg') ?>"
-                                    alt="<?= htmlspecialchars($a['nome']) ?>">
-                            </div>
-                            <div class="course-text">
-                                <h5><?= htmlspecialchars($a['nome']) ?></h5>
-                               
-                                <h6>Número de Mec: <?= htmlspecialchars($a['id']) ?> </h6>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($encarregado as $e): ?>
+                            <tr>
+                                <td><?= htmlspecialchars($e['id']) ?></td>
+                                <td><?= htmlspecialchars($e['nome']) ?></td>
+                             
+                                <td><?= htmlspecialchars($e['email']) ?></td>
+                                <td><?= htmlspecialchars($e['contato']) ?></td>
+                                <td><?= htmlspecialchars($e['morada']) ?></td>
                                 
-                            </div>
-                        </div>
-
-                    </div>
-                </a>
+                               
+                                <td>
+                                    <a href="editar_encarregado.php?id=<?= $e['id'] ?>" class="btn btn-sm btn-primary mb-1">Editar</a>
+                                    <a href="apagar_encarregado.php?id=<?= $e['id'] ?>" class="btn btn-sm btn-danger mb-1"
+                                       onclick="return confirm('Tem certeza que deseja apagar?')">Apagar</a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
             </div>
-        <?php endforeach; ?>
-
+        </div>
     </div>
 </div>
+
 <!-- Sales Chart End -->
 
 

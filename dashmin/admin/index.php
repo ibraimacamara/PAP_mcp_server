@@ -3,75 +3,9 @@ include '../conexao.php';
 include 'menu.php';
 
 
-$stmt = $pdo->query("SELECT COUNT(*) AS total FROM aluno");
-$totalAlunos = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
-
-$stmt = $pdo->query("SELECT COUNT(*) AS total FROM curso");
-$totalCurso = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
-
-$stmt = $pdo->query("SELECT COUNT(*) AS total FROM turma");
-$totalTurma = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
-
-$stmt = $pdo->query("SELECT COUNT(*) AS total FROM professor");
-$totalProfessor = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+include 'nav-menu.php';
 ?>
 
-<!-- Sale & Revenue Start -->
-<div class="container-fluid pt-4 px-4">
-    <div class="row g-4">
-        <div class="col-sm-6 col-xl-3">
-            <a href="lista_aluno.php" class="text-decoration-none text-dark">
-                <div class="bg-white shadow rounded d-flex align-items-center justify-content-between p-4">
-                    <i class="fa fa-chart-line fa-3x text-primary"></i>
-                    <div class="ms-3">
-                        <p class="mb-2">Total de Alunos</p>
-                        <h6 class="mb-0">
-                            <?php echo $totalAlunos; ?>
-                        </h6>
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-sm-6 col-xl-3">
-            <a href="lista_curso.php" class="text-decoration-none text-dark">
-                <div class="bg-white shadow rounded d-flex align-items-center justify-content-between p-4">
-                    <i class="fa fa-chart-bar fa-3x text-primary"></i>
-                    <div class="ms-3">
-                        <p class="mb-2">Total Cursos</p>
-                        <h6 class="mb-0">
-                            <?php echo $totalCurso; ?>
-                        </h6>
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-sm-6 col-xl-3">
-            <a href="lista_turma.php" class="text-decoration-none text-dark">
-                <div class="bg-white shadow rounded d-flex align-items-center justify-content-between p-4">
-                    <i class="fa fa-chart-area fa-3x text-primary"></i>
-                    <div class="ms-3">
-                        <p class="mb-2">Total Turmas</p>
-                        <h6 class="mb-0">
-                            <?php echo $totalTurma; ?>
-                        </h6>
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-sm-6 col-xl-3">
-            <div class="bg-white shadow rounded d-flex align-items-center justify-content-between p-4">
-                <i class="fa fa-chart-pie fa-3x text-primary"></i>
-                <div class="ms-3">
-                    <p class="mb-2">Professor</p>
-                    <h6 class="mb-0">
-                        <?php echo $totalProfessor; ?>
-                    </h6>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- Sale & Revenue End -->
 
 
 <!-- Sales Chart Start -->
@@ -301,21 +235,9 @@ $totalProfessor = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
 
 
 <!-- Footer Start -->
-<div class="container-fluid pt-4 px-4">
-    <div class="bg-light rounded-top p-4">
-        <div class="row">
-            <div class="col-12 col-sm-6 text-center text-sm-start">
-                &copy; <a href="#">Your Site Name</a>, All Right Reserved.
-            </div>
-            <div class="col-12 col-sm-6 text-center text-sm-end">
-                <!--/*** This template is free as long as you keep the footer author’s credit link/attribution link/backlink. If you'd like to use the template without the footer author’s credit link/attribution link/backlink, you can purchase the Credit Removal License from "https://htmlcodex.com/credit-removal". Thank you for your support. ***/-->
-                Designed By <a href="https://htmlcodex.com">HTML Codex</a>
-                </br>
-                Distributed By <a class="border-bottom" href="https://themewagon.com" target="_blank">ThemeWagon</a>
-            </div>
-        </div>
-    </div>
-</div>
+ <?php
+include 'footer.php';
+?>
 <!-- Footer End -->
 </div>
 <!-- Content End -->

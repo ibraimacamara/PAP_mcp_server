@@ -25,18 +25,19 @@ ORDER BY a.nome ASC
 
     // Se não passar turma_id, lista todos os alunos
     $stmt = $pdo->query("
- SELECT 
-    a.numero_aluno AS id,
-    a.nome,
-    a.morada,
-    u.foto AS imagem,
-    t.codigo AS turma
-FROM aluno a
-INNER JOIN users u ON u.id = a.user_id
-INNER JOIN aluno_turma alt ON alt.numero_aluno = a.numero_aluno
-INNER JOIN turma t ON t.id = alt.turma_id
-ORDER BY t.codigo ASC, a.nome ASC"
-    );
+        SELECT 
+            a.numero_aluno AS id,
+            a.nome,
+            a.morada,
+            u.foto AS imagem,
+            t.codigo AS turma
+        FROM aluno a
+        INNER JOIN users u ON u.id = a.user_id
+        INNER JOIN aluno_turma alt ON alt.numero_aluno= a.numero_aluno
+        INNER JOIN turma t ON t.id = alt.turma_id
+        ORDER BY t.codigo ASC, a.nome ASC
+        "
+        );
 }
 
 $alunos = $stmt->fetchAll(PDO::FETCH_ASSOC);

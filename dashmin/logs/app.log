@@ -1,2 +1,5 @@
 [2026-02-24 16:54:56] Erro BD: SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry 'camaraibraima@gmail.com' for key 'email'
 [2026-02-25 09:36:18] Erro BD: SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry 'camaraibraima@gmail.com' for key 'email'
+[2026-02-26 11:19:25] Erro BD: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'foto' in 'field list'
+[2026-02-27 11:33:09] Erro BD: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'gestor_escola.alunos' doesn't exist
+[2026-02-27 11:34:27] Erro BD: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'gestor_escola.alunos' doesn't exist

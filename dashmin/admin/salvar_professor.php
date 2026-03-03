@@ -96,7 +96,7 @@ if (!empty($_FILES['foto']['name'])) {
         erroUtilizador('Apenas imagens JPEG, PNG ou GIF são permitidas.');
     }
 
-    $uploadDir = __DIR__ . '/../uploads/';
+    $uploadDir = 'uploads_prof/';
     if (!is_dir($uploadDir)) {
         erroUtilizador('A pasta de uploads não existe.');
     }
@@ -119,38 +119,10 @@ if (!empty($_FILES['foto']['name'])) {
 try {
     $pdo->beginTransaction();
 
-    // Inserir professor
-    $stmt = $pdo->prepare("
-        INSERT INTO professor 
-        (nome, data_nascimento, contato, bi, email, morada,nacionalidade, nif, genero, distrito, freguesia, foto)
-        VALUES (:nome, :data, :contato, :bi, :email, :morada,:nacionalidade, :nif, :genero, :distrito, :freguesia, :foto)
-    ");
-    $stmt->execute([
-        ':nome' => $nome,
-        ':data' => $dataNasc,
-        ':contato' => $contato,
-        ':bi' => $bi,
-        ':email' => $email,
-        ':morada' => $morada,
-        ':nacionalidade' => $nacionalidade,
-        ':nif' => $nif,
-        ':genero' => $genero,
-        ':distrito' => $distrito,
-        ':freguesia' => $freguesia,
-        ':foto' => $fotoPath
-    ]);
-    
 
+        // users
 
-    // users
-    $partesNome = explode(' ', trim($nome));
-    $apelido = end($partesNome);
-
-    $apelidoFormatado = mb_convert_case($apelido, MB_CASE_TITLE, 'UTF-8');
-
-    $anoAtual = date('Y');
-
-    $senhaOriginal = $apelidoFormatado . $anoAtual . '#';
+    $senhaOriginal = 'Epsab00!';
 
     $senhaHash = password_hash($senhaOriginal, PASSWORD_DEFAULT);
     $categoria = "professor";
@@ -167,9 +139,28 @@ try {
 
     $userId = (int) $pdo->lastInsertId();
 
-
- 
- 
+    // Inserir professor
+    $stmt = $pdo->prepare("
+        INSERT INTO professor 
+        (user_id, nome, data_nascimento, contato, bi, email, morada,nacionalidade, nif, genero, distrito, freguesia )
+        VALUES (:user_id,:nome, :data, :contato, :bi, :email, :morada,:nacionalidade, :nif, :genero, :distrito, :freguesia)
+    ");
+    $stmt->execute([
+        ':user_id' => $userId,
+        ':nome' => $nome,
+        ':data' => $dataNasc,
+        ':contato' => $contato,
+        ':bi' => $bi,
+        ':email' => $email,
+        ':morada' => $morada,
+        ':nacionalidade' => $nacionalidade,
+        ':nif' => $nif,
+        ':genero' => $genero,
+        ':distrito' => $distrito,
+        ':freguesia' => $freguesia,
+        
+    ]);
+    
 
     $pdo->commit();
 
@@ -179,8 +170,8 @@ try {
     $pdo->rollBack();
 
     // Remove foto se já tiver sido movida
-    if ($fotoPath && file_exists(__DIR__ . '/' . $fotoPath)) {
-        unlink(__DIR__ . '/' . $fotoPath);
+    if ($fotoPath && file_exists( '/' . $fotoPath)) {
+        unlink( '/' . $fotoPath);
     }
 
     if ($e->getCode() === '23000') {

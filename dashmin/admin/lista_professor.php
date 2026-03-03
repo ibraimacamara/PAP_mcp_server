@@ -2,44 +2,29 @@
 include('../conexao.php');
 include('menu.php');
 
-$turma_id = isset($_GET['turma_id']) ? (int) $_GET['turma_id'] : null;
-
-if ($turma_id !== null) {
-
-    $stmt = $pdo->prepare("
+$stmt = $pdo->prepare("
      SELECT 
-    a.numero_aluno AS id,
-    a.nome,
-    a.morada,
+    p.id,
+    p.nome,
+    p.data_nascimento,
+    p.bi,
+    p.email,
+    p.contato,
+    p.morada,
+    p.nif,
+    p.nacionalidade,
+    p.genero,
+    p.distrito,
+    p.freguesia,
+    p.statu,
+    p.registado_em,
     u.foto AS imagem
-FROM aluno a
-INNER JOIN aluno_turma at ON at.numero_aluno = a.numero_aluno
-INNER JOIN users u ON u.id = a.user_id
-WHERE at.turma_id = ?
-ORDER BY a.nome ASC
+FROM professor p
+INNER JOIN users u ON u.id = p.user_id
+ORDER BY p.nome ASC
     ");
-
-    $stmt->execute([$turma_id]);
-
-} else {
-
-    // Se não passar turma_id, lista todos os alunos
-    $stmt = $pdo->query("
- SELECT 
-    a.numero_aluno AS id,
-    a.nome,
-    a.morada,
-    u.foto AS imagem,
-    t.codigo AS turma
-FROM aluno a
-INNER JOIN users u ON u.id = a.user_id
-INNER JOIN aluno_turma alt ON alt.numero_aluno = a.numero_aluno
-INNER JOIN turma t ON t.id = alt.turma_id
-ORDER BY t.codigo ASC, a.nome ASC"
-    );
-}
-
-$alunos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$stmt->execute();
+$professor = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <style>
     .col-xl-2 {
@@ -85,13 +70,11 @@ $alunos = $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     .course-text {
-        padding: 5px;
+        padding: 10px;
         flex: 1;
-        margin: 0px;
         /* ocupa o espaço restante do card */
         overflow: hidden;
     }
- 
 </style>
 <?php
 include 'nav-menu.php';
@@ -111,21 +94,19 @@ include 'nav-menu.php';
                 </div>
             </a>
         </div> -->
-        <?php foreach ($alunos as $a): ?>
+        <?php foreach ($professor as $p): ?>
             <div class="col-sm-12 col-xl-2">
-                <a href="detalhe_aluno.php?id=<?= $a['id'] ?>" class="text-decoration-none text-dark">
+                <a href="aluno.php?id=<?= $p['id'] ?>" class="text-decoration-none text-dark">
                     <div class="bg-white shadow rounded overflow-hidden h-100">
 
                         <div class="course-card">
                             <div class="course-image">
-                                <img src="uploads_aluno/<?= htmlspecialchars($a['imagem'] ?? 'default.jpg') ?>"
-                                    alt="<?= htmlspecialchars($a['nome']) ?>">
+                                <img src="uploads_prof/<?= htmlspecialchars($p['imagem'] ?? 'default.jpg') ?>"
+                                    alt="<?= htmlspecialchars($p['nome']) ?>">
                             </div>
                             <div class="course-text">
-                                <h5><?= htmlspecialchars($a['nome']) ?></h5>
-                               
-                                <h6>Número de Mec: <?= htmlspecialchars($a['id']) ?> </h6>
-                                
+                                <h5><?= htmlspecialchars($p['nome']) ?></h5>
+                                <p>Número de Mec: <?= htmlspecialchars($p['id']) ?></p>
                             </div>
                         </div>
 

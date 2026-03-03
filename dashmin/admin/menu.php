@@ -61,7 +61,7 @@ include "../conexao.php";
         <div class="sidebar pe-4 pb-3">
             <nav class="navbar white navbar-light">
                 <a href="index.php" class="navbar-brand mx-4 mb-3">
-                    <h3 class="text-primary"><i class="fa fa-university me-2"></i>EPSAB</h3>
+                    <h3 class="text-primary"><i class="fa fa-university me-2"></i>SGE-LMS</h3>
                 </a>
                 <div class="d-flex align-items-center ms-4 mb-4">
                     <div class="position-relative">
@@ -105,14 +105,15 @@ include "../conexao.php";
                         <a href="#" class="nav-link " data-bs-toggle="dropdown"><i
                                 class="fa fa-graduation-cap me-2"></i>Aluno</a>
                         <div class="dropdown-menu bg-transparent border-0">
-                            <a href="lista_aluno.php" class="dropdown-item ps-5 <?= isActive('lista_aluno.php') ? 'active bg-light text-dark shadow' : ''; ?>">
+                            <a href="lista_aluno.php"
+                                class="dropdown-item ps-5 <?= isActive('lista_aluno.php') ? 'active bg-light text-dark shadow' : ''; ?>">
                                 <i class="fa fa-book-open me-2 text-primary  "></i> Listar
                             </a>
                             <a href="form_aluno.php"
-                                class="dropdown-item ps-5 <?= isActive('form_aluno.php')? 'active bg-light text-dark  shadow' : ''; ?>"><i
+                                class="dropdown-item ps-5 <?= isActive('form_aluno.php') ? 'active bg-light text-dark  shadow' : ''; ?>"><i
                                     class="fa fa-user-plus me-2 text-primary "></i>Registar </a>
                             <a href="editar_aluno.php"
-                                class="dropdown-item ps-5 <?= isActive('editar_aluno.php')? 'active bg-light text-dark shadow' : ''; ?>"><i
+                                class="dropdown-item ps-5 <?= isActive('editar_aluno.php') ? 'active bg-light text-dark shadow' : ''; ?>"><i
                                     class="fa fa-pen me-2 text-primary"></i> Editar</a>
                         </div>
                     </div>
@@ -121,14 +122,14 @@ include "../conexao.php";
                                 class="fa fa-user-tie  me-2"></i>Encarregado</a>
                         <div class="dropdown-menu bg-transparent border-0">
                             <a href="lista_encarregado.php"
-                                class="dropdown-item ps-5 <?= isActive('lista_encarregado.php')? 'active bg-light text-dark shadow' : ''; ?>">
+                                class="dropdown-item ps-5 <?= isActive('lista_encarregado.php') ? 'active bg-light text-dark shadow' : ''; ?>">
                                 <i class="fa fa-book-open me-2  text-primary "></i> Listar
                             </a>
                             <a href="form_encarregado.php"
-                                class="dropdown-item ps-5 <?= isActive('form_encarregado.php')? 'active bg-light text-dark shadow' : ''; ?>"><i
+                                class="dropdown-item ps-5 <?= isActive('form_encarregado.php') ? 'active bg-light text-dark shadow' : ''; ?>"><i
                                     class="fa fa-user-plus me-2 text-primary"></i>Registar </a>
                             <a href="editar_encarregado.php"
-                                class="dropdown-item ps-5 <?= isActive('editar_encarregado.php')? 'active bg-light text-dark shadow' : ''; ?>"><i
+                                class="dropdown-item ps-5 <?= isActive('editar_encarregado.php') ? 'active bg-light text-dark shadow' : ''; ?>"><i
                                     class="fa fa-pen me-2 text-primary "></i> Editar</a>
                         </div>
                     </div>
@@ -138,11 +139,11 @@ include "../conexao.php";
                                 class=" fa fa-chalkboard-teacher me-2"></i>Professor</a>
                         <div class="dropdown-menu bg-transparent border-0">
                             <a href="lista_professor.php"
-                                class="dropdown-item ps-5 <?= isActive('lista_professor.php')? 'active bg-light text-dark shadow' : ''; ?>">
+                                class="dropdown-item ps-5 <?= isActive('lista_professor.php') ? 'active bg-light text-dark shadow' : ''; ?>">
                                 <i class="fa fa-book-open me-2   text-primary"></i> Listar
                             </a>
                             <a href="form_professor.php"
-                                class="dropdown-item ps-5  <?= isActive('form_professor.php')? 'active bg-light text-dark shadow' : ''; ?>"><i
+                                class="dropdown-item ps-5  <?= isActive('form_professor.php') ? 'active bg-light text-dark shadow' : ''; ?>"><i
                                     class="fa fa-user-plus me-2 text-primary"></i>Registar </a>
                             <a href="editar_professor.php"
                                 class="dropdown-item ps-5 <?= isActive('editar_professor.php') ? 'active bg-light text-dark shadow' : ''; ?>"><i
@@ -153,29 +154,30 @@ include "../conexao.php";
                         <a href="#" class="nav-link " data-bs-toggle="dropdown"><i class="bi bi-book me-2"></i>Curso</a>
                         <div class="dropdown-menu bg-transparent border-0">
                             <a href="lista_curso.php"
-                                class="dropdown-item ps-5 <?= isActive('lista_professor.php')? 'active bg-light text-dark shadow' : ''; ?>">
+                                class="dropdown-item ps-5 <?= isActive('lista_professor.php') ? 'active bg-light text-dark shadow' : ''; ?>">
                                 <i class="fa fa-book-open me-2   text-primary"></i> Listar
                             </a>
                             <a href="curso_turma.php"
-                                class="dropdown-item ps-5  <?= isActive('curso_turma.php')? 'active bg-light text-dark shadow' : ''; ?>"><i
+                                class="dropdown-item ps-5  <?= isActive('curso_turma.php') ? 'active bg-light text-dark shadow' : ''; ?>"><i
                                     class="fa fa-user-plus me-2 text-primary"></i>Registar </a>
                             <a href="editar_curso.php"
-                                class="dropdown-item ps-5 <?= isActive('editar_curso.php')? 'active bg-light text-dark shadow' : ''; ?>"><i
+                                class="dropdown-item ps-5 <?= isActive('editar_curso.php') ? 'active bg-light text-dark shadow' : ''; ?>"><i
                                     class="fa fa-pen me-2 text-primary"></i> Editar</a>
                         </div>
                     </div>
                     <div class="nav-item dropdown">
-                        <a href="#" class="nav-link " data-bs-toggle="dropdown"><i class="bi bi-people me-2"></i>Turma</a>
+                        <a href="#" class="nav-link " data-bs-toggle="dropdown"><i
+                                class="bi bi-people me-2"></i>Turma</a>
                         <div class="dropdown-menu bg-transparent border-0">
                             <a href="lista_turma.php"
-                                class="dropdown-item ps-5 <?= isActive('lista_turma.php')? 'active bg-light text-dark shadow' : ''; ?>">
+                                class="dropdown-item ps-5 <?= isActive('lista_turma.php') ? 'active bg-light text-dark shadow' : ''; ?>">
                                 <i class="fa fa-book-open me-2   text-primary"></i> Listar
                             </a>
                             <a href="curso_turma.php"
-                                class="dropdown-item ps-5  <?= isActive('curso_turma.php')? 'active bg-light text-dark shadow' : ''; ?>"><i
+                                class="dropdown-item ps-5  <?= isActive('curso_turma.php') ? 'active bg-light text-dark shadow' : ''; ?>"><i
                                     class="fa fa-user-plus me-2 text-primary"></i>Registar </a>
                             <a href="editar_turma.php"
-                                class="dropdown-item ps-5 <?= isActive('editar_turma.php')? 'active bg-light text-dark shadow' : ''; ?>"><i
+                                class="dropdown-item ps-5 <?= isActive('editar_turma.php') ? 'active bg-light text-dark shadow' : ''; ?>"><i
                                     class="fa fa-pen me-2 text-primary"></i> Editar</a>
                         </div>
                     </div>
@@ -205,8 +207,13 @@ include "../conexao.php";
                     <i class="fa fa-bars"></i>
                 </a>
                 <form class="d-none d-md-flex ms-4">
-                    <input class="form-control border-0" type="search" placeholder="Search">
+                    <input class="form-control border-0" type="search" placeholder="pesquisa">
                 </form>
+
+                <a href="#" class="sidebar-toggler flex-shrink-0 ms-2">
+                    <i class="fa fa-search"></i>
+                </a>
+                
                 <div class="navbar-nav align-items-center ms-auto">
                     <div class="nav-item dropdown">
                         <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
@@ -268,6 +275,6 @@ include "../conexao.php";
             <!-- Navbar End -->
 
             <?php
-            require("chatbox.php");
-
+            // require("chatbox.php");
+            
             ?>

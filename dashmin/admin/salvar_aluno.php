@@ -1,6 +1,5 @@
 <?php
 
-
 declare(strict_types=1);
 
 date_default_timezone_set('Europe/Lisbon');
@@ -140,9 +139,14 @@ try {
     $partesNome = explode(' ', trim($nome));
     $apelido = end($partesNome);
 
+    // Primeira letra maiúscula (suporte a acentos)
+    $apelidoFormatado = mb_convert_case($apelido, MB_CASE_TITLE, 'UTF-8');
+
+    // Ano atual
+    $anoAtual = date('Y');
 
     // Senha final
-    $senhaOriginal = 'Epsab00!';
+    $senhaOriginal = $apelidoFormatado . $anoAtual . '#';
 
     // Hash da senha (RECOMENDADO)
     $senhaHash = password_hash($senhaOriginal, PASSWORD_DEFAULT);
@@ -161,7 +165,7 @@ try {
 
     // Inserir aluno
     $stmt = $pdo->prepare("
-        INSERT INTO alunos 
+        INSERT INTO aluno 
         (user_id, nome, data_nascimento, contato, bi, email, morada, genero, distrito, freguesia)
         VALUES (:user_id, :nome, :data, :contato, :bi, :email, :morada, :genero, :distrito, :freguesia )
     ");

@@ -96,7 +96,7 @@ include 'nav-menu.php';
                 <div class="card h-100 shadow p-2">
 
                     <!-- Imagem -->
-                   <a href="lista_turma.php?curso_id=<?= $c['id'] ?>">
+                    <a href="lista_turma.php?curso_id=<?= $c['id'] ?>">
                         <img src="./uploads_curso/<?= htmlspecialchars($c['imagem'] ?? 'default.jpg') ?>"
                             class="card-img-top rounded" alt="<?= htmlspecialchars($c['nome']) ?>"
                             style="height:190px; object-fit:cover; font-family:'Times New Roman', serif;">
@@ -114,6 +114,15 @@ include 'nav-menu.php';
                             <?= htmlspecialchars($c['descricao']) ?>
                         </p>
                     </div>
+                    <div class="mt-3 d-flex justify-content-between">
+                        <a href="editar_curso.php?id=<? $c['id'] ?>" class="btn btn-sm btn-primary">
+                            Editar
+                        </a>
+                        <form action="deletar_curso.php" method="POST" onsubmit="return confirm('Tens certeza deseja remover este curso?');">
+                            <input type="hidden" name="id" value="<?= $c['id'] ?>">
+                            <button type="submit" class="btn btn-sm btn-danger">Remover</button>
+                        </form>
+                    </div>
 
                 </div>
             </div>
@@ -126,23 +135,10 @@ include 'nav-menu.php';
 
 
 
-
 <!-- Footer Start -->
-<div class="container-fluid pt-4 px-4">
-    <div class="bg-light rounded-top p-4">
-        <div class="row">
-            <div class="col-12 col-sm-6 text-center text-sm-start">
-                &copy; <a href="#">Your Site Name</a>, All Right Reserved.
-            </div>
-            <div class="col-12 col-sm-6 text-center text-sm-end">
-                <!--/*** This template is free as long as you keep the footer author’s credit link/attribution link/backlink. If you'd like to use the template without the footer author’s credit link/attribution link/backlink, you can purchase the Credit Removal License from "https://htmlcodex.com/credit-removal". Thank you for your support. ***/-->
-                Designed By <a href="https://htmlcodex.com">HTML Codex</a>
-                </br>
-                Distributed By <a class="border-bottom" href="https://themewagon.com" target="_blank">ThemeWagon</a>
-            </div>
-        </div>
-    </div>
-</div>
+<?php
+include 'footer.php';
+?>
 <!-- Footer End -->
 </div>
 <!-- Content End -->

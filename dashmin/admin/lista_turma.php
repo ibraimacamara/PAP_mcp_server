@@ -2,12 +2,6 @@
 include('../conexao.php');
 include('menu.php');
 
-// Pegar totais
-$totalAlunos = $pdo->query("SELECT COUNT(*) AS total FROM aluno")->fetch(PDO::FETCH_ASSOC)['total'];
-$totalCurso = $pdo->query("SELECT COUNT(*) AS total FROM curso")->fetch(PDO::FETCH_ASSOC)['total'];
-$totalTurma = $pdo->query("SELECT COUNT(*) AS total FROM turma")->fetch(PDO::FETCH_ASSOC)['total'];
-$totalProfessor = $pdo->query("SELECT COUNT(*) AS total FROM professor")->fetch(PDO::FETCH_ASSOC)['total'];
-
 // Verifica se foi passado um curso_id via GET
 $curso_id = $_GET['curso_id'] ?? null;
 
@@ -143,21 +137,9 @@ include 'nav-menu.php';
 
 
 <!-- Footer Start -->
-<div class="container-fluid pt-4 px-4">
-    <div class="bg-light rounded-top p-4">
-        <div class="row">
-            <div class="col-12 col-sm-6 text-center text-sm-start">
-                &copy; <a href="#">Your Site Name</a>, All Right Reserved.
-            </div>
-            <div class="col-12 col-sm-6 text-center text-sm-end">
-                <!--/*** This template is free as long as you keep the footer author’s credit link/attribution link/backlink. If you'd like to use the template without the footer author’s credit link/attribution link/backlink, you can purchase the Credit Removal License from "https://htmlcodex.com/credit-removal". Thank you for your support. ***/-->
-                Designed By <a href="https://htmlcodex.com">HTML Codex</a>
-                </br>
-                Distributed By <a class="border-bottom" href="https://themewagon.com" target="_blank">ThemeWagon</a>
-            </div>
-        </div>
-    </div>
-</div>
+<?php
+include 'footer.php';
+?>
 <!-- Footer End -->
 </div>
 <!-- Content End -->
