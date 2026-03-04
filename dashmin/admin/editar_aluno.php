@@ -1,25 +1,25 @@
 <?php
 session_start();
-include "../conexao.php";
-include "menu.php";
-include "nav-menu.php";
+include('../conexao.php');
+include('menu.php');
+include('nav-menu.php');
 
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-if (!isset($_GET['id']) || empty($_GET['id'])) {
+if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
     die("ID inválido.");
 }
 
 $id = (int) $_GET['id'];
 
-$stmt = $pdo->prepare("SELECT * FROM encarregado WHERE id = ?");
+$stmt = $pdo->prepare("SELECT * FROM aluno WHERE numero_aluno = ?");
 $stmt->execute([$id]);
-$encarregado = $stmt->fetch(PDO::FETCH_ASSOC);
+$aluno = $stmt->fetch(PDO::FETCH_ASSOC);
 
-if (!$encarregado) {
-    die("Encarregado não encontrado.");
+if (!$aluno) {
+    die("Aluno não encontrado.");
 }
 ?>
 
@@ -27,10 +27,10 @@ if (!$encarregado) {
     <div class="row g-4">
         <div class="col-12">
             <div class="bg-white shadow rounded p-4">
-                <h6 class="mb-4">Editar Encarregado</h6>
+                <h6 class="mb-4">Editar Aluno — <?= htmlspecialchars($aluno['nome']) ?></h6>
 
-                <form action="atualizar_encarregado.php" method="POST">
-                    <input type="hidden" name="id" value="<?= $encarregado['id'] ?>">
+                <form action="atualizar_aluno.php" method="POST">
+                    <input type="hidden" name="numero_aluno" value="<?= $aluno['numero_aluno'] ?>">
                     <input type="hidden" name="csrf_token"
                         value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
 
@@ -38,12 +38,12 @@ if (!$encarregado) {
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Nome completo</label>
                             <input type="text" name="nome" class="form-control"
-                                value="<?= htmlspecialchars($encarregado['nome']) ?>" required>
+                                value="<?= htmlspecialchars($aluno['nome']) ?>" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Email</label>
                             <input type="email" name="email" class="form-control"
-                                value="<?= htmlspecialchars($encarregado['email'] ?? '') ?>">
+                                value="<?= htmlspecialchars($aluno['email'] ?? '') ?>">
                         </div>
                     </div>
 
@@ -51,28 +51,25 @@ if (!$encarregado) {
                         <div class="col-md-6 mb-3">
                             <label class="form-label">BI</label>
                             <input type="text" name="bi" class="form-control"
-                                value="<?= htmlspecialchars($encarregado['bi'] ?? '') ?>" required>
+                                value="<?= htmlspecialchars($aluno['bi'] ?? '') ?>">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Contato</label>
                             <input type="text" name="contato" class="form-control"
-                                value="<?= htmlspecialchars($encarregado['contato'] ?? '') ?>">
+                                value="<?= htmlspecialchars($aluno['contato'] ?? '') ?>">
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Morada</label>
-                            <input type="text" name="morada" class="form-control"
-                                value="<?= htmlspecialchars($encarregado['morada'] ?? '') ?>">
+                            <label class="form-label">Data de Nascimento</label>
+                            <input type="date" name="data_nascimento" class="form-control"
+                                value="<?= htmlspecialchars($aluno['data_nascimento'] ?? '') ?>">
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Gênero</label>
-                            <select name="genero" class="form-select">
-                                <option value="">Escolha...</option>
-                                <option value="masculino" <?= ($encarregado['genero'] ?? '') == 'masculino' ? 'selected' : '' ?>>Masculino</option>
-                                <option value="feminino"  <?= ($encarregado['genero'] ?? '') == 'feminino'  ? 'selected' : '' ?>>Feminino</option>
-                            </select>
+                            <label class="form-label">Morada</label>
+                            <input type="text" name="morada" class="form-control"
+                                value="<?= htmlspecialchars($aluno['morada'] ?? '') ?>">
                         </div>
                     </div>
 
@@ -80,17 +77,28 @@ if (!$encarregado) {
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Distrito</label>
                             <input type="text" name="distrito" class="form-control"
-                                value="<?= htmlspecialchars($encarregado['distrito'] ?? '') ?>">
+                                value="<?= htmlspecialchars($aluno['distrito'] ?? '') ?>">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Freguesia</label>
                             <input type="text" name="freguesia" class="form-control"
-                                value="<?= htmlspecialchars($encarregado['freguesia'] ?? '') ?>">
+                                value="<?= htmlspecialchars($aluno['freguesia'] ?? '') ?>">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Gênero</label>
+                            <select name="genero" class="form-select">
+                                <option value="">Escolha...</option>
+                                <option value="Masculino" <?= ($aluno['genero'] ?? '') == 'Masculino' ? 'selected' : '' ?>>Masculino</option>
+                                <option value="Feminino"  <?= ($aluno['genero'] ?? '') == 'Feminino'  ? 'selected' : '' ?>>Feminino</option>
+                            </select>
                         </div>
                     </div>
 
                     <div class="d-flex gap-2 justify-content-center">
-                        <a href="lista_encarregado.php" class="btn btn-secondary w-25">Cancelar</a>
+                        <a href="detalhe_aluno.php?id=<?= $aluno['numero_aluno'] ?>" class="btn btn-secondary w-25">Cancelar</a>
                         <button type="submit" class="btn btn-primary w-25">Atualizar</button>
                     </div>
                 </form>
