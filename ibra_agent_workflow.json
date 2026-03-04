@@ -48,8 +48,8 @@
     },
     {
       "parameters": {
-        "connectionType": "sse",
-        "sseEndpoint": "http://host.docker.internal:8000/sse"
+        "connectionType": "streamableHttp",
+        "streamableHttpUrl": "http://host.docker.internal:8000/mcp"
       },
       "id": "a1b2c3d4-0004-0004-0004-000000000004",
       "name": "MCP Server Escolar",
