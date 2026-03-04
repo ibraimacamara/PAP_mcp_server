@@ -1,6 +1,6 @@
 import os
 from fastmcp import FastMCP
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Dict, List, Tuple
 import json
 from conexao import get_connection, init_db
 
@@ -12,7 +12,7 @@ mcp = FastMCP("gestor de escola MCP Tool")
 # ---------------------------------------------------------------------------
 
 @mcp.tool
-def insert_aluno(data: Union[str, dict]) -> dict:
+def insert_aluno(data: str) -> dict:
     """
     Insere um novo aluno na tabela 'aluno'.
     data: dict ou JSON string com os campos do aluno.
@@ -77,7 +77,7 @@ def list_aluno() -> dict:
 
 
 @mcp.tool
-def update_aluno(numero_aluno: int, updates: Union[dict, str]) -> dict:
+def update_aluno(numero_aluno: int, updates: str) -> dict:
     """
     Atualiza dados de um aluno pelo seu número de identificação.
     updates: dict ou JSON string com os campos a alterar.
@@ -144,7 +144,7 @@ def delete_aluno(numero_aluno: int) -> dict:
 # ---------------------------------------------------------------------------
 
 @mcp.tool
-def insert_encarregado(data: Union[str, dict]) -> dict:
+def insert_encarregado(data: str) -> dict:
     """
     Insere um novo encarregado de educação.
     data: dict ou JSON string com os campos do encarregado.
@@ -208,7 +208,7 @@ def list_encarregado() -> dict:
 
 
 @mcp.tool
-def update_encarregado(encarregado_id: int, updates: Union[dict, str]) -> dict:
+def update_encarregado(encarregado_id: int, updates: str) -> dict:
     """
     Atualiza dados de um encarregado de educação pelo ID.
     updates: dict ou JSON string com os campos a alterar.
@@ -271,8 +271,8 @@ def delete_encarregado(encarregado_id: int) -> dict:
 
 @mcp.tool
 def get_aluno_encarregado(
-    aluno_input: str | None = None,
-    numero_aluno: int | None = None,
+    aluno_input: str = "",
+    numero_aluno: int = 0,
 ) -> dict:
     """
     Consulta o encarregado de educação de um aluno.
@@ -357,6 +357,46 @@ def delete_aluno_encarregado(encarregado_id: int) -> dict:
         conn.close()
 
 
+@mcp.tool
+def link_aluno_encarregado(numero_aluno: int, encarregado_id: int, laco_familiar: str = "Pai/Mãe") -> dict:
+    """
+    Liga um encarregado de educação existente a um aluno.
+    laco_familiar: ex. "Pai", "Mãe", "Tio", "Avó", etc.
+    Ex: link_aluno_encarregado(numero_aluno=1, encarregado_id=2, laco_familiar="Mãe")
+    """
+    conn = get_connection()
+    if not conn:
+        return {"success": False, "message": "Sem conexão ao banco"}
+
+    cur = conn.cursor(dictionary=True)
+    try:
+        cur.execute("SELECT numero_aluno, nome FROM aluno WHERE numero_aluno = %s", (numero_aluno,))
+        aluno = cur.fetchone()
+        if not aluno:
+            return {"success": False, "message": f"Aluno {numero_aluno} não encontrado."}
+
+        cur.execute("SELECT id, nome FROM encarregado WHERE id = %s", (encarregado_id,))
+        enc = cur.fetchone()
+        if not enc:
+            return {"success": False, "message": f"Encarregado {encarregado_id} não encontrado."}
+
+        cur.execute(
+            "INSERT INTO aluno_encarregado (numero_aluno, id_encarregado, laco_familiar) VALUES (%s, %s, %s)",
+            (numero_aluno, encarregado_id, laco_familiar)
+        )
+        conn.commit()
+        return {
+            "success": True,
+            "message": f"Encarregado '{enc['nome']}' ligado ao aluno '{aluno['nome']}' como {laco_familiar}."
+        }
+    except Exception as e:
+        conn.rollback()
+        return {"success": False, "message": "Erro ao criar ligação.", "error": str(e)}
+    finally:
+        cur.close()
+        conn.close()
+
+
 # ---------------------------------------------------------------------------
 # TURMA
 # ---------------------------------------------------------------------------
@@ -431,7 +471,7 @@ def insert_aluno_turma(numero_aluno: int, turma_id: int) -> dict:
 
 
 @mcp.tool
-def get_aluno_turma(aluno_input: str | None = None, numero_aluno: int | None = None) -> dict:
+def get_aluno_turma(aluno_input: str = "", numero_aluno: int = 0) -> dict:
     """
     Consulta a turma em que um aluno está inscrito.
     Pesquisa por nome ou número do aluno.
@@ -513,7 +553,7 @@ def list_professor() -> dict:
 
 
 @mcp.tool
-def insert_professor(data: Union[str, dict]) -> dict:
+def insert_professor(data: str) -> dict:
     """
     Insere um novo professor no sistema.
     data: dict ou JSON string com os campos do professor.
@@ -585,5 +625,5 @@ def list_curso() -> dict:
 
 if __name__ == "__main__":
     port = int(os.getenv("MCP_PORT", 8000))
-    print(f"Starting MCP server (SSE) on http://0.0.0.0:{port}/sse")
+    print(f"Starting MCP server (sse) on http://0.0.0.0:{port}/sse")
     mcp.run(transport="sse", host="0.0.0.0", port=port)

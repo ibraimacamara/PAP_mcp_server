@@ -3,7 +3,7 @@
 Este projeto é um sistema de gestão escolar com um assistente de inteligência artificial que responde a perguntas em linguagem natural, como:
 
 - *"Qual é o encarregado de educação do aluno João Silva?"*
-- *"Insere o aluno Ibra na turma 10A"*
+- *"Insere o aluno Ibra na turma INF-A"*
 - *"Lista todos os professores"*
 
 ---
@@ -11,11 +11,9 @@ Este projeto é um sistema de gestão escolar com um assistente de inteligência
 ## Como funciona (visão geral)
 
 ```
-Tu escreves no chat
+Tu escreves no chat (painel PHP ou n8n)
         ↓
-   n8n (interface de chat)
-        ↓
-   Agente IA (Google Gemini)
+   n8n — Agente IA (Google Gemini)
         ↓
    Servidor MCP (Python) — porta 8000
         ↓
@@ -26,26 +24,33 @@ Tu escreves no chat
 
 ## O que precisas de instalar
 
-Antes de começar, instala estas ferramentas no teu computador:
-
 | Ferramenta | Para que serve | Link |
 |---|---|---|
 | **Python 3.10+** | Correr o servidor MCP | https://www.python.org/downloads/ |
 | **Docker Desktop** | Correr o n8n | https://www.docker.com/products/docker-desktop/ |
-| **XAMPP** (ou MySQL) | Base de dados | https://www.apachefriends.org/ |
+| **XAMPP** | Apache (PHP) + MySQL | https://www.apachefriends.org/ |
 
-> **Nota:** No XAMPP, basta iniciar o **Apache** e o **MySQL**.
+> No XAMPP, inicia o **Apache** e o **MySQL**.
 
 ---
 
 ## Passo 1 — Configurar a base de dados
 
 1. Abre o **XAMPP** e clica em **Start** no Apache e no MySQL
-2. Abre o browser e vai a `http://localhost/phpmyadmin`
-3. Cria uma base de dados chamada `gestor_escola`
-4. Importa o teu ficheiro SQL (se tiveres um) ou cria as tabelas manualmente
+2. Corre o script SQL de criação da base de dados:
 
-> A base de dados deve ter estas tabelas: `aluno`, `encarregado`, `aluno_encarregado`, `professor`, `curso`, `turma`, `aluno_turma`, `aluno_curso`, `users`
+```bash
+/Applications/XAMPP/xamppfiles/bin/mysql -u root -e "SOURCE /caminho/para/PAP_mcp_server/database/schema_with_data.sql;"
+```
+
+> Ou abre o `phpMyAdmin` (`http://localhost/phpmyadmin`), clica em **Import** e seleciona o ficheiro `database/schema_with_data.sql`.
+
+O script cria automaticamente a base de dados `gestor_escola` com dados de teste:
+- 5 alunos (incluindo **Ibra Camara**)
+- 4 turmas (INF-A, INF-B, GES-A, ENF-A)
+- 3 cursos
+- 3 professores
+- 4 encarregados
 
 ---
 
@@ -67,132 +72,133 @@ MCP_PORT=8000
 
 ## Passo 3 — Instalar as dependências Python
 
-Abre o **terminal** (Prompt de Comando no Windows, Terminal no Mac), vai à pasta do projeto e corre:
-
 ```bash
 cd PAP_mcp_server/backend
+python -m venv .venv
+source .venv/bin/activate      # Mac/Linux
+# .venv\Scripts\activate       # Windows
+
 pip install -r requirements.txt
 ```
-
-Se tiveres problemas com `pip`, tenta `pip3` em vez de `pip`.
 
 ---
 
 ## Passo 4 — Iniciar o servidor MCP
 
-No mesmo terminal, corre:
-
 ```bash
+cd PAP_mcp_server/backend
+source .venv/bin/activate
 python server1.py
 ```
 
-Deves ver esta mensagem:
+Deves ver:
 
 ```
-Starting MCP server (SSE) on http://0.0.0.0:8000/sse
+Starting MCP server (sse) on http://0.0.0.0:8000/sse
+Uvicorn running on http://0.0.0.0:8000
 ```
 
-> **Deixa este terminal aberto.** O servidor tem de estar sempre a correr enquanto usas o sistema.
+> **Deixa este terminal aberto.** O servidor tem de estar sempre a correr.
+
+> **Atenção:** Não corras outros servidores na porta 8000 ao mesmo tempo (verifica com `lsof -i :8000`).
 
 ---
 
-## Passo 5 — Iniciar o n8n com Docker
+## Passo 5 — Configurar o Apache (XAMPP) para o painel PHP
 
-Abre um **segundo terminal**, vai à pasta do projeto e corre:
+Adiciona `ibra.local` ao ficheiro de hosts do sistema:
+
+```bash
+# Mac/Linux
+echo "127.0.0.1 ibra.local" | sudo tee -a /etc/hosts
+
+# Windows (como Administrador)
+echo 127.0.0.1 ibra.local >> C:\Windows\System32\drivers\etc\hosts
+```
+
+Edita o ficheiro `/Applications/XAMPP/xamppfiles/etc/extra/httpd-vhosts.conf` e adiciona:
+
+```apache
+<VirtualHost *:80>
+    ServerName ibra.local
+    DocumentRoot "/caminho/para/PAP_mcp_server/dashmin"
+    <Directory "/caminho/para/PAP_mcp_server/dashmin">
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+</VirtualHost>
+```
+
+Reinicia o Apache no XAMPP. O painel estará disponível em `http://ibra.local/admin/`.
+
+> Certifica-te também que o ficheiro `httpd-vhosts.conf` está incluído no `httpd.conf` (linha `Include etc/extra/httpd-vhosts.conf` deve estar sem `#`).
+
+---
+
+## Passo 6 — Iniciar o n8n com Docker
 
 ```bash
 cd PAP_mcp_server
 docker compose up -d
 ```
 
-O Docker vai descarregar a imagem do n8n (pode demorar alguns minutos na primeira vez).
-
-Quando terminar, abre o browser e vai a:
-
-```
-http://localhost:5678
-```
-
-Cria uma conta (é local, não precisas de cartão de crédito).
+Abre `http://localhost:5678` e cria uma conta local.
 
 ---
 
-## Passo 6 — Obter a chave API do Google Gemini (grátis)
+## Passo 7 — Obter a chave API do Google Gemini (grátis)
 
 1. Vai a [https://aistudio.google.com](https://aistudio.google.com)
 2. Faz login com a tua conta Google
 3. Clica em **"Get API key"** → **"Create API key"**
 4. Copia a chave (começa por `AIza...`)
 
-> Esta chave é gratuita e permite testar à vontade.
+> Modelo recomendado: `models/gemini-2.5-pro-exp-03-25` (gratuito, experimental)
 
 ---
 
-## Passo 7 — Importar o workflow no n8n
+## Passo 8 — Importar o workflow no n8n
 
-1. No n8n (`http://localhost:5678`), clica em **"New workflow"**
-2. Clica no menu **⋯** (três pontos) no canto superior direito
-3. Escolhe **"Import from file"**
-4. Seleciona o ficheiro `ibra_agent_workflow.json` que está na pasta do projeto
-5. O workflow vai aparecer com 5 nós ligados entre si
-
----
-
-## Passo 8 — Adicionar as credenciais do Google Gemini
-
-1. Clica no nó **"Google Gemini Flash"** (o nó cor-de-laranja/amarelo)
-2. Em **"Credential to connect with"**, clica em **"Create new credential"**
-3. Cola a tua chave API do passo anterior
-4. Clica em **Save**
+1. No n8n, clica em **"New workflow"**
+2. Menu **⋯** → **"Import from file"**
+3. Seleciona `ibra_agent_workflow.json`
+4. Clica no nó **"Google Gemini"** → cria credencial com a tua chave API
+5. Confirma que o nó **"MCP Server Escolar"** tem:
+   - Connection Type: **SSE**
+   - URL: `http://host.docker.internal:8000/sse`
+6. Ativa o workflow (toggle **Inactive → Active**)
 
 ---
 
-## Passo 9 — Ativar o workflow
+## Passo 9 — Usar o chat
 
-1. No canto superior direito do n8n, muda o toggle de **Inactive** para **Active**
-2. O workflow está agora a correr
+### Opção A — Chat integrado no painel PHP
 
----
+Abre `http://ibra.local/admin/chatbox.php` para a interface de chat completa.
 
-## Passo 10 — Abrir o chat
+O painel também tem um **widget de chat** (botão "IA" na barra superior) disponível em qualquer página da administração.
 
-1. Clica no nó **"Chat Trigger"** (o primeiro nó, à esquerda)
-2. Copia o link que aparece (algo como `http://localhost:5678/webhook/.../chat`)
-3. Abre esse link no browser
+### Opção B — Chat do n8n
 
-Já podes escrever perguntas em português! Experimenta:
+Clica no nó **"Chat Trigger"** no n8n → copia o link do chat webhook.
 
-- `"Lista todos os alunos"`
-- `"Qual o encarregado do aluno com número 1?"`
-- `"Insere o aluno Ibra Camara na turma 1"`
-
----
-
-## Incorporar o chat no painel de administração (opcional)
-
-Se quiseres mostrar o chat dentro do painel PHP (`dashmin`), abre qualquer página PHP e adiciona este código onde quiseres o chat:
-
-```html
-<iframe
-  src="http://localhost:5678/webhook/ibra-chat-webhook/chat"
-  width="100%"
-  height="600"
-  style="border: none; border-radius: 8px;">
-</iframe>
-```
+Exemplos de perguntas:
+- `"Lista todas as turmas"`
+- `"Qual o encarregado do aluno Ibra Camara?"`
+- `"Insere o aluno Ibra na turma INF-B"`
+- `"Liga o encarregado António ao aluno Fatoumata como Tio"`
 
 ---
 
 ## Resumo — ordem de arranque
 
-Sempre que quiseres usar o sistema, faz isto **por esta ordem**:
-
 ```
 1. Inicia o XAMPP (Apache + MySQL)
-2. Corre: python server1.py          (terminal 1)
-3. Corre: docker compose up -d       (terminal 2, só se o Docker não estiver já a correr)
-4. Abre: http://localhost:5678       (n8n — workflow deve estar ativo)
-5. Abre o link do chat e usa o sistema
+2. cd backend && python server1.py          ← terminal 1
+3. docker compose up -d                     ← (só se o Docker não estiver a correr)
+4. Abre http://localhost:5678               ← confirma que o workflow está Active
+5. Abre http://ibra.local/admin/            ← painel de administração
 ```
 
 ---
@@ -202,22 +208,25 @@ Sempre que quiseres usar o sistema, faz isto **por esta ordem**:
 ```
 PAP_mcp_server/
 ├── backend/
-│   ├── server1.py          ← Servidor MCP (ferramentas de base de dados)
-│   ├── server.py           ← Versão alternativa genérica
-│   ├── conexao.py          ← Ligação ao MySQL
-│   ├── .env                ← Credenciais da base de dados
-│   └── requirements.txt    ← Dependências Python
-├── dashmin/                ← Painel de administração PHP
-├── ibra_agent_workflow.json ← Workflow do n8n (importar aqui)
-├── docker-compose.yml      ← Configuração do Docker para o n8n
-└── README.md               ← Este ficheiro
+│   ├── server1.py              ← Servidor MCP principal
+│   ├── conexao.py              ← Ligação ao MySQL
+│   ├── .env                    ← Credenciais (não commitar)
+│   └── requirements.txt        ← Dependências Python
+├── dashmin/                    ← Painel de administração PHP
+│   └── admin/
+│       ├── chatbox.php         ← Chat completo (página inteira)
+│       ├── menu.php            ← Sidebar + widget de chat popup
+│       └── ...
+├── database/
+│   └── schema_with_data.sql    ← Schema + dados de teste
+├── ibra_agent_workflow.json    ← Workflow do n8n
+├── docker-compose.yml          ← n8n via Docker
+└── guia.md                     ← Este ficheiro
 ```
 
 ---
 
 ## Ferramentas disponíveis no agente
-
-O agente tem acesso a estas ações na base de dados:
 
 | Ferramenta | O que faz |
 |---|---|
@@ -228,6 +237,9 @@ O agente tem acesso a estas ações na base de dados:
 | `get_aluno_encarregado` | Consulta o encarregado de um aluno |
 | `list_encarregado` | Lista todos os encarregados |
 | `insert_encarregado` | Adiciona um novo encarregado |
+| `update_encarregado` | Atualiza dados de um encarregado |
+| `delete_encarregado` | Remove um encarregado |
+| `link_aluno_encarregado` | Liga um encarregado existente a um aluno |
 | `list_turma` | Lista todas as turmas |
 | `insert_aluno_turma` | Inscreve um aluno numa turma |
 | `get_aluno_turma` | Consulta a turma de um aluno |
@@ -240,13 +252,19 @@ O agente tem acesso a estas ações na base de dados:
 ## Problemas comuns
 
 **"Sem conexão ao banco"**
-→ Verifica se o MySQL está ligado no XAMPP e se o `.env` tem os dados corretos.
+→ Verifica se o MySQL está ligado no XAMPP e se o `backend/.env` tem os dados corretos.
 
-**O chat não responde**
+**"Unknown database 'gestor_escola'"**
+→ Corre o script SQL: `database/schema_with_data.sql` no phpMyAdmin ou via terminal.
+
+**O chat não responde / erro de ligação**
 → Confirma que o `server1.py` está a correr e que o workflow está **Active** no n8n.
 
-**Erro ao ligar ao MCP no Docker**
-→ O endereço `host.docker.internal:8000` só funciona se o servidor MCP estiver a correr no teu computador (fora do Docker). Confirma que o `server1.py` está a correr num terminal normal.
+**Porta 8000 ocupada**
+→ Corre `lsof -i :8000` para ver que processo está a usar a porta e termina-o com `kill <PID>`.
 
-**"Invalid API key" no Gemini**
-→ A chave expira ou pode ter sido revogada. Vai ao Google AI Studio e cria uma nova.
+**"Non-200 status code (404)" no MCP do n8n**
+→ O servidor MCP usa transporte SSE. Confirma que o nó MCP no n8n aponta para `http://host.docker.internal:8000/sse` com tipo **SSE**.
+
+**Quota do Gemini esgotada (429)**
+→ Muda o modelo para `models/gemini-2.5-pro-exp-03-25` ou cria uma nova chave API num projeto Google diferente.
