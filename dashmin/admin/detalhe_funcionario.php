@@ -15,8 +15,7 @@ try {
         SELECT
             f.*,
             u.foto,
-            u.categoria,
-            u.email
+            u.categoria
         FROM funcionario f
         LEFT JOIN users u ON u.id = f.user_id
         WHERE f.id = :id

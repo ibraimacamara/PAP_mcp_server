@@ -7,12 +7,12 @@ services:
     environment:
       - N8N_BASIC_AUTH_ACTIVE=false
       - WEBHOOK_URL=http://localhost:5678/
-      # Add your Anthropic API key here or set it in n8n credentials UI
+     # adicionar api key aqui opcional
       # - ANTHROPIC_API_KEY=sk-ant-...
     volumes:
       - n8n_data:/home/node/.n8n
     extra_hosts:
-      # Allows n8n (in Docker) to reach the MCP server running on the host
+      # Permite que o n8n (no Docker) aceda ao servidor MCP a correr no host (teu computador)
       - "host.docker.internal:host-gateway"
 
 volumes:

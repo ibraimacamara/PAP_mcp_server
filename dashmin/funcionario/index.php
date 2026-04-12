@@ -24,11 +24,9 @@ include 'nav-menu.php';
 
 
     .msg-bubble {
-        max-width: 60%;
-        padding: 4px 0;
-        background: transparent;
-        border: none;
-        border-radius: 0;
+        max-width: 75%;
+        padding: 10px 14px;
+        border-radius: 16px;
         line-height: 1.5;
         word-wrap: break-word;
         white-space: pre-wrap;
@@ -36,13 +34,18 @@ include 'nav-menu.php';
 
     .msg-user {
         align-self: flex-end;
-        color: #0d6efd;
+        background: #0d6efd;
+        color: #fff;
+        border-bottom-right-radius: 4px;
     }
 
     .msg-agent {
         align-self: flex-start;
+        background: #ffffff;
         color: #333;
-        box-shadow: none;
+        border: 1px solid #e0e0e0;
+        border-bottom-left-radius: 4px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     }
 
     .msg-agent .agent-label {
@@ -88,13 +91,13 @@ include 'nav-menu.php';
     .chat-input-area {
         padding: 12px 16px;
         background: #fff;
-        
+
         position: fixed;
         bottom: 0;
         left: 30%;
         width: 60%;
 
-        
+
     }
 
     .chat-input-box {
@@ -209,7 +212,7 @@ include 'nav-menu.php';
         if (role === 'agent') {
             const label = document.createElement('div');
             label.className = 'agent-label';
-            label.innerHTML = '<i class="fa fa-robot"></i> Assistente IBRA';
+            label.innerHTML = '<i class="fa fa-robot"></i> Assistente SGE-ECP';
             bubble.appendChild(label);
         }
 
@@ -226,7 +229,7 @@ include 'nav-menu.php';
         const bubble = document.createElement('div');
         bubble.classList.add('msg-bubble', 'msg-agent');
         bubble.id = 'typingIndicator';
-        bubble.innerHTML = '<div class="agent-label"><i class="fa fa-robot"></i> Assistente IBRA</div>' +
+        bubble.innerHTML = '<div class="agent-label"><i class="fa fa-robot"></i> Assistente SGE-ECP</div>' +
             '<div class="typing-indicator"><span></span><span></span><span></span></div>';
         messages.appendChild(bubble);
         messages.scrollTop = messages.scrollHeight;
@@ -288,7 +291,7 @@ include 'footer.php';
 <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
 </div>
 
-<!-- JavaScript Libraries -->
+<!-- JavaScript LSGE-ECPries -->
 <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="lib/chart/chart.min.js"></script>

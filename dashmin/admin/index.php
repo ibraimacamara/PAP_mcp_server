@@ -2,15 +2,284 @@
 include '../conexao.php';
 include 'menu.php';
 
-
 include 'nav-menu.php';
-?>
 
+?>
+<style>
+    .chat-page {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 60px);
+    }
+
+    .chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        background: transparent;
+    }
+
+
+    .msg-bubble {
+        max-width: 75%;
+        padding: 10px 14px;
+        border-radius: 16px;
+        line-height: 1.5;
+        word-wrap: break-word;
+        white-space: pre-wrap;
+    }
+
+    .msg-user {
+        align-self: flex-end;
+        background: #0d6efd;
+        color: #fff;
+        border-bottom-right-radius: 4px;
+    }
+
+    .msg-agent {
+        align-self: flex-start;
+        background: #ffffff;
+        color: #333;
+        border: 1px solid #e0e0e0;
+        border-bottom-left-radius: 4px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .msg-agent .agent-label {
+        font-size: 11px;
+        color: #888;
+        margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .typing-indicator span {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        background: #aaa;
+        border-radius: 50%;
+        margin: 0 2px;
+        animation: bounce 1.2s infinite;
+    }
+
+    .typing-indicator span:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .typing-indicator span:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+
+    @keyframes bounce {
+
+        0%,
+        80%,
+        100% {
+            transform: translateY(0);
+        }
+
+        40% {
+            transform: translateY(-6px);
+        }
+    }
+
+    .chat-input-area {
+        padding: 12px 16px;
+        background: #fff;
+
+        position: fixed;
+        bottom: 0;
+        left: 30%;
+        width: 60%;
+
+
+    }
+
+    .chat-input-box {
+        display: flex;
+        align-items: flex-end;
+        gap: 8px;
+        background: #f1f3f5;
+        border-radius: 12px;
+        padding: 8px 12px;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .chat-input-box textarea {
+        flex: 1;
+        border: none;
+        background: transparent;
+        resize: none;
+        outline: none;
+        font-size: 15px;
+        max-height: 150px;
+        overflow-y: auto;
+        line-height: 1.4;
+    }
+
+    .chat-input-box button {
+        border: none;
+        background: #0d6efd;
+        color: #fff;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+
+    .chat-input-box button:disabled {
+        background: #aaa;
+        cursor: not-allowed;
+    }
+
+    .chat-welcome {
+        text-align: center;
+        color: #aaa;
+        margin: auto;
+        padding: 40px 20px;
+    }
+
+    .chat-welcome i {
+        font-size: 48px;
+        margin-bottom: 12px;
+        display: block;
+    }
+</style>
+<div class="chat-page">
+    <div class="chat-messages" id="chatMessages">
+        <div class="chat-welcome" id="welcomeMsg">
+            <i class="fa fa-robot text-primary"></i>
+            <h5>Assistente SGE-ECP</h5>
+            <p>Olá! Posso consultar alunos, encarregados, turmas, professores e cursos.<br>Como posso ajudar?</p>
+        </div>
+    </div>
+
+    <div class="chat-input-area">
+        <div class="chat-input-box">
+            <textarea id="userInput" rows="1" placeholder="Faça uma pergunta..."></textarea>
+            <button id="sendBtn" onclick="sendMessage()" title="Enviar">
+                <i class="fa fa-paper-plane"></i>
+            </button>
+        </div>
+        <div class="text-center mt-1" style="font-size:11px;color:#aaa;">
+            Assistente IA — pode cometer erros. Verifique informações importantes.
+        </div>
+    </div>
+</div>
+
+<script>
+    const N8N_WEBHOOK = 'http://localhost:5678/webhook/e978382d-df6e-46da-b67d-a6982f6ae11b/chat';
+    const sessionId = 'admin-' + Math.random().toString(36).slice(2, 9);
+
+    const textarea = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const messages = document.getElementById('chatMessages');
+
+    // Auto-grow textarea
+    textarea.addEventListener('input', () => {
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
+    });
+
+    // Enter sends, Shift+Enter = new line
+    textarea.addEventListener('keydown', e => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+
+    function appendMessage(text, role) {
+        document.getElementById('welcomeMsg')?.remove();
+
+        const wrap = document.createElement('div');
+        wrap.style.display = 'flex';
+        wrap.style.flexDirection = 'column';
+
+        const bubble = document.createElement('div');
+        bubble.classList.add('msg-bubble', role === 'user' ? 'msg-user' : 'msg-agent');
+
+        if (role === 'agent') {
+            const label = document.createElement('div');
+            label.className = 'agent-label';
+            label.innerHTML = '<i class="fa fa-robot"></i> Assistente SGE-ECP';
+            bubble.appendChild(label);
+        }
+
+        const content = document.createElement('div');
+        content.textContent = text;
+        bubble.appendChild(content);
+        wrap.appendChild(bubble);
+        messages.appendChild(wrap);
+        messages.scrollTop = messages.scrollHeight;
+        return bubble;
+    }
+
+    function showTyping() {
+        const bubble = document.createElement('div');
+        bubble.classList.add('msg-bubble', 'msg-agent');
+        bubble.id = 'typingIndicator';
+        bubble.innerHTML = '<div class="agent-label"><i class="fa fa-robot"></i> Assistente SGE-ECP</div>' +
+            '<div class="typing-indicator"><span></span><span></span><span></span></div>';
+        messages.appendChild(bubble);
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    function removeTyping() {
+        document.getElementById('typingIndicator')?.remove();
+    }
+
+    async function sendMessage() {
+        const text = textarea.value.trim();
+        if (!text) return;
+
+        appendMessage(text, 'user');
+        textarea.value = '';
+        textarea.style.height = 'auto';
+        sendBtn.disabled = true;
+        showTyping();
+
+        try {
+            const res = await fetch(N8N_WEBHOOK, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chatInput: text, sessionId: sessionId })
+            });
+
+            if (!res.ok) throw new Error('Erro HTTP ' + res.status);
+
+            const data = await res.json();
+            removeTyping();
+
+            // n8n Chat Trigger returns { output: "..." } or { text: "..." }
+            const reply = data.output ?? data.text ?? data.message ?? data.response ?? JSON.stringify(data);
+            appendMessage(reply, 'agent');
+
+        } catch (err) {
+            removeTyping();
+            appendMessage('Erro ao contactar o assistente. Verifique se o n8n está em execução.', 'agent');
+            console.error(err);
+        }
+
+        sendBtn.disabled = false;
+        textarea.focus();
+    }
+</script>
 
 
 
 <!-- Footer Start -->
- <?php
+<?php
 include 'footer.php';
 ?>
 <!-- Footer End -->
@@ -22,7 +291,7 @@ include 'footer.php';
 <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
 </div>
 
-<!-- JavaScript Libraries -->
+<!-- JavaScript LSGE-ECPries -->
 <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="lib/chart/chart.min.js"></script>

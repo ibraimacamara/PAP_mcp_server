@@ -135,18 +135,19 @@ if (!empty($_FILES['foto']['name'])) {
 try {
     $pdo->beginTransaction();
 
+
     // users
-    $senhaOriginal = 'SGE-LMS00!';
+    $senhaOriginal = $bi;
 
     // Hash da senha (RECOMENDADO)
     $senhaHash = password_hash($senhaOriginal, PASSWORD_DEFAULT);
     $categoria = "aluno";
     $stmt = $pdo->prepare("
-    INSERT INTO users (email, senha, categoria, foto)
-    VALUES (:email, :senha, :categoria, :foto)
+    INSERT INTO users (username, senha, categoria, foto)
+    VALUES (:username, :senha, :categoria, :foto)
     ");
     $stmt->execute([
-        ':email' => $email,
+        ':username' => $email,
         ':senha' => $senhaHash,
         ':categoria' => $categoria,
         ':foto' => $fotoPath

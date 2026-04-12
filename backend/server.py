@@ -2,6 +2,7 @@ import os
 from fastmcp import FastMCP
 from typing import Any, Dict, List, Tuple
 import json
+import bcrypt
 from conexao import get_connection, init_db
 
 mcp = FastMCP("gestor de escola MCP Tool")
@@ -15,41 +16,145 @@ mcp = FastMCP("gestor de escola MCP Tool")
 @mcp.tool
 def insert_aluno(data: str) -> dict:
     """
-    Insere um novo aluno na tabela 'aluno'.
-    data: dict ou JSON string com os campos do aluno.
-    Ex: {"nome":"Ibra camara", "data_nascimento":"2005-01-01"}
-    Obs:o campo nome comtem o nome completo de aluno primeiro nome e segundo nome.
+    Regista um aluno completo:
+    - Cria user (username = email)
+    - senha = BI criptografado
+    - Cria aluno
+    - Liga curso, turma e encarregado(s)
     """
+
     conn = get_connection()
     if conn is None:
-        return {"success": False, "message": "Sem conexão ao banco", "error": "get_connection retornou None"}
+        return {"success": False, "message": "Sem conexão ao banco"}
 
-    cur = conn.cursor()
+    cur = conn.cursor(dictionary=True)
+
     try:
         data_dict = json.loads(data) if isinstance(data, str) else data
-        if not isinstance(data_dict, dict):
-            return {"success": False, "message": "Dados devem ser um dict/JSON", "error": "Formato inválido"}
 
-        cur.execute("DESCRIBE `aluno`")
-        col_names = [c[0] for c in cur.fetchall()]
-        valid_data = {k: v for k, v in data_dict.items() if k in col_names}
+        # -------------------------
+        # DADOS
+        # -------------------------
+        nome = data_dict.get("nome")
+        data_nasc = data_dict.get("data_nascimento")
+        contato = data_dict.get("contato")
+        bi = data_dict.get("bi")
+        email = data_dict.get("email")
+        morada = data_dict.get("morada")
+        genero = data_dict.get("genero")
+        distrito = data_dict.get("distrito")
+        freguesia = data_dict.get("freguesia")
 
-        if not valid_data:
-            return {"success": False, "message": "Nenhuma coluna válida para 'aluno'",
-                    "error": f"Colunas disponíveis: {', '.join(col_names)}"}
+        curso_id = data_dict.get("curso_id")
+        turma_id = data_dict.get("turma_id")
 
-        columns = ", ".join([f"`{c}`" for c in valid_data.keys()])
-        placeholders = ", ".join(["%s"] * len(valid_data))
-        sql = f"INSERT INTO `aluno` ({columns}) VALUES ({placeholders})"
-        cur.execute(sql, tuple(valid_data.values()))
+        enc_principal = data_dict.get("encarregado_principal_id")
+        laco_principal = data_dict.get("laco_principal")
+
+        enc_sec = data_dict.get("encarregado_secundario_id")
+        laco_sec = data_dict.get("laco_secundario")
+
+        # -------------------------
+        # VALIDAÇÃO
+        # -------------------------
+        if not all([nome, data_nasc, contato, bi, email, curso_id, turma_id]):
+            return {"success": False, "message": "Campos obrigatórios em falta"}
+
+        if not enc_principal or not laco_principal:
+            return {"success": False, "message": "Encarregado principal obrigatório"}
+
+        # -------------------------
+        # VERIFICAR USER
+        # -------------------------
+        cur.execute("SELECT id FROM users WHERE username = %s", (email,))
+        if cur.fetchone():
+            return {"success": False, "message": "Email já registado"}
+
+        # HASH DA SENHA (BI)
+
+        senha_hash = bcrypt.hashpw(
+            bi.encode("utf-8"),
+            bcrypt.gensalt()
+        ).decode("utf-8")
+
+        # -------------------------
+        # INSERT USERS
+
+        cur.execute("""
+            INSERT INTO users (username, senha, categoria)
+            VALUES (%s, %s, %s)
+        """, (email, senha_hash, "aluno"))
+
+        user_id = cur.lastrowid
+
+        # -------------------------
+        # INSERT ALUNO
+  
+        cur.execute("""
+            INSERT INTO aluno (
+                user_id, nome, data_nascimento, contato,
+                bi, email, morada, genero, distrito, freguesia
+            )
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        """, (
+            user_id, nome, data_nasc, contato,
+            bi, email, morada, genero, distrito, freguesia
+        ))
+
+        aluno_id = cur.lastrowid
+
+        # -------------------------
+        # CURSO
+
+        cur.execute("""
+            INSERT INTO aluno_curso (numero_aluno, curso_id)
+            VALUES (%s, %s)
+        """, (aluno_id, curso_id))
+
+        # -------------------------
+        # TURMA
+
+        cur.execute("""
+            INSERT INTO aluno_turma (numero_aluno, turma_id)
+            VALUES (%s, %s)
+        """, (aluno_id, turma_id))
+
+        # -------------------------
+        # ENCARREGADO PRINCIPAL
+    
+        cur.execute("""
+            INSERT INTO aluno_encarregado
+            (numero_aluno, encarregado_id, laco_familiar)
+            VALUES (%s, %s, %s)
+        """, (aluno_id, enc_principal, laco_principal))
+
+        # -------------------------
+        # ENCARREGADO SECUNDÁRIO
+        # -------------------------
+        if enc_sec and laco_sec:
+            cur.execute("""
+                INSERT INTO aluno_encarregado
+                (numero_aluno, encarregado_id, laco_familiar)
+                VALUES (%s, %s, %s)
+            """, (aluno_id, enc_sec, laco_sec))
+
         conn.commit()
 
-        return {"success": True, "message": "Aluno inserido com sucesso",
-                "row_id": cur.lastrowid, "rows_affected": cur.rowcount, "error": None}
+        return {
+            "success": True,
+            "message": "Aluno registado com sucesso",
+            "user_id": user_id,
+            "aluno_id": aluno_id
+        }
 
     except Exception as e:
         conn.rollback()
-        return {"success": False, "message": "Erro ao inserir aluno", "error": str(e)}
+        return {
+            "success": False,
+            "message": "Erro ao registar aluno",
+            "error": str(e)
+        }
+
     finally:
         cur.close()
         conn.close()
@@ -148,43 +253,94 @@ def delete_aluno(numero_aluno: int) -> dict:
 @mcp.tool
 def insert_encarregado(data: str) -> dict:
     """
-    Insere um novo encarregado de educação.
-    data: dict ou JSON string com os campos do encarregado.
-    Ex: {"nome":"Maria Silva", "bi":"001234567LA0"}
+    ESPELHO EXATO DO PHP:
+    - cria users primeiro
+    - depois cria encarregado
+    - username = email
+    - senha = hash(BI)
     """
+
     conn = get_connection()
     if conn is None:
-        return {"success": False, "message": "Sem conexão ao banco", "error": "get_connection retornou None"}
+        return {"success": False, "message": "Sem conexão ao banco"}
 
-    cur = conn.cursor()
+    cur = conn.cursor(dictionary=True)
+
     try:
         data_dict = json.loads(data) if isinstance(data, str) else data
-        if not isinstance(data_dict, dict):
-            return {"success": False, "message": "Dados devem ser um dict/JSON", "error": "Formato inválido"}
 
-        cur.execute("DESCRIBE `encarregado`")
-        col_names = [c[0] for c in cur.fetchall()]
-        valid_data = {k: v for k, v in data_dict.items() if k in col_names}
+        nome = data_dict.get("nome")
+        email = data_dict.get("email")
+        bi = data_dict.get("bi")
+        morada = data_dict.get("morada")
+        contato = data_dict.get("contato")
+        genero = data_dict.get("genero")
+        distrito = data_dict.get("distrito")
+        freguesia = data_dict.get("freguesia")
 
-        if not valid_data:
-            return {"success": False, "message": "Nenhuma coluna válida para 'encarregado'",
-                    "error": f"Colunas disponíveis: {', '.join(col_names)}"}
+        if not nome or not email or not bi:
+            return {"success": False, "message": "Campos obrigatórios em falta"}
 
-        columns = ", ".join([f"`{c}`" for c in valid_data.keys()])
-        placeholders = ", ".join(["%s"] * len(valid_data))
-        sql = f"INSERT INTO `encarregado` ({columns}) VALUES ({placeholders})"
-        cur.execute(sql, tuple(valid_data.values()))
+
+        # 1. VERIFICAR USER
+        cur.execute("SELECT id FROM users WHERE username = %s", (email,))
+        if cur.fetchone():
+            return {"success": False, "message": "Já existe este user"}
+        
+        
+        # 2. CRIAR USER (igual PHP)
+        senha_hash = bcrypt.hashpw(
+            bi.encode("utf-8"),
+            bcrypt.gensalt()
+        ).decode("utf-8")
+
+        categoria = "encarregado"
+
+        cur.execute("""
+            INSERT INTO users (username, senha, categoria)
+            VALUES (%s, %s, %s)
+        """, (email, senha_hash, categoria))
+
+        user_id = cur.lastrowid
+
+    
+        # 3. INSERIR ENCARREGADO
+        cur.execute("""
+            INSERT INTO encarregado
+            (user_id, nome, email, bi, morada, contato, genero, distrito, freguesia)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (
+            user_id,
+            nome,
+            email,
+            bi,
+            morada,
+            contato,
+            genero,
+            distrito,
+            freguesia
+        ))
+
         conn.commit()
 
-        return {"success": True, "message": "Encarregado inserido com sucesso",
-                "row_id": cur.lastrowid, "rows_affected": cur.rowcount, "error": None}
+        return {
+            "success": True,
+            "message": "Encarregado criado com sucesso",
+            "user_id": user_id,
+            "encarregado_id": cur.lastrowid
+        }
+
     except Exception as e:
         conn.rollback()
-        return {"success": False, "message": "Erro ao inserir encarregado", "error": str(e)}
+        return {
+            "success": False,
+            "message": "Erro ao criar encarregado",
+            "error": str(e)
+        }
+
     finally:
         cur.close()
         conn.close()
-
 
 @mcp.tool
 def list_encarregado() -> dict:

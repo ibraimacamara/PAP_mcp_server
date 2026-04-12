@@ -28,20 +28,16 @@ include('menu.php');
         white-space: pre-wrap;
     }
 
-    .msg-user {
-        align-self: flex-end;
-        background: #0d6efd;
-        color: #fff;
-        border-bottom-right-radius: 4px;
+    .chat-messages .msg-bubble.msg-user {
+        background-color: #0d6efd !important;
+        color: #fff !important;
     }
 
-    .msg-agent {
-        align-self: flex-start;
-        background: #fff;
-        color: #333;
-        border: 1px solid #dee2e6;
-        border-bottom-left-radius: 4px;
-        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
+    .chat-messages .msg-bubble.msg-agent {
+        background-color: #ffffff !important;
+        color: #333 !important;
+        border: 1px solid #e0e0e0;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
     }
 
     .msg-agent .agent-label {
@@ -145,7 +141,6 @@ include('menu.php');
         display: block;
     }
 </style>
-
 
 
 <div class="chat-page">

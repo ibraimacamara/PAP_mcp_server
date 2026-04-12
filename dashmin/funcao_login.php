@@ -4,7 +4,7 @@ declare(strict_types=1);
 session_start();
 require_once 'conexao.php';
 
-define('LOG_FILE', __DIR__ . '/../logs/app.log');
+define('LOG_FILE', __DIR__ . 'logs/app.log');
 
 
 // FUNÇÕES
@@ -43,40 +43,37 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 validarCSRF();
 
-/* =====================================================
-   INPUT
-===================================================== */
+// INPUT
 
-$email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
+$username = filter_input(INPUT_POST, 'username');
 $senha = $_POST['senha'] ?? '';
 
-if (!$email || empty($senha)) {
+if (!$username || empty($senha)) {
     redirectComMensagem('Preencha corretamente os campos.');
 }
 
-/* =====================================================
-   LOGIN
-===================================================== */
+
+//   LOGIN
+
 
 try {
 
     $stmt = $pdo->prepare("
-        SELECT id, email, senha, categoria, foto, primeiro_login
+        SELECT id, username, senha, categoria, foto, primeiro_login
         FROM users
-        WHERE email = :email
+        WHERE username = :username
         LIMIT 1
     ");
 
-    $stmt->execute(['email' => $email]);
+    $stmt->execute(['username' => $username]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
 
     if (!$user || !password_verify($senha, $user['senha'])) {
         redirectComMensagem('Credenciais inválidas.');
     }
-    /* =====================================================
-      PRIMEIRO LOGIN - REDIRECIONAMENTO
-   ===================================================== */
+
+    //  PRIMEIRO LOGIN - REDIRECIONAMENTO
 
     $isPrimeiroLogin = ((int) $user['primeiro_login'] === 0);
 
@@ -94,7 +91,7 @@ try {
         $_SESSION['auth'] = true;
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['categoria'] = $user['categoria'];
-        $_SESSION['email'] = $user['email'];
+        $_SESSION['username'] = $user['username'];
         $_SESSION['foto'] = $user['foto'] ?? 'default.jpg';
 
         $_SESSION['ip'] = $_SERVER['REMOTE_ADDR'];
@@ -105,7 +102,7 @@ try {
         unset($_SESSION['csrf_token']);
 
         $rotaEditar = [
-            'admin' => 'admin/editar_admin.php',
+            'admin' => 'admin/editar_user.php',
             'aluno' => 'aluno/editar_aluno.php',
             'professor' => 'prof/editar_professor.php',
             'funcionario' => 'funcionario/editar_funcionario.php',
@@ -125,16 +122,15 @@ try {
         exit;
     }
 
-    /* =====================================================
-       LOGIN OK
-    ===================================================== */
+
+    //   LOGIN OK
 
     session_regenerate_id(true);
 
     $_SESSION['auth'] = true;
     $_SESSION['user_id'] = $user['id'];
     $_SESSION['categoria'] = $user['categoria'];
-    $_SESSION['email'] = $user['email'];
+    $_SESSION['username'] = $user['username'];
     $_SESSION['foto'] = $user['foto'] ?? 'default.jpg';
 
     $_SESSION['ip'] = $_SERVER['REMOTE_ADDR'];
@@ -142,9 +138,8 @@ try {
 
     unset($_SESSION['csrf_token']);
 
-    /* =====================================================
-       REDIRECIONAMENTO POR CATEGORIA
-    ===================================================== */
+
+    // REDIRECIONAMENTO POR CATEGORIA
 
     $rotas = [
         'admin' => 'admin/index.php',

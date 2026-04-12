@@ -184,7 +184,7 @@ $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 
         <div class="login-header">
             <div class="logo">
-                <i class="fa-solid fa-building-columns"></i> SGE-LMS
+                <i class="fa-solid fa-building-columns"></i> SGE-ECP
             </div>
             <h2>Entrar</h2>
         </div>
@@ -192,7 +192,7 @@ $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
         <form action="funcao_login.php" method="POST">
             <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
             <div class="input-group">
-                <input type="email" name="email" placeholder="Email address" required>
+                <input type="username" name="username" placeholder="Nome de utilizador" required>
             </div>
 
             <div class="input-group" style="position:relative;">
@@ -206,7 +206,7 @@ $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
                 <label>
                     <input type="checkbox">Lembrar-me
                 </label>
-                <a href="#">Esqueceu sua senha?</a>
+                
             </div>
 
             <button type="submit">Entrar</button>
