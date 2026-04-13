@@ -556,8 +556,89 @@ def link_aluno_encarregado(numero_aluno: int, encarregado_id: int, laco_familiar
     finally:
         cur.close()
         conn.close()
+# ---------------------------------------------------------------------------
+# CURSO
+# ---------------------------------------------------------------------------
 
+@mcp.tool
+def list_curso() -> dict:
+    """
+    Lista todos os cursos disponíveis no sistema.
+    Retorna: {success, rows, row_count, error}
+    """
+    conn = get_connection()
+    if conn is None:
+        return {"success": False, "message": "Sem conexão ao banco", "error": "get_connection retornou None"}
 
+    cur = conn.cursor(dictionary=True)
+    try:
+        cur.execute("SELECT * FROM `curso`")
+        rows = cur.fetchall()
+        return {"success": True, "rows": rows, "row_count": len(rows), "error": None}
+    except Exception as e:
+        return {"success": False, "message": "Erro ao listar cursos", "error": str(e)}
+    finally:
+        cur.close()
+        conn.close()
+
+@mcp.tool
+def list_todos_alunos_do_curso(curso_id: int) -> dict:
+    """
+    Lista todos os alunos associados a um curso específico.
+
+    Fluxo:
+    - recebe curso_id
+    - procura em aluno_curso
+    - pega numero_aluno
+    - busca dados na tabela aluno
+    """
+
+    conn = get_connection()
+    if not conn:
+        return {"success": False, "message": "Sem conexão ao banco"}
+
+    cur = conn.cursor(dictionary=True)
+
+    try:
+        # -------------------------
+        # 1. VALIDAR CURSO
+        # -------------------------
+        cur.execute("SELECT id, nome FROM curso WHERE id = %s", (curso_id,))
+        curso = cur.fetchone()
+
+        if not curso:
+            return {"success": False, "message": f"Curso {curso_id} não encontrado"}
+
+        # -------------------------
+        # 2. BUSCAR ALUNOS (JOIN)
+        # -------------------------
+        cur.execute("""
+            SELECT a.*
+            FROM aluno_curso ac
+            JOIN aluno a ON ac.numero_aluno = a.numero_aluno
+            WHERE ac.curso_id = %s
+        """, (curso_id,))
+
+        alunos = cur.fetchall()
+
+        return {
+            "success": True,
+            "curso": curso,
+            "total_alunos": len(alunos),
+            "alunos": alunos
+        }
+
+    except Exception as e:
+        return {
+            "success": False,
+            "message": "Erro ao buscar alunos",
+            "error": str(e)
+        }
+
+    finally:
+        cur.close()
+        conn.close()
+        
 # ---------------------------------------------------------------------------
 # TURMA
 # ---------------------------------------------------------------------------
@@ -688,7 +769,7 @@ def get_aluno_turma(aluno_input: str = "", numero_aluno: int = 0) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# PROFESSOR
+# Funcionário
 # ---------------------------------------------------------------------------
 
 @mcp.tool
@@ -991,30 +1072,11 @@ def delete_professor(professor_id: int) -> dict:
         conn.close()
 
 
-# ---------------------------------------------------------------------------
-# CURSO
-# ---------------------------------------------------------------------------
 
-@mcp.tool
-def list_curso() -> dict:
-    """
-    Lista todos os cursos disponíveis no sistema.
-    Retorna: {success, rows, row_count, error}
-    """
-    conn = get_connection()
-    if conn is None:
-        return {"success": False, "message": "Sem conexão ao banco", "error": "get_connection retornou None"}
 
-    cur = conn.cursor(dictionary=True)
-    try:
-        cur.execute("SELECT * FROM `curso`")
-        rows = cur.fetchall()
-        return {"success": True, "rows": rows, "row_count": len(rows), "error": None}
-    except Exception as e:
-        return {"success": False, "message": "Erro ao listar cursos", "error": str(e)}
-    finally:
-        cur.close()
-        conn.close()
+
+
+
 
 @mcp.tool
 def list_users() -> dict:

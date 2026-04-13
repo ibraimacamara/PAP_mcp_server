@@ -90,7 +90,7 @@ include 'nav-menu.php';
 
     .chat-input-area {
         padding: 12px 16px;
-        background: #fff;
+        background: transparent;
 
         position: fixed;
         bottom: 0;
