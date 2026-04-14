@@ -7,9 +7,17 @@ $id = $_GET['id'] ?? 0; // pega direto, sem checagem
 $stmt = $pdo->prepare("
     SELECT 
         a.*,
-        u.foto AS imagem
+        u.foto AS imagem,
+        c.nome AS curso_nome,
+        t.codigo AS turma_codigo,
+        ep.nome AS encarregado_principal_nome,
+        es.nome AS encarregado_secundario_nome
     FROM aluno a
-    INNER JOIN users u ON u.id = a.user_id
+    LEFT JOIN users u ON u.id = a.user_id
+    LEFT JOIN curso c ON c.id = a.curso_id
+    LEFT JOIN turma t ON t.id = a.turma_id
+    LEFT JOIN encarregado ep ON ep.id = a.encarregado_principal_id
+    LEFT JOIN encarregado es ON es.id = a.encarregado_secundario_id
     WHERE a.numero_aluno = ?
     LIMIT 1
 ");
@@ -161,18 +169,22 @@ if (!empty($aluno['imagem'])) {
             </span>
             <h4><?= htmlspecialchars($aluno['nome']) ?></h4>
             <div class="aluno-subtitle">
-                <?= htmlspecialchars($aluno['morada'] ?? 'Sem morada definida') ?>
+                <?= htmlspecialchars($aluno['email'] ?? 'Sem morada definida') ?>
             </div>
             <div class="aluno-fields">
                 <p><span class="aluno-label">BI:</span> <?= htmlspecialchars($aluno['bi'] ?? '—') ?></p>
                 <p><span class="aluno-label">Data Nasc.:</span>
                     <?= htmlspecialchars($aluno['data_nascimento'] ?? '—') ?></p>
-                <p><span class="aluno-label">Email:</span> <?= htmlspecialchars($aluno['email'] ?? '—') ?></p>
+                <p><span class="aluno-label">Morada:</span> <?= htmlspecialchars($aluno['morada'] ?? '—') ?></p>
                 <p><span class="aluno-label">Contato:</span> <?= htmlspecialchars($aluno['contato'] ?? '—') ?></p>
                 <p><span class="aluno-label">Género:</span> <?= htmlspecialchars($aluno['genero'] ?? '—') ?></p>
                 <p><span class="aluno-label">Distrito:</span> <?= htmlspecialchars($aluno['distrito'] ?? '—') ?></p>
                 <p><span class="aluno-label">Freguesia:</span> <?= htmlspecialchars($aluno['freguesia'] ?? '—') ?></p>
-                <p><span class="aluno-label">Inserido em:</span> <?= htmlspecialchars($aluno['inserido_em'] ?? '—') ?>
+                <!-- <p><span class="aluno-label">Inserido em:</span> <?= htmlspecialchars($aluno['inserido_em'] ?? '—') ?> -->
+                 <p><span class="aluno-label">Turma:</span> <?= htmlspecialchars($aluno['turma_codigo'] ?? '—') ?></p>
+                 <p><span class="aluno-label">Curso:</span> <?= htmlspecialchars($aluno['curso_nome'] ?? '—') ?></p>
+                <p><span class="aluno-label">encarregado:</span> <?= htmlspecialchars($aluno['encarregado_principal_nome'] ?? '—') ?>
+                <p><span class="aluno-label">encarregado:</span> <?= htmlspecialchars($aluno['encarregado_secundario_nome'] ?? '—') ?>
                 </p>
             </div>
             <div class="aluno-actions d-flex gap-2">

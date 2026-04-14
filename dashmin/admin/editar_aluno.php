@@ -21,6 +21,15 @@ $stmt = $pdo->prepare("
     LEFT JOIN users u ON u.id = a.user_id
     WHERE a.numero_aluno = ?
 ");
+// cursos
+$cursos = $pdo->query("SELECT id, nome FROM curso ORDER BY nome")->fetchAll();
+
+// turmas
+$turmas = $pdo->query("SELECT id, codigo FROM turma ORDER BY codigo")->fetchAll();
+
+// encarregados
+$encarregados = $pdo->query("SELECT id, nome FROM encarregado ORDER BY nome")->fetchAll();
+
 $stmt->execute([$id]);
 $aluno = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -55,7 +64,7 @@ if (!$aluno) {
                     </div>
 
                     <div class="row">
-                       
+
                     </div>
 
                     <div class="row">
@@ -102,20 +111,71 @@ if (!$aluno) {
                             <label class="form-label">Gênero</label>
                             <select name="genero" class="form-select">
                                 <option value="">Escolha...</option>
-                                <option value="Masculino" <?= ($aluno['genero'] ?? '') == 'Masculino' ? 'selected' : '' ?>>Masculino</option>
-                                <option value="Feminino"  <?= ($aluno['genero'] ?? '') == 'Feminino'  ? 'selected' : '' ?>>Feminino</option>
+                                <option value="Masculino" <?= ($aluno['genero'] ?? '') == 'Masculino' ? 'selected' : '' ?>>
+                                    Masculino</option>
+                                <option value="Feminino" <?= ($aluno['genero'] ?? '') == 'Feminino' ? 'selected' : '' ?>>
+                                    Feminino</option>
                             </select>
                         </div>
-                        
+
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Alterar foto</label>
                             <input type="file" name="foto" class="form-control" accept="image/*">
                             <small class="text-muted">Formatos: JPG, PNG. Deixe vazio para manter a foto atual.</small>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Curso</label>
+                            <select name="curso_id" class="form-select" required>
+                                <option value="">Escolha...</option>
+                                <?php foreach ($cursos as $c): ?>
+                                    <option value="<?= $c['id'] ?>" <?= $c['id'] == $aluno['curso_id'] ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($c['nome']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Turma</label>
+                            <select name="turma_id" class="form-select" required>
+                                <option value="">Escolha...</option>
+                                <?php foreach ($turmas as $t): ?>
+                                    <option value="<?= $t['id'] ?>" <?= $t['id'] == $aluno['turma_id'] ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($t['codigo']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Encarregado Principal</label>
+                            <select name="encarregado_principal_id" class="form-select" required>
+                                <option value="">Escolha...</option>
+                                <?php foreach ($encarregados as $e): ?>
+                                    <option value="<?= $e['id'] ?>" <?= $e['id'] == $aluno['encarregado_principal_id'] ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($e['nome']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Encarregado Secundário</label>
+                            <select name="encarregado_secundario_id" class="form-select">
+                                <option value="">Nenhum</option>
+                                <?php foreach ($encarregados as $e): ?>
+                                    <option value="<?= $e['id'] ?>" <?= $e['id'] == $aluno['encarregado_secundario_id'] ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($e['nome']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
 
                     <div class="d-flex gap-2 justify-content-center">
-                        <a href="detalhe_aluno.php?id=<?= $aluno['numero_aluno'] ?>" class="btn btn-secondary w-25">Cancelar</a>
+                        <a href="detalhe_aluno.php?id=<?= $aluno['numero_aluno'] ?>"
+                            class="btn btn-secondary w-25">Cancelar</a>
                         <button type="submit" class="btn btn-primary w-25">Atualizar</button>
                     </div>
                 </form>
@@ -138,4 +198,5 @@ if (!$aluno) {
 <script src="lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js"></script>
 <script src="js/main.js"></script>
 </body>
+
 </html>

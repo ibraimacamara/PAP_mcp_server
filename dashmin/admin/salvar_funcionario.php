@@ -111,11 +111,8 @@ if (!empty($_FILES['foto']['name'])) {
         'image/gif' => 'gif'
     ];
 
-    $finfo = finfo_open(FILEINFO_MIME_TYPE);
-    $mime = finfo_file($finfo, $foto['tmp_name']);
-
-    if (!array_key_exists($mime, $tiposPermitidos)) {
-        erroUtilizador('Tipo de ficheiro inválido.');
+    if (!array_key_exists($foto['type'], $tiposPermitidos)) {
+        erroUtilizador('Apenas imagens JPEG, PNG ou GIF são permitidas.');
     }
 
     $uploadDir = 'uploads/';
@@ -124,7 +121,7 @@ if (!empty($_FILES['foto']['name'])) {
     }
 
     $extensao = $tiposPermitidos[$foto['type']];
-    $novoNome = bin2hex(random_bytes(16)) . '.' . $extensao;
+    $novoNome = 'funcionario_' . $bi . '.' . $extensao;
     $destino = $uploadDir . $novoNome;
 
 
@@ -137,22 +134,21 @@ if (!empty($_FILES['foto']['name'])) {
 
 
 
-
 try {
     $pdo->beginTransaction();
 
 
     // users
 
-    $senhaOriginal = 'SGE-LMS00!';
+    $senhaOriginal = $bi;
 
     $senhaHash = password_hash($senhaOriginal, PASSWORD_DEFAULT);
     $stmt = $pdo->prepare("
-    INSERT INTO users (email, senha, categoria, foto)
-    VALUES (:email, :senha, :categoria, :foto)
+    INSERT INTO users (username, senha, categoria, foto)
+    VALUES (:username, :senha, :categoria, :foto)
     ");
     $stmt->execute([
-        ':email' => $email,
+        ':username' => $email,
         ':senha' => $senhaHash,
         ':categoria' => $categoria,
         ':foto' => $fotoPath

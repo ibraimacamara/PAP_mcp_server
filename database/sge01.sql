@@ -530,3 +530,216 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+
+
+
+
+
+
+USE gestao_escolar;
+
+CREATE TABLE aluno (
+  numero_aluno INT AUTO_INCREMENT PRIMARY KEY,
+
+  user_id INT DEFAULT NULL,
+
+  curso_id INT NOT NULL,
+  turma_id INT NOT NULL,
+  encarregado_principal_id INT DEFAULT NULL,
+  encarregado_secundario_id INT DEFAULT NULL,
+
+  nome VARCHAR(100) NOT NULL,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  bi VARCHAR(15) NOT NULL UNIQUE,
+  contato VARCHAR(30),
+
+  data_nascimento DATE,
+  morada VARCHAR(255),
+  genero ENUM('masculino','feminino'),
+  distrito VARCHAR(255),
+  freguesia VARCHAR(255),
+
+  inserido_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  CONSTRAINT fk_aluno_user
+    FOREIGN KEY (user_id)
+    REFERENCES users(id)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE,
+
+  CONSTRAINT fk_aluno_curso
+    FOREIGN KEY (curso_id)
+    REFERENCES curso(id)
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE,
+
+  CONSTRAINT fk_aluno_turma
+    FOREIGN KEY (turma_id)
+    REFERENCES turma(id)
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE,
+
+  CONSTRAINT fk_aluno_encarregado_principal
+    FOREIGN KEY (encarregado_principal_id)
+    REFERENCES encarregado(id)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE
+
+  CONSTRAINT fk_aluno_encarregado_sencudario
+    FOREIGN KEY (encarregado_secundario_id)
+    REFERENCES encarregado(id)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE
+);
+
+
+CREATE TABLE `encarregado` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `nome` VARCHAR(100) NOT NULL,
+  `bi` VARCHAR(15) NOT NULL,
+  `email` VARCHAR(150) DEFAULT NULL,
+  `contato` VARCHAR(30) DEFAULT NULL,
+  `morada` VARCHAR(255) DEFAULT NULL,
+  `genero` ENUM('masculino','feminino') DEFAULT NULL,
+  `distrito` VARCHAR(20) DEFAULT NULL,
+  `freguesia` VARCHAR(20) DEFAULT NULL,
+  `inserido_em` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `user_id` INT(11) DEFAULT NULL,
+
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `bi` (`bi`),
+  UNIQUE KEY `email` (`email`),
+  INDEX (`user_id`),
+
+  CONSTRAINT `fk_encarregado_user`
+    FOREIGN KEY (`user_id`)
+    REFERENCES `users`(`id`)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `curso` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `nome` VARCHAR(150) NOT NULL,
+  `descricao` TEXT DEFAULT NULL,
+  `imagem` VARCHAR(255) DEFAULT NULL,
+  `coordenador` INT(11) DEFAULT NULL,
+  `inserido_em` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+  PRIMARY KEY (`id`),
+
+  INDEX (`coordenador`),
+
+  CONSTRAINT `fk_curso_professor`
+    FOREIGN KEY (`coordenador`)
+    REFERENCES `professor`(`id`)
+    ON DELETE SET NULL
+    ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+
+  username VARCHAR(100) NOT NULL UNIQUE,
+  senha VARCHAR(255) NOT NULL,
+
+  categoria ENUM('admin','funcionario','professor','encarregado','aluno') DEFAULT NULL,
+
+  foto VARCHAR(255),
+
+  primeiro_login TINYINT(1) NOT NULL DEFAULT 0,
+
+  inserido_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE turma (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+
+  curso_id INT NOT NULL,
+  diretor INT NOT NULL,
+
+  codigo VARCHAR(20) NOT NULL,
+  ciclo_formacao VARCHAR(50),
+
+  inserido_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  CONSTRAINT fk_turma_curso
+    FOREIGN KEY (curso_id)
+    REFERENCES curso(id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+
+  CONSTRAINT fk_turma_diretor
+    FOREIGN KEY (diretor)
+    REFERENCES professor(id)
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE
+);
+
+CREATE TABLE professor (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+
+  user_id INT NOT NULL UNIQUE,
+
+  nome VARCHAR(100) NOT NULL,
+  bi VARCHAR(15) NOT NULL UNIQUE,
+  contato VARCHAR(30),
+
+  data_nascimento DATE,
+  morada VARCHAR(255),
+  nacionalidade VARCHAR(255),
+  nif VARCHAR(255),
+
+  genero ENUM('masculino','feminino'),
+  distrito VARCHAR(255),
+  freguesia VARCHAR(255),
+
+  grupo_d VARCHAR(10),
+
+  tipo_c ENUM('contrato sem termo','contrato com termo','prestação de serviços'),
+
+  h_profissional VARCHAR(100),
+  h_academica VARCHAR(100),
+
+  inserido_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  CONSTRAINT fk_professor_user
+    FOREIGN KEY (user_id)
+    REFERENCES users(id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+);
+
+CREATE TABLE funcionario (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+
+  user_id INT NOT NULL UNIQUE,
+
+  nome VARCHAR(100) NOT NULL,
+  bi VARCHAR(15) NOT NULL UNIQUE,
+  contato VARCHAR(30),
+
+  data_nascimento DATE,
+  morada VARCHAR(255),
+  nacionalidade VARCHAR(255),
+  nif VARCHAR(255),
+
+  genero ENUM('masculino','feminino'),
+  distrito VARCHAR(255),
+  freguesia VARCHAR(255),
+
+  cargo VARCHAR(255) NOT NULL,
+  tipo_c ENUM('contrato sem termo','contrato com termo','prestação de serviços'),
+
+  h_profissional VARCHAR(100),
+  h_academica VARCHAR(100),
+
+  inserido_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  CONSTRAINT fk_funcionario_user
+    FOREIGN KEY (user_id)
+    REFERENCES users(id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+);

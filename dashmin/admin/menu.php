@@ -263,7 +263,7 @@ $fotoPath = file_exists(__DIR__ . '/uploads/' . $fotoUser)
                             </span>
                         </a>
                         <div class="dropdown-menu dropdown-menu-end bg-light border-0 rounded-0 rounded-bottom m-0">
-                            <a href="#" class="dropdown-item">Meu perfil</a>
+                           <a href="editar_user.php?id=<?= $_SESSION['user_id'] ?>" class="dropdown-item">Meu perfil</a>
                             <a href="#" class="dropdown-item">Configurações</a>
                             <a href="logout.php" class="dropdown-item">Sair</a>
                         </div>

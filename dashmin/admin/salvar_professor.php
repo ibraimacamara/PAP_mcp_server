@@ -145,11 +145,11 @@ try {
     $senhaHash = password_hash($senhaOriginal, PASSWORD_DEFAULT);
     $categoria = "professor";
     $stmt = $pdo->prepare("
-    INSERT INTO users (email, senha, categoria, foto)
-    VALUES (:email, :senha, :categoria, :foto)
+    INSERT INTO users (username, senha, categoria, foto)
+    VALUES (:usename, :senha, :categoria, :foto)
     ");
     $stmt->execute([
-        ':email' => $email,
+        ':usename' => $email,
         ':senha' => $senhaHash,
         ':categoria' => $categoria,
         ':foto' => $fotoPath
