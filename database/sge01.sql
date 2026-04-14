@@ -673,7 +673,7 @@ CREATE TABLE turma (
   CONSTRAINT fk_turma_diretor
     FOREIGN KEY (diretor)
     REFERENCES professor(id)
-    ON DELETE RESTRICT
+    ON DELETE SET NULL
     ON UPDATE CASCADE
 );
 

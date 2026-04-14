@@ -2,9 +2,9 @@
 include('../conexao.php');
 include('menu.php');
 
-// Garante que vem um ID válido, caso contrário volta para a lista
+// Garante que vem um ID válido
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
-    header('Location: lista_aluno.php');
+    header('Location: lista_professor.php');
     exit;
 }
 
@@ -21,22 +21,22 @@ try {
     ");
     $stmt->bindParam(':id', $id, PDO::PARAM_INT);
     $stmt->execute();
+
     $professor = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$professor) {
-        // Se não encontrar o professor, volta para a lista
         header('Location: lista_professor.php');
         exit;
     }
 } catch (PDOException $e) {
-    // Em caso de erro de BD, mostra mensagem simples
     echo '<div class="alert alert-danger m-4">Erro ao carregar os dados do professor.</div>';
     exit;
 }
 
-// Normaliza o caminho da foto (aceita tanto "aluno_123.png" como "uploads_aluno/aluno_123.png")
+// Caminho da foto
 $foto = isset($professor['foto']) ? trim($professor['foto']) : '';
 $fotoPath = 'uploads/default.jpg';
+
 if ($foto !== '') {
     if (strpos($foto, 'uploads/') !== false) {
         $fotoPath = $foto;
@@ -89,7 +89,6 @@ if ($foto !== '') {
         position: relative;
         width: 100%;
         height: 100%;
-        border-radius: 0;
         overflow: hidden;
         box-shadow: 0 8px 25px rgba(15, 23, 42, 0.35);
         border-radius: 15px;
@@ -105,14 +104,12 @@ if ($foto !== '') {
     .aluno-info {
         width: 60%;
         padding: 24px 28px;
-        ;
     }
 
     .aluno-info h4 {
         margin-bottom: 8px;
         font-weight: 800;
         font-size: 1.6rem;
-
     }
 
     .aluno-subtitle {
@@ -185,43 +182,43 @@ if ($foto !== '') {
                 <img src="<?= htmlspecialchars($fotoPath) ?>" alt="Foto do professor">
             </div>
         </div>
+
         <div class="aluno-info">
             <span class="aluno-badge">
                 <i class="bi bi-person-badge"></i>
                 N.º <?= htmlspecialchars($professor['id']) ?>
             </span>
+
             <h4><?= htmlspecialchars($professor['nome']) ?></h4>
+
             <div class="aluno-subtitle">
                 <?= htmlspecialchars($professor['morada'] ?? 'Sem morada definida') ?>
             </div>
+
             <div class="aluno-fields">
                 <p><span class="aluno-label">BI:</span> <?= htmlspecialchars($professor['bi'] ?? '—') ?></p>
-                <p><span class="aluno-label">Data
-                     Nasc.:</span><?= htmlspecialchars($professor['data_nascimento'] ?? '—') ?></p>
+                <p><span class="aluno-label">Data Nasc.:</span> <?= htmlspecialchars($professor['data_nascimento'] ?? '—') ?></p>
                 <p><span class="aluno-label">Email:</span> <?= htmlspecialchars($professor['email'] ?? '—') ?></p>
                 <p><span class="aluno-label">Contato:</span> <?= htmlspecialchars($professor['contato'] ?? '—') ?></p>
                 <p><span class="aluno-label">Género:</span> <?= htmlspecialchars($professor['genero'] ?? '—') ?></p>
                 <p><span class="aluno-label">Distrito:</span> <?= htmlspecialchars($professor['distrito'] ?? '—') ?></p>
-                <p><span class="aluno-label">Freguesia:</span> <?= htmlspecialchars($professor['freguesia'] ?? '—') ?>
-                </p>
-                <p><span class="aluno-label">Grupo
-                        Disciplinar:</span><?= htmlspecialchars($professor['grupo_d'] ?? '—') ?></p>
-                <p><span class="aluno-label">Tipo de
-                        Contrato:</span><?= htmlspecialchars($professor['tipo_c'] ?? '—') ?></p>
-                <p><span class="aluno-label">Habilitação Profissional:</span>
-                    <?= htmlspecialchars($professor['h_profissional'] ?? '—') ?></p>
-                <p><span class="aluno-label">Habilitação Académica:</span>
-                    <?= htmlspecialchars($professor['grupo_disciplinar'] ?? '—') ?></p>
-                <p><span class="aluno-label">Registado
-                        em:</span><?= htmlspecialchars($professor['inserido_em'] ?? '—') ?></p>
+                <p><span class="aluno-label">Freguesia:</span> <?= htmlspecialchars($professor['freguesia'] ?? '—') ?></p>
+                <p><span class="aluno-label">Grupo Disciplinar:</span> <?= htmlspecialchars($professor['grupo_d'] ?? '—') ?></p>
+                <p><span class="aluno-label">Tipo de Contrato:</span> <?= htmlspecialchars($professor['tipo_c'] ?? '—') ?></p>
+                <p><span class="aluno-label">Habilitação Profissional:</span> <?= htmlspecialchars($professor['h_profissional'] ?? '—') ?></p>
+                <p><span class="aluno-label">Habilitação Académica:</span> <?= htmlspecialchars($professor['h_academica'] ?? '—') ?></p>
+                <p><span class="aluno-label">Registado em:</span> <?= htmlspecialchars($professor['inserido_em'] ?? '—') ?></p>
             </div>
+
             <div class="aluno-actions d-flex gap-2">
                 <a href="lista_professor.php" class="btn btn-outline-secondary btn-sm">Voltar</a>
                 <a href="editar_professor.php?id=<?= $professor['id'] ?>" class="btn btn-primary btn-sm">Editar</a>
-                <a href="remover_professor.php?id=<?= $professor['id'] ?>" class="btn btn-danger btn-sm"
-                    onclick="return confirm('Tem certeza que deseja remover este aluno?');">
-                    Remover
-                </a>
+
+                <form action="remover_professor.php" method="POST"
+                      onsubmit="return confirm('Tens certeza que deseja remover este professor?');">
+                    <input type="hidden" name="id" value="<?= $professor['id'] ?>">
+                    <button type="submit" class="btn btn-sm btn-danger">Remover</button>
+                </form>
             </div>
         </div>
     </div>
@@ -230,6 +227,7 @@ if ($foto !== '') {
 <?php include 'footer.php'; ?>
 <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
 </div>
+
 <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="lib/chart/chart.min.js"></script>
@@ -241,5 +239,4 @@ if ($foto !== '') {
 <script src="lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js"></script>
 <script src="js/main.js"></script>
 </body>
-
 </html>

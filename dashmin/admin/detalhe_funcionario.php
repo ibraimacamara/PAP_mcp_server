@@ -2,9 +2,8 @@
 include('../conexao.php');
 include('menu.php');
 
-// Garante que vem um ID válido, caso contrário volta para a lista
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
-    header('Location: lista_aluno.php');
+    header('Location: lista_funcionario.php');
     exit;
 }
 
@@ -22,22 +21,21 @@ try {
     ");
     $stmt->bindParam(':id', $id, PDO::PARAM_INT);
     $stmt->execute();
+
     $funcionario = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if (!$funcionario    ) {
-        // Se não encontrar o professor, volta para a lista
+    if (!$funcionario) {
         header('Location: lista_funcionario.php');
         exit;
     }
 } catch (PDOException $e) {
-    // Em caso de erro de BD, mostra mensagem simples
-    echo '<div class="alert alert-danger m-4">Erro ao carregar os dados do professor.</div>';
+    echo '<div class="alert alert-danger m-4">Erro ao carregar os dados do funcionário.</div>';
     exit;
 }
 
-// Normaliza o caminho da foto (aceita tanto "aluno_123.png" como "uploads_aluno/aluno_123.png")
 $foto = isset($funcionario['foto']) ? trim($funcionario['foto']) : '';
 $fotoPath = 'uploads/default.jpg';
+
 if ($foto !== '') {
     if (strpos($foto, 'uploads/') !== false) {
         $fotoPath = $foto;
@@ -90,7 +88,6 @@ if ($foto !== '') {
         position: relative;
         width: 100%;
         height: 100%;
-        border-radius: 0;
         overflow: hidden;
         box-shadow: 0 8px 25px rgba(15, 23, 42, 0.35);
         border-radius: 15px;
@@ -106,14 +103,12 @@ if ($foto !== '') {
     .aluno-info {
         width: 60%;
         padding: 24px 28px;
-        ;
     }
 
     .aluno-info h4 {
         margin-bottom: 8px;
         font-weight: 800;
         font-size: 1.6rem;
-
     }
 
     .aluno-subtitle {
@@ -183,45 +178,46 @@ if ($foto !== '') {
     <div class="aluno-card">
         <div class="aluno-foto">
             <div class="aluno-foto-inner">
-                <img src="<?= htmlspecialchars($fotoPath) ?>" alt="Foto do funcionario">
+                <img src="<?= htmlspecialchars($fotoPath) ?>" alt="Foto do funcionário">
             </div>
         </div>
+
         <div class="aluno-info">
             <span class="aluno-badge">
                 <i class="bi bi-person-badge"></i>
                 N.º <?= htmlspecialchars($funcionario['id']) ?>
             </span>
+
             <h4><?= htmlspecialchars($funcionario['nome']) ?></h4>
+
             <div class="aluno-subtitle">
-                <?= htmlspecialchars($funcionario['cargo'] ?? 'Sem morada definida') ?>
+                <?= htmlspecialchars($funcionario['cargo'] ?? 'Sem cargo definido') ?>
             </div>
+
             <div class="aluno-fields">
                 <p><span class="aluno-label">BI:</span> <?= htmlspecialchars($funcionario['bi'] ?? '—') ?></p>
-                <p><span class="aluno-label">Data
-                     Nasc.:</span><?= htmlspecialchars($funcionario['data_nascimento'] ?? '—') ?></p>
+                <p><span class="aluno-label">Data Nasc.:</span> <?= htmlspecialchars($funcionario['data_nascimento'] ?? '—') ?></p>
                 <p><span class="aluno-label">Email:</span> <?= htmlspecialchars($funcionario['email'] ?? '—') ?></p>
                 <p><span class="aluno-label">Contato:</span> <?= htmlspecialchars($funcionario['contato'] ?? '—') ?></p>
                 <p><span class="aluno-label">Género:</span> <?= htmlspecialchars($funcionario['genero'] ?? '—') ?></p>
                 <p><span class="aluno-label">Distrito:</span> <?= htmlspecialchars($funcionario['distrito'] ?? '—') ?></p>
-                <p><span class="aluno-label">Freguesia:</span> <?= htmlspecialchars($funcionario['freguesia'] ?? '—') ?>
-                </p>
-                <p><span class="aluno-label">Morada: </span><?= htmlspecialchars($funcionario['morada'] ?? '—') ?></p>
-                <p><span class="aluno-label">Tipo de
-                        Contrato:</span><?= htmlspecialchars($funcionario['tipo_c'] ?? '—') ?></p>
-                <p><span class="aluno-label">Habilitação Profissional:</span>
-                    <?= htmlspecialchars($funcionario['h_profissional'] ?? '—') ?></p>
-                <p><span class="aluno-label">Habilitação Académica:</span>
-                    <?= htmlspecialchars($funcionario['h_academica'] ?? '—') ?></p>
-                <p><span class="aluno-label">Registado
-                        em:</span><?= htmlspecialchars($funcionario['inserido_em'] ?? '—') ?></p>
+                <p><span class="aluno-label">Freguesia:</span> <?= htmlspecialchars($funcionario['freguesia'] ?? '—') ?></p>
+                <p><span class="aluno-label">Morada:</span> <?= htmlspecialchars($funcionario['morada'] ?? '—') ?></p>
+                <p><span class="aluno-label">Tipo de Contrato:</span> <?= htmlspecialchars($funcionario['tipo_c'] ?? '—') ?></p>
+                <p><span class="aluno-label">Habilitação Profissional:</span> <?= htmlspecialchars($funcionario['h_profissional'] ?? '—') ?></p>
+                <p><span class="aluno-label">Habilitação Académica:</span> <?= htmlspecialchars($funcionario['h_academica'] ?? '—') ?></p>
+                <p><span class="aluno-label">Registado em:</span> <?= htmlspecialchars($funcionario['inserido_em'] ?? '—') ?></p>
             </div>
+
             <div class="aluno-actions d-flex gap-2">
                 <a href="lista_funcionario.php" class="btn btn-outline-secondary btn-sm">Voltar</a>
                 <a href="editar_funcionario.php?id=<?= $funcionario['id'] ?>" class="btn btn-primary btn-sm">Editar</a>
-                <a href="remover_funcionario.php?id=<?= $funcionario['id'] ?>" class="btn btn-danger btn-sm"
-                    onclick="return confirm('Tem certeza que deseja remover este aluno?');">
-                    Remover
-                </a>
+
+                <form action="remover_funcionario.php" method="POST"
+                      onsubmit="return confirm('Tem certeza que deseja remover este funcionário?');">
+                    <input type="hidden" name="id" value="<?= $funcionario['id'] ?>">
+                    <button type="submit" class="btn btn-danger btn-sm">Remover</button>
+                </form>
             </div>
         </div>
     </div>
@@ -241,5 +237,4 @@ if ($foto !== '') {
 <script src="lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js"></script>
 <script src="js/main.js"></script>
 </body>
-
 </html>

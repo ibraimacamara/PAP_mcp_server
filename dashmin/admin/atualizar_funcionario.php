@@ -2,70 +2,65 @@
 session_start();
 include('../conexao.php');
 
-// ================================
-// Verifica método POST
-// ================================
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: lista_funcionario.php');
     exit;
 }
 
-// ================================
-// CSRF
-// ================================
 if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== ($_SESSION['csrf_token'] ?? '')) {
-    $_SESSION['alerta'] = ['tipo' => 'danger', 'msg' => 'Token CSRF inválido.'];
+    $_SESSION['alerta'] = [
+        'tipo' => 'danger',
+        'msg' => 'Token CSRF inválido.'
+    ];
     header('Location: lista_funcionario.php');
     exit;
 }
 
-// ================================
-// ID do funcionário
-// ================================
 $id = (int) ($_POST['id'] ?? 0);
+
 if ($id <= 0) {
-    $_SESSION['alerta'] = ['tipo' => 'danger', 'msg' => 'ID inválido.'];
+    $_SESSION['alerta'] = [
+        'tipo' => 'danger',
+        'msg' => 'ID inválido.'
+    ];
     header('Location: lista_funcionario.php');
     exit;
 }
 
-// ================================
-// Buscar user_id, foto atual e email
-// ================================
+// Buscar user_id e foto atual
 $stmt = $pdo->prepare("
-    SELECT f.user_id, u.foto, u.email
+    SELECT f.user_id, u.foto
     FROM funcionario f
-    JOIN users u ON u.id = f.user_id
+    LEFT JOIN users u ON u.id = f.user_id
     WHERE f.id = ?
 ");
 $stmt->execute([$id]);
 $dados = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$dados) {
-    $_SESSION['alerta'] = ['tipo' => 'danger', 'msg' => 'Funcionário não encontrado.'];
+    $_SESSION['alerta'] = [
+        'tipo' => 'danger',
+        'msg' => 'Funcionário não encontrado.'
+    ];
     header('Location: lista_funcionario.php');
     exit;
 }
 
-$user_id = $dados['user_id'];
+$user_id = $dados['user_id'] ?? null;
 $fotoAtual = $dados['foto'] ?? '';
-$emailAtual = $dados['email'] ?? '';
 
-// ================================
-// Normalizar gênero
-// ================================
+// Normalizar género
 if (isset($_POST['genero'])) {
     $genero = trim($_POST['genero']);
-    $genero = ucfirst(strtolower($genero)); // "masculino" -> "Masculino"
+    $genero = strtolower($genero); // fica "masculino" ou "feminino"
     $_POST['genero'] = $genero;
 }
 
-// ================================
-// Campos do funcionário (tabela funcionario)
-// ================================
+// Campos da tabela funcionario
 $camposFuncionario = [
     'nome',
     'bi',
+    'email',
     'nif',
     'contato',
     'data_nascimento',
@@ -82,6 +77,7 @@ $camposFuncionario = [
 
 $set = [];
 $valores = [];
+
 foreach ($camposFuncionario as $campo) {
     if (isset($_POST[$campo])) {
         $set[] = "`$campo` = ?";
@@ -89,32 +85,36 @@ foreach ($camposFuncionario as $campo) {
     }
 }
 
+if (empty($set)) {
+    $_SESSION['alerta'] = [
+        'tipo' => 'warning',
+        'msg' => 'Nenhum dado para atualizar.'
+    ];
+    header("Location: editar_funcionario.php?id=$id");
+    exit;
+}
+
 $valores[] = $id;
 $sqlFuncionario = "UPDATE funcionario SET " . implode(', ', $set) . " WHERE id = ?";
 
-// ================================
-// Início da transação
-// ================================
 $pdo->beginTransaction();
 
 try {
-    // Atualiza funcionario
+    // Atualizar tabela funcionario
     $stmt = $pdo->prepare($sqlFuncionario);
     $stmt->execute($valores);
 
-    // Atualiza email na tabela users
-    if (isset($_POST['email'])) {
-        $email = trim($_POST['email']);
-        $stmt = $pdo->prepare("UPDATE users SET email = ? WHERE id = ?");
-        $stmt->execute([$email, $user_id]);
-    }
-
-    // Upload de foto (se houver)
+    // Upload da foto
     if (!empty($_FILES['foto']['name'])) {
+        if (empty($user_id)) {
+            throw new Exception('Este funcionário não tem utilizador associado para guardar a foto.');
+        }
+
         $foto = $_FILES['foto'];
+
         $tiposPermitidos = [
             'image/jpeg' => 'jpg',
-            'image/png' => 'png',
+            'image/png'  => 'png',
             'image/webp' => 'webp'
         ];
 
@@ -123,20 +123,20 @@ try {
         }
 
         $ext = $tiposPermitidos[$foto['type']];
-        $novoNome = "funcionario_" . $user_id . "." . $ext;
-        $pasta = "uploads/";
+        $novoNome = 'funcionario_' . $user_id . '.' . $ext;
+        $pasta = 'uploads/';
         $destino = $pasta . $novoNome;
 
         if (!move_uploaded_file($foto['tmp_name'], $destino)) {
             throw new Exception('Erro ao guardar a imagem.');
         }
 
-        // Apaga foto antiga
-        if (!empty($fotoAtual) && file_exists($pasta . $fotoAtual)) {
+        // Apagar foto antiga, se for diferente
+        if (!empty($fotoAtual) && $fotoAtual !== $novoNome && file_exists($pasta . $fotoAtual)) {
             unlink($pasta . $fotoAtual);
         }
 
-        // Atualiza foto na tabela users
+        // Atualizar foto na tabela users
         $stmt = $pdo->prepare("UPDATE users SET foto = ? WHERE id = ?");
         $stmt->execute([$novoNome, $user_id]);
     }
@@ -145,17 +145,22 @@ try {
 
     $_SESSION['alerta'] = [
         'tipo' => 'success',
-        'msg' => 'Funcionário atualizado com sucesso.'
+        'msg'  => 'Funcionário atualizado com sucesso.'
     ];
+
     header('Location: lista_funcionario.php');
     exit;
 
 } catch (Exception $e) {
-    $pdo->rollBack();
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+
     $_SESSION['alerta'] = [
         'tipo' => 'danger',
-        'msg' => 'Erro ao atualizar funcionário: ' . $e->getMessage()
+        'msg'  => 'Erro ao atualizar funcionário: ' . $e->getMessage()
     ];
+
     header("Location: editar_funcionario.php?id=$id");
     exit;
 }

@@ -1,20 +1,14 @@
 <?php
 include('../conexao.php');
 
-if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+if (!isset($_POST['id']) || !is_numeric($_POST['id'])) {
     header('Location: lista_turma.php');
     exit;
 }
 
-$id = (int) $_GET['id'];
+$id = (int) $_POST['id'];
 
 try {
-    // Remove relações aluno_turma primeiro
-    $stmt = $pdo->prepare('DELETE FROM aluno_turma WHERE turma_id = :id');
-    $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-    $stmt->execute();
-
-    // Depois remove a turma
     $stmt = $pdo->prepare('DELETE FROM turma WHERE id = :id');
     $stmt->bindParam(':id', $id, PDO::PARAM_INT);
     $stmt->execute();
@@ -25,4 +19,3 @@ try {
     echo 'Erro ao remover turma: ' . htmlspecialchars($e->getMessage());
     exit;
 }
-

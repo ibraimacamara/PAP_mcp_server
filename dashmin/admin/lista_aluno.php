@@ -52,6 +52,8 @@ if ($turma_id !== null) {
 }
 
 $alunos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
 ?>
 <style>
     .col-xl-2 {
@@ -103,6 +105,9 @@ $alunos = $stmt->fetchAll(PDO::FETCH_ASSOC);
         /* ocupa o espaço restante do card */
         overflow: hidden;
     }
+    h5{
+        color: dodgerblue;
+    }
 </style>
 <?php
 include 'nav-menu.php';
@@ -133,9 +138,15 @@ include 'nav-menu.php';
                                     alt="<?= htmlspecialchars($a['nome']) ?>">
                             </div>
                             <div class="course-text">
-                                <h5><?= htmlspecialchars($a['nome']) ?></h5>
+                                <?php
+                                $nomes = explode(' ', trim($a['nome']));
+                                $primeiro = $nomes[0];
+                                $ultimo = end($nomes);
+                                ?>
 
-                                <h6>Número de Mec: <?= htmlspecialchars($a['id']) ?> </h6>
+                                <h5><?= htmlspecialchars($primeiro . ' ' . $ultimo) ?></h5>
+
+                                <h6>ID: <?= htmlspecialchars($a['id']) ?> </h6>
 
                             </div>
                         </div>

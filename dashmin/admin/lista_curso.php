@@ -2,18 +2,6 @@
 include('../conexao.php');
 include('menu.php');
 
-$stmt = $pdo->query("SELECT COUNT(*) AS total FROM aluno");
-$totalAlunos = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
-
-$stmt = $pdo->query("SELECT COUNT(*) AS total FROM curso");
-$totalCurso = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
-
-$stmt = $pdo->query("SELECT COUNT(*) AS total FROM turma");
-$totalTurma = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
-
-$stmt = $pdo->query("SELECT COUNT(*) AS total FROM professor");
-$totalProfessor = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
-
 $stmt = $pdo->prepare("
     SELECT c.id, c.nome, c.descricao, c.coordenador, c.imagem,
            p.nome AS nome_coordenador

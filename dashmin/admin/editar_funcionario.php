@@ -17,8 +17,8 @@ $id = (int) $_GET['id'];
 $stmt = $pdo->prepare("
     SELECT 
         f.*,
-        u.email,
-        u.foto 
+        u.foto,
+        u.categoria 
     FROM funcionario f
     LEFT JOIN users u ON u.id = f.user_id
     WHERE f.id = ?
