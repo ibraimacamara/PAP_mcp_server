@@ -377,6 +377,7 @@ def insert_encarregado(data: str) -> dict:
     finally:
         cur.close()
         conn.close()
+        
 
 @mcp.tool
 def list_encarregado() -> dict:

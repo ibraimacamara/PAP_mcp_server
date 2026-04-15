@@ -107,6 +107,7 @@ if (!empty($_FILES['foto']['name'])) {
         'image/gif' => 'gif'
     ];
 
+    
     if (!array_key_exists($foto['type'], $tiposPermitidos)) {
         erroUtilizador('Apenas imagens JPEG, PNG ou GIF são permitidas.');
     }
