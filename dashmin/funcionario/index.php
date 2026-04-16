@@ -178,7 +178,7 @@ include 'nav-menu.php';
 </div>
 
 <script>
-    const N8N_WEBHOOK = 'http://localhost:5678/webhook/e978382d-df6e-46da-b67d-a6982f6ae11b/chat';
+    const N8N_WEBHOOK = 'http://localhost:5678/webhook/ibra-chat-webhook/chat';
     const sessionId = 'admin-' + Math.random().toString(36).slice(2, 9);
 
     const textarea = document.getElementById('userInput');

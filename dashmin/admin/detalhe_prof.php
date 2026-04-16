@@ -35,13 +35,13 @@ try {
 
 // Caminho da foto
 $foto = isset($professor['foto']) ? trim($professor['foto']) : '';
-$fotoPath = 'uploads/default.jpg';
+$fotoPath = '../uploads/default.jpg';
 
 if ($foto !== '') {
-    if (strpos($foto, 'uploads/') !== false) {
+    if (strpos($foto, '../uploads/') !== false) {
         $fotoPath = $foto;
     } else {
-        $fotoPath = 'uploads/' . $foto;
+        $fotoPath = '../uploads/' . $foto;
     }
 }
 ?>

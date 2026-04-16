@@ -114,7 +114,7 @@ if (!empty($_FILES['foto']['name'])) {
         erroUtilizador('Apenas imagens JPEG, PNG ou GIF são permitidas.');
     }
 
-    $uploadDir = 'uploads/';
+    $uploadDir = '../uploads/';
     if (!is_dir($uploadDir)) {
         erroUtilizador('A pasta de uploads não existe.');
     }

@@ -74,7 +74,7 @@ if ($userId > 0 && !empty($_FILES['foto']['name'])) {
 
         if (isset($tiposPermitidos[$foto['type']])) {
 
-            $uploadDir = __DIR__ . '/uploads/';
+            $uploadDir = __DIR__ . '../uploads/';
             if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0777, true);
             }

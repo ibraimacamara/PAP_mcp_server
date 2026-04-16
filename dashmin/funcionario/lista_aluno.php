@@ -7,16 +7,23 @@ $turma_id = isset($_GET['turma_id']) ? (int) $_GET['turma_id'] : null;
 if ($turma_id !== null) {
 
     $stmt = $pdo->prepare("
-     SELECT 
-    a.numero_aluno AS id,
-    a.nome,
-    a.morada,
-    u.foto AS imagem
-FROM aluno a
-INNER JOIN aluno_turma at ON at.numero_aluno = a.numero_aluno
-INNER JOIN users u ON u.id = a.user_id
-WHERE at.turma_id = ?
-ORDER BY a.nome ASC
+    SELECT 
+        a.numero_aluno AS id,
+        a.nome,
+        a.morada,
+        u.foto AS imagem,
+        c.nome AS curso,
+        t.codigo AS turma,
+        ep.nome AS encarregado_principal,
+        es.nome AS encarregado_secundario
+    FROM aluno a
+    LEFT JOIN users u ON u.id = a.user_id
+    LEFT JOIN curso c ON c.id = a.curso_id
+    LEFT JOIN turma t ON t.id = a.turma_id
+    LEFT JOIN encarregado ep ON ep.id = a.encarregado_principal_id
+    LEFT JOIN encarregado es ON es.id = a.encarregado_secundario_id
+    WHERE a.turma_id = ?
+    ORDER BY a.nome ASC
     ");
 
     $stmt->execute([$turma_id]);
@@ -25,21 +32,28 @@ ORDER BY a.nome ASC
 
     // Se não passar turma_id, lista todos os alunos
     $stmt = $pdo->query("
- SELECT 
-    a.numero_aluno AS id,
-    a.nome,
-    a.morada,
-    u.foto AS imagem,
-    t.codigo AS turma
-FROM aluno a
-INNER JOIN users u ON u.id = a.user_id
-INNER JOIN aluno_turma alt ON alt.numero_aluno = a.numero_aluno
-INNER JOIN turma t ON t.id = alt.turma_id
-ORDER BY t.codigo ASC, a.nome ASC"
-    );
+    SELECT 
+        a.numero_aluno AS id,
+        a.nome,
+        a.morada,
+        u.foto AS imagem,
+        c.nome AS curso,
+        t.codigo AS turma,
+        ep.nome AS encarregado_principal,
+        es.nome AS encarregado_secundario
+    FROM aluno a
+    LEFT JOIN users u ON u.id = a.user_id
+    LEFT JOIN curso c ON c.id = a.curso_id
+    LEFT JOIN turma t ON t.id = a.turma_id
+    LEFT JOIN encarregado ep ON ep.id = a.encarregado_principal_id
+    LEFT JOIN encarregado es ON es.id = a.encarregado_secundario_id
+    ORDER BY t.codigo ASC, a.nome ASC
+    ");
 }
 
 $alunos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
 ?>
 <style>
     .col-xl-2 {
@@ -91,7 +105,7 @@ $alunos = $stmt->fetchAll(PDO::FETCH_ASSOC);
         /* ocupa o espaço restante do card */
         overflow: hidden;
     }
- 
+
 </style>
 <?php
 include 'nav-menu.php';
@@ -118,14 +132,20 @@ include 'nav-menu.php';
 
                         <div class="course-card">
                             <div class="course-image">
-                                <img src="uploads/<?= htmlspecialchars($a['imagem'] ?? 'default.jpg') ?>"
+                                <img src="../uploads/<?= htmlspecialchars($a['imagem'] ?? 'default.jpg') ?>"
                                     alt="<?= htmlspecialchars($a['nome']) ?>">
                             </div>
                             <div class="course-text">
-                                <h5><?= htmlspecialchars($a['nome']) ?></h5>
-                               
-                                <h6>Número de Mec: <?= htmlspecialchars($a['id']) ?> </h6>
-                                
+                                <?php
+                                $nomes = explode(' ', trim($a['nome']));
+                                $primeiro = $nomes[0];
+                                $ultimo = end($nomes);
+                                ?>
+
+                                <h5><?= htmlspecialchars($primeiro . ' ' . $ultimo) ?></h5>
+
+                                <h6>ID: <?= htmlspecialchars($a['id']) ?> </h6>
+
                             </div>
                         </div>
 

@@ -125,13 +125,13 @@ if (!$professor) {
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Grupo Disciplinar</label>
-                            <input type="text" name="grupo_disciplinar" class="form-control"
-                                value="<?= htmlspecialchars($professor['grupo_disciplinar'] ?? '') ?>">
+                            <input type="text" name="grupo_d" class="form-control"
+                                value="<?= htmlspecialchars($professor['grupo_d'] ?? '') ?>">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Tipo de Contrato</label>
-                            <input type="text" name="tipo_contrato" class="form-control"
-                                value="<?= htmlspecialchars($professor['tipo_contrato'] ?? '') ?>">
+                            <input type="text" name="tipo_c" class="form-control"
+                                value="<?= htmlspecialchars($professor['tipo_c'] ?? '') ?>">
                         </div>
 
                     </div>

@@ -96,30 +96,20 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
 }
 
 
-
+          
 try {
     
-    $partesNome = explode(' ', trim($nome));
-    $apelido = end($partesNome);
-
-    // Primeira letra maiúscula (suporte a acentos)
-    $apelidoFormatado = mb_convert_case($apelido, MB_CASE_TITLE, 'UTF-8');
-
-    // Ano atual
-    $anoAtual = date('Y');
-
     // Senha final
-    $senhaOriginal = $apelidoFormatado . $anoAtual . '#';
+    $senhaOriginal = $bi;
 
-    // Hash da senha (RECOMENDADO)
     $senhaHash = password_hash($senhaOriginal, PASSWORD_DEFAULT);
     $categoria = "encarregado";
     $stmt = $pdo->prepare("
-    INSERT INTO users (email, senha, categoria, foto)
-    VALUES (:email, :senha, :categoria, :foto)
+    INSERT INTO users (username, senha, categoria, foto)
+    VALUES (:username, :senha, :categoria, :foto)
     ");
     $stmt->execute([
-        ':email' => $email,
+        ':username' => $email,
         ':senha' => $senhaHash,
         ':categoria' => $categoria,
         ':foto' => $fotoPath

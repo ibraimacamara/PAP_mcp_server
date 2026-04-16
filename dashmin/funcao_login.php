@@ -105,8 +105,8 @@ try {
             'admin' => 'admin/editar_user.php',
             'aluno' => 'aluno/editar_aluno.php',
             'professor' => 'prof/editar_professor.php',
-            'funcionario' => 'funcionario/editar_funcionario.php',
-            'encarregado' => 'encarregado/editar_encarregado.php'
+            'funcionario' => 'funcionario/editar_user.php',
+            'encarregado' => 'encarregado/editar_user.php'
 
         ];
 

@@ -34,7 +34,7 @@ $curso = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <div class="col-sm-12 col-xl-4 mb-4">
                 <div class="card h-100 shadow p-2">
                     <a href="lista_turma.php?curso_id=<?= $c['id'] ?>">
-                        <img src="./uploads/<?= htmlspecialchars($c['imagem'] ?? 'default.jpg') ?>"
+                        <img src="../uploads/<?= htmlspecialchars($c['imagem'] ?? 'default.jpg') ?>"
                             class="card-img-top rounded" alt="<?= htmlspecialchars($c['nome']) ?>"
                             style="height:190px; object-fit:cover;">
                     </a>

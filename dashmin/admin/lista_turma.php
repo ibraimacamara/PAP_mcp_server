@@ -77,7 +77,7 @@ $turma = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <div class="course-card">
                     <a href="lista_aluno.php?turma_id=<?= $t['id'] ?>">
                         <div class="course-image">
-                            <img src="uploads/<?= htmlspecialchars($t['imagem'] ?? 'default.jpg') ?>"
+                            <img src="../uploads/<?= htmlspecialchars($t['imagem'] ?? 'default.jpg') ?>"
                                 alt="<?= htmlspecialchars($t['nome_curso']) ?>">
                         </div>
                     </a>

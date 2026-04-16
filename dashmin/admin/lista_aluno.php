@@ -105,9 +105,7 @@ $alunos = $stmt->fetchAll(PDO::FETCH_ASSOC);
         /* ocupa o espaço restante do card */
         overflow: hidden;
     }
-    h5{
-        color: dodgerblue;
-    }
+
 </style>
 <?php
 include 'nav-menu.php';
@@ -134,7 +132,7 @@ include 'nav-menu.php';
 
                         <div class="course-card">
                             <div class="course-image">
-                                <img src="uploads/<?= htmlspecialchars($a['imagem'] ?? 'default.jpg') ?>"
+                                <img src="../uploads/<?= htmlspecialchars($a['imagem'] ?? 'default.jpg') ?>"
                                     alt="<?= htmlspecialchars($a['nome']) ?>">
                             </div>
                             <div class="course-text">

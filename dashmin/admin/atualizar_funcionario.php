@@ -124,7 +124,7 @@ try {
 
         $ext = $tiposPermitidos[$foto['type']];
         $novoNome = 'funcionario_' . $user_id . '.' . $ext;
-        $pasta = 'uploads/';
+        $pasta = '../uploads/';
         $destino = $pasta . $novoNome;
 
         if (!move_uploaded_file($foto['tmp_name'], $destino)) {

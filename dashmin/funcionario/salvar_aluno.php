@@ -35,6 +35,7 @@ function erroTecnico(string $logMsg, int $httpCode = 500): void
 }
 
 
+
 //SEGURANÇA no request
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -106,11 +107,12 @@ if (!empty($_FILES['foto']['name'])) {
         'image/gif' => 'gif'
     ];
 
+    
     if (!array_key_exists($foto['type'], $tiposPermitidos)) {
         erroUtilizador('Apenas imagens JPEG, PNG ou GIF são permitidas.');
     }
 
-    $uploadDir = 'uploads/';
+    $uploadDir = '../uploads/';
     if (!is_dir($uploadDir)) {
         erroUtilizador('A pasta de uploads não existe.');
     }
@@ -135,18 +137,19 @@ if (!empty($_FILES['foto']['name'])) {
 try {
     $pdo->beginTransaction();
 
+
     // users
-    $senhaOriginal = 'SGE-LMS00!';
+   
 
     // Hash da senha (RECOMENDADO)
-    $senhaHash = password_hash($senhaOriginal, PASSWORD_DEFAULT);
+    $senhaHash = password_hash($bi, PASSWORD_DEFAULT);
     $categoria = "aluno";
     $stmt = $pdo->prepare("
-    INSERT INTO users (email, senha, categoria, foto)
-    VALUES (:email, :senha, :categoria, :foto)
+    INSERT INTO users (username, senha, categoria, foto)
+    VALUES (:username, :senha, :categoria, :foto)
     ");
     $stmt->execute([
-        ':email' => $email,
+        ':username' => $email,
         ':senha' => $senhaHash,
         ':categoria' => $categoria,
         ':foto' => $fotoPath
@@ -155,55 +158,36 @@ try {
 
     // Inserir aluno
     $stmt = $pdo->prepare("
-        INSERT INTO aluno 
-        (user_id, nome, data_nascimento, contato, bi, email, morada, genero, distrito, freguesia)
-        VALUES (:user_id, :nome, :data, :contato, :bi, :email, :morada, :genero, :distrito, :freguesia )
+    INSERT INTO aluno 
+    (user_id, nome, data_nascimento, contato, bi, email, morada, genero, distrito, freguesia,
+    curso_id, turma_id, encarregado_principal_id, encarregado_secundario_id)
+    VALUES 
+    (:user_id, :nome, :data, :contato, :bi, :email, :morada, :genero, :distrito, :freguesia,
+    :curso, :turma, :enc_principal, :enc_secundario)
     ");
-    $stmt->execute([
-        'user_id' => $userId,
-        ':nome' => $nome,
-        ':data' => $dataNasc,
-        ':contato' => $contato,
-        ':bi' => $bi,
-        ':email' => $email,
-        ':morada' => $morada,
-        ':genero' => $genero,
-        ':distrito' => $distrito,
-        ':freguesia' => $freguesia,
-        
-    ]);
+ $stmt->execute([
+    'user_id' => $userId,
+    ':nome' => $nome,
+    ':data' => $dataNasc,
+    ':contato' => $contato,
+    ':bi' => $bi,
+    ':email' => $email,
+    ':morada' => $morada,
+    ':genero' => $genero,
+    ':distrito' => $distrito,
+    ':freguesia' => $freguesia,
+
+    ':curso' => $cursoId,
+    ':turma' => $turmaId,
+    ':enc_principal' => $encarregadoPrincipalId,
+    ':enc_secundario' => $encarregadoSecundarioId ?: null
+]);
     $alunoId = (int) $pdo->lastInsertId();
 
-    // Relação com curso
-    $stmt = $pdo->prepare("INSERT INTO aluno_curso (numero_aluno, curso_id) VALUES (:aluno, :curso)");
-    $stmt->execute([':aluno' => $alunoId, ':curso' => $cursoId]);
-
-    // Relação com turma
-    $stmt = $pdo->prepare("INSERT INTO aluno_turma (numero_aluno, turma_id) VALUES (:aluno, :turma)");
-    $stmt->execute([':aluno' => $alunoId, ':turma' => $turmaId]);
-
-
-
-
+   
     $userId = (int) $pdo->lastInsertId();
 
 
-    // Encarregado principal
-    $stmt = $pdo->prepare("INSERT INTO aluno_encarregado (numero_aluno, encarregado_id, laco_familiar) VALUES (:aluno, :encarregado, :laco)");
-    $stmt->execute([
-        ':aluno' => $alunoId,
-        ':encarregado' => $encarregadoPrincipalId,
-        ':laco' => $lacoPrincipal
-    ]);
-
-    // Encarregado secundário (opcional)
-    if ($encarregadoSecundarioId) {
-        $stmt->execute([
-            ':aluno' => $alunoId,
-            ':encarregado' => $encarregadoSecundarioId,
-            ':laco' => $lacoSecundario
-        ]);
-    }
 
     $pdo->commit();
 
@@ -221,13 +205,13 @@ try {
     //     erroUtilizador('Aluno já registado.');
     // }
     if ($e->getCode() === '23000') {
-    if (str_contains($e->getMessage(), 'users.email')) {
-        erroUtilizador('Email já registado.');
+        if (str_contains($e->getMessage(), 'users.email')) {
+            erroUtilizador('Email já registado.');
+        }
+        if (str_contains($e->getMessage(), 'curso_id')) {
+            erroUtilizador('Curso inválido.');
+        }
     }
-    if (str_contains($e->getMessage(), 'curso_id')) {
-        erroUtilizador('Curso inválido.');
-    }
-}
 
 
     erroTecnico('Erro BD: ' . $e->getMessage());

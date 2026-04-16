@@ -2,18 +2,6 @@
 include('../conexao.php');
 include('menu.php');
 
-$stmt = $pdo->query("SELECT COUNT(*) AS total FROM aluno");
-$totalAlunos = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
-
-$stmt = $pdo->query("SELECT COUNT(*) AS total FROM curso");
-$totalCurso = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
-
-$stmt = $pdo->query("SELECT COUNT(*) AS total FROM turma");
-$totalTurma = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
-
-$stmt = $pdo->query("SELECT COUNT(*) AS total FROM professor");
-$totalProfessor = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
-
 $stmt = $pdo->prepare("
     SELECT c.id, c.nome, c.descricao, c.coordenador, c.imagem,
            p.nome AS nome_coordenador
@@ -46,7 +34,7 @@ $curso = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <div class="col-sm-12 col-xl-4 mb-4">
                 <div class="card h-100 shadow p-2">
                     <a href="lista_turma.php?curso_id=<?= $c['id'] ?>">
-                        <img src="./uploads/<?= htmlspecialchars($c['imagem'] ?? 'default.jpg') ?>"
+                        <img src="../uploads/<?= htmlspecialchars($c['imagem'] ?? 'default.jpg') ?>"
                             class="card-img-top rounded" alt="<?= htmlspecialchars($c['nome']) ?>"
                             style="height:190px; object-fit:cover;">
                     </a>
@@ -65,7 +53,7 @@ $curso = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </div>
                     <div class="mt-3 d-flex justify-content-between">
                         <a href="editar_curso.php?id=<?= $c['id'] ?>" class="btn btn-sm btn-primary">Editar</a>
-                        <form action="deletar_curso.php" method="POST"
+                        <form action="remover_curso.php" method="POST"
                             onsubmit="return confirm('Tens certeza que deseja remover este curso?');">
                             <input type="hidden" name="id" value="<?= $c['id'] ?>">
                             <button type="submit" class="btn btn-sm btn-danger">Remover</button>

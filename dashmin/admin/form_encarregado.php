@@ -35,7 +35,7 @@ if (empty($_SESSION['csrf_token'])) {
 
             <div class="col-12 mb-4">
                 <div class="bg-white shadow rounded h-100 p-4">
-                    <h6 class="mb-4">Encarregado</h6>
+                    <h6 class="mb-4">Registar Encarregado</h6>
                     <form action="salvar_encarregado.php" method="POST">
                         <input type="hidden" name="csrf_token"
                             value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">

@@ -13,6 +13,15 @@ if (empty($_SESSION['auth']) || !$_SESSION['auth']) {
     header('Location: ../login.php'); // volta para login
     exit;
 }
+// Verifica se é ADMIN
+if (!isset($_SESSION['categoria']) || $_SESSION['categoria'] !== 'admin') {
+    // Opcional: destruir sessão
+    session_destroy();
+
+    // Redirecionar (ou mostrar erro)
+    header('Location: ../login.php');
+    exit;
+}
 
 // Pega os dados do utilizador da sessão
 $nomeUser = $_SESSION['nome'] ?? $_SESSION['username'] ?? 'Sem nome';
@@ -20,9 +29,9 @@ $categoriaUser = $_SESSION['categoria'] ?? 'Sem categoria';
 $fotoUser = $_SESSION['foto'] ?? 'default.jpg';
 
 // Ajusta o caminho da foto (assumindo que está em admin/uploads/)
-$fotoPath = file_exists(__DIR__ . '/uploads/' . $fotoUser)
-    ? 'uploads/' . $fotoUser
-    : 'uploads/default.jpg';
+$fotoPath = file_exists(__DIR__ . '/../uploads/' . $fotoUser)
+    ? '../uploads/' . $fotoUser
+    : '../uploads/default.jpg';
 ?>
 
 

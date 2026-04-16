@@ -53,7 +53,7 @@ if (!empty($_FILES['imagem']['name'])) {
     $ext      = pathinfo($_FILES['imagem']['name'], PATHINFO_EXTENSION);
     $filename = 'curso_' . $id . '_' . time() . '.' . $ext;
 
-    $destDir  = 'uploads/';
+    $destDir  = '../uploads/';
     $destPath = $destDir . $filename;
 
     // Criar pasta se não existir
@@ -66,7 +66,7 @@ if (!empty($_FILES['imagem']['name'])) {
 
         $imagem = $filename;
 
-        // 🗑️ Apagar imagem antiga (se existir e não for default)
+        //  Apagar imagem antiga (se existir e não for default)
         if (!empty($imagem_antiga) && $imagem_antiga !== 'default.png') {
             $oldPath = $destDir . $imagem_antiga;
 

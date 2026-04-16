@@ -70,7 +70,7 @@ $professor = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <div class="bg-white shadow rounded overflow-hidden h-100">
                         <div class="course-card">
                             <div class="course-image">
-                                <img src="uploads/<?= htmlspecialchars($p['imagem'] ?? 'default.jpg') ?>"
+                                <img src="../uploads/<?= htmlspecialchars($p['imagem'] ?? 'default.jpg') ?>"
                                     alt="<?= htmlspecialchars($p['nome']) ?>">
                             </div>
                             <div class="course-text">

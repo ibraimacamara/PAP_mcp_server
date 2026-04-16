@@ -27,7 +27,7 @@ $aluno = $stmt->fetch(PDO::FETCH_ASSOC);
 // Normaliza foto
 $fotoPath = 'uploads/default.jpg';
 if (!empty($aluno['imagem'])) {
-    $fotoPath = (strpos($aluno['imagem'], 'uploads/') !== false) ? $aluno['imagem'] : 'uploads/' . $aluno['imagem'];
+    $fotoPath = (strpos($aluno['imagem'], '../uploads/') !== false) ? $aluno['imagem'] : '../uploads/' . $aluno['imagem'];
 }
 ?>
 

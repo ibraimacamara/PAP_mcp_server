@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 include "../conexao.php";
+
 // Só inicia a sessão se ainda não estiver ativa
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -19,9 +20,9 @@ $categoriaUser = $_SESSION['categoria'] ?? 'Sem categoria';
 $fotoUser = $_SESSION['foto'] ?? 'default.jpg';
 
 // Ajusta o caminho da foto (assumindo que está em admin/uploads/)
-$fotoPath = file_exists(__DIR__ . '/uploads/' . $fotoUser)
-    ? 'uploads/' . $fotoUser
-    : 'uploads/default.jpg';
+$fotoPath = file_exists(__DIR__ . '/../uploads/' . $fotoUser)
+    ? '../uploads/' . $fotoUser
+    : '../uploads/default.jpg';
 ?>
 
 
@@ -91,7 +92,7 @@ $fotoPath = file_exists(__DIR__ . '/uploads/' . $fotoUser)
         </div>
         <!-- Spinner End -->
 
-
+        
         <!-- Sidebar Start -->
 
         <?php
@@ -193,10 +194,8 @@ $fotoPath = file_exists(__DIR__ . '/uploads/' . $fotoUser)
 
                         </div>
                     </div>
-                  
-                    <a href="chatbox.php" class="nav-item nav-link <?= isActive('chatbox.php') ? 'active' : ''; ?>">
-                        <i class="fa fa-robot me-2"></i>Assistente IA
-                    </a>
+               
+                
 
                     <!--div class="nav-item dropdown">
                         <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"><i class="far fa-file-alt me-2"></i>Pages</a>
@@ -250,7 +249,7 @@ $fotoPath = file_exists(__DIR__ . '/uploads/' . $fotoUser)
                             </span>
                         </a>
                         <div class="dropdown-menu dropdown-menu-end bg-light border-0 rounded-0 rounded-bottom m-0">
-                            <a href="editar_user" class="dropdown-item">Meu perfil</a>
+                           <a href="editar_user.php?id=<?= $_SESSION['user_id'] ?>" class="dropdown-item">Meu perfil</a>
                             <a href="#" class="dropdown-item">Configurações</a>
                             <a href="logout.php" class="dropdown-item">Sair</a>
                         </div>

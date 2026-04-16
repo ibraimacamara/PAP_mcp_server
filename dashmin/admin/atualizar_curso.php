@@ -53,7 +53,7 @@ if (!empty($_FILES['imagem']['name'])) {
     $ext      = pathinfo($_FILES['imagem']['name'], PATHINFO_EXTENSION);
     $filename = 'curso_' . $id . '_' . time() . '.' . $ext;
 
-    $destDir  = 'uploads/';
+    $destDir  = '../uploads/';
     $destPath = $destDir . $filename;
 
     // Criar pasta se não existir

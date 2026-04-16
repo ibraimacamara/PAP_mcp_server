@@ -30,17 +30,43 @@ if ($curso_id !== null) {
 $turma = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <style>
-    .col-xl-2 { flex: 0 0 auto; width: calc(25% + 20px); }
-    .course-card {
-        background: #fff; border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        padding: 5px; overflow: hidden;
-        width: 100%; height: 330px;
-        display: flex; flex-direction: column;
+    .col-xl-2 {
+        flex: 0 0 auto;
+        width: calc(25% + 20px);
     }
-    .course-image { width: 100%; height: 160px; overflow: hidden; border-radius: 8px; }
-    .course-image img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 8px; }
-    .course-text { padding: 10px; flex: 1; overflow: hidden; }
+
+    .course-card {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        padding: 5px;
+        overflow: hidden;
+        width: 100%;
+        height: 330px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .course-image {
+        width: 100%;
+        height: 160px;
+        overflow: hidden;
+        border-radius: 8px;
+    }
+
+    .course-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        border-radius: 8px;
+    }
+
+    .course-text {
+        padding: 10px;
+        flex: 1;
+        overflow: hidden;
+    }
 </style>
 <?php include 'nav-menu.php'; ?>
 
@@ -51,7 +77,7 @@ $turma = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <div class="course-card">
                     <a href="lista_aluno.php?turma_id=<?= $t['id'] ?>">
                         <div class="course-image">
-                            <img src="uploads/<?= htmlspecialchars($t['imagem'] ?? 'default.jpg') ?>"
+                            <img src="../uploads/<?= htmlspecialchars($t['imagem'] ?? 'default.jpg') ?>"
                                 alt="<?= htmlspecialchars($t['nome_curso']) ?>">
                         </div>
                     </a>
@@ -66,17 +92,22 @@ $turma = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         </small>
                     </div>
                     <div class="px-2 pb-2 d-flex gap-2">
-                        <a href="editar_turma.php?id=<?= $t['id'] ?>"
-                           class="btn btn-sm btn-primary"
-                           style="padding: 2px 8px; white-space: nowrap;">
-                            Editar
-                        </a>
-                        <a href="remover_turma.php?id=<?= $t['id'] ?>"
-                           class="btn btn-sm btn-danger"
-                           style="padding: 2px 8px; white-space: nowrap;"
-                           onclick="return confirm('Tem certeza que deseja remover esta turma?');">
-                            Remover
-                        </a>
+                        <div class="px-2 pb-2 d-flex gap-2">
+                            <a href="editar_turma.php?id=<?= $t['id'] ?>" class="btn btn-sm btn-primary"
+                                style="padding: 2px 8px; white-space: nowrap;">
+                                Editar
+                            </a>
+
+                            <form action="remover_turma.php" method="POST"
+                                onsubmit="return confirm('Tem certeza que deseja remover esta turma?');"
+                                style="display:inline;">
+                                <input type="hidden" name="id" value="<?= $t['id'] ?>">
+                                <button type="submit" class="btn btn-sm btn-danger"
+                                    style="padding: 2px 8px; white-space: nowrap;">
+                                    Remover
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -98,4 +129,5 @@ $turma = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <script src="lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js"></script>
 <script src="js/main.js"></script>
 </body>
+
 </html>
