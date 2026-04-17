@@ -17,8 +17,12 @@ $curso = $pdo->query(
     "SELECT id, nome FROM curso ORDER BY nome"
 )->fetchAll(PDO::FETCH_ASSOC);
 
+// $turma = $pdo->query(
+//     "SELECT id, codigo FROM turma ORDER BY codigo"
+// )->fetchAll(PDO::FETCH_ASSOC);
+
 $turma = $pdo->query(
-    "SELECT id, codigo FROM turma ORDER BY codigo"
+    "SELECT id, codigo, curso_id FROM turma ORDER BY codigo"
 )->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
@@ -128,7 +132,7 @@ $turma = $pdo->query(
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label>Curso</label>
-                            <select name="curso_id" class="form-select" required>
+                            <select name="curso_id" id="curso_id" class="form-select" required>
                                 <option value="">Escolha...</option>
                                 <?php foreach ($curso as $c): ?>
                                     <option value="<?= $c['id'] ?>">
@@ -139,10 +143,10 @@ $turma = $pdo->query(
                         </div>
                         <div class="col-md-6 mb-3">
                             <label>Turma</label>
-                            <select name="turma_id" class="form-select" required>
+                            <select name="turma_id" id="turma_id" class="form-select" required>
                                 <option value="">Escolha...</option>
                                 <?php foreach ($turma as $t): ?>
-                                    <option value="<?= $t['id'] ?>">
+                                    <option value="<?= $t['id'] ?>" data-curso="<?= $t['curso_id'] ?>">
                                         <?= htmlspecialchars($t['codigo']) ?>
                                     </option>
                                 <?php endforeach; ?>
@@ -221,8 +225,47 @@ include 'footer.php';
 <script src="lib/tempusdominus/js/moment-timezone.min.js"></script>
 <script src="lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js"></script>
 
+
 <!-- Template Javascript -->
 <script src="js/main.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const cursoSelect = document.getElementById('curso_id');
+        const turmaSelect = document.getElementById('turma_id');
+
+        const todasTurmas = Array.from(turmaSelect.options).map(option => ({
+            value: option.value,
+            text: option.text,
+            curso: option.getAttribute('data-curso')
+        }));
+
+        function atualizarTurmas() {
+            const cursoSelecionado = cursoSelect.value;
+
+            turmaSelect.innerHTML = '<option value="">Escolha...</option>';
+
+            todasTurmas.forEach(turma => {
+                // ignora a opção vazia original
+                if (!turma.value) return;
+
+                // se não houver curso selecionado, mostra todas
+                // se houver, mostra só as turmas desse curso
+                if (cursoSelecionado === '' || turma.curso === cursoSelecionado) {
+                    const option = document.createElement('option');
+                    option.value = turma.value;
+                    option.textContent = turma.text;
+                    option.setAttribute('data-curso', turma.curso);
+                    turmaSelect.appendChild(option);
+                }
+            });
+        }
+
+        cursoSelect.addEventListener('change', atualizarTurmas);
+
+        // ao carregar a página
+        atualizarTurmas();
+    });
+</script>
 </body>
 
 </html>

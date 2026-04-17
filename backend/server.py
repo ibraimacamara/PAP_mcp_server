@@ -2,7 +2,9 @@ import os
 from fastmcp import FastMCP
 from typing import Any, Dict, List, Tuple
 import json
+import hashlib
 from conexao import get_connection, init_db
+
 
 mcp = FastMCP("gestor de escola MCP Tool")
 
@@ -11,50 +13,221 @@ mcp = FastMCP("gestor de escola MCP Tool")
 # ALUNO
 # ---------------------------------------------------------------------------
 
+
+
 @mcp.tool
 def insert_aluno(data: str) -> dict:
     """
-    Insere um novo aluno na tabela 'aluno'.
-    data: dict ou JSON string com os campos do aluno.
-    Ex: {"nome":"Ibra", "apelido":"Camara", "data_nascimento":"2005-01-01"}
+    Insere um aluno no sistema.
+
+    Recebe:
+    - dados pessoais do aluno;
+    - nome do curso;
+    - código da turma;
+    - nome do encarregado principal;
+    - nome do encarregado secundário (opcional).
+
+    Fluxo:
+    1. cria utilizador em users com username=email e senha baseada no BI;
+    2. procura os IDs de curso, turma e encarregados;
+    3. insere o aluno com esses IDs.
     """
     conn = get_connection()
     if conn is None:
-        return {"success": False, "message": "Sem conexão ao banco", "error": "get_connection retornou None"}
+        return {
+            "success": False,
+            "message": "Sem conexão à base de dados.",
+            "error": "get_connection retornou None"
+        }
 
-    cur = conn.cursor()
+    cur = conn.cursor(dictionary=True)
+
     try:
         data_dict = json.loads(data) if isinstance(data, str) else data
+
         if not isinstance(data_dict, dict):
-            return {"success": False, "message": "Dados devem ser um dict/JSON", "error": "Formato inválido"}
+            return {
+                "success": False,
+                "message": "Os dados devem ser um objeto JSON.",
+                "error": "Formato inválido"
+            }
 
-        cur.execute("DESCRIBE `aluno`")
-        col_names = [c[0] for c in cur.fetchall()]
-        valid_data = {k: v for k, v in data_dict.items() if k in col_names}
+        nome = str(data_dict.get("nome", "")).strip()
+        email = str(data_dict.get("email", "")).strip().lower()
+        bi = str(data_dict.get("bi", "")).strip()
+        contato = str(data_dict.get("contato", "")).strip()
+        data_nascimento = str(data_dict.get("data_nascimento", "")).strip()
+        morada = str(data_dict.get("morada", "")).strip()
+        genero = str(data_dict.get("genero", "")).strip().lower()
+        distrito = str(data_dict.get("distrito", "")).strip()
+        freguesia = str(data_dict.get("freguesia", "")).strip()
 
-        if not valid_data:
-            return {"success": False, "message": "Nenhuma coluna válida para 'aluno'",
-                    "error": f"Colunas disponíveis: {', '.join(col_names)}"}
+        nome_curso = str(data_dict.get("curso", "")).strip()
+        codigo_turma = str(data_dict.get("turma", "")).strip()
+        nome_enc_principal = str(data_dict.get("encarregado_principal", "")).strip()
+        nome_enc_secundario = str(data_dict.get("encarregado_secundario", "")).strip()
 
-        columns = ", ".join([f"`{c}`" for c in valid_data.keys()])
-        placeholders = ", ".join(["%s"] * len(valid_data))
-        sql = f"INSERT INTO `aluno` ({columns}) VALUES ({placeholders})"
-        cur.execute(sql, tuple(valid_data.values()))
+        if not nome or not email or not bi or not contato or not data_nascimento:
+            return {
+                "success": False,
+                "message": "Faltam dados obrigatórios do aluno.",
+                "error": "nome, email, bi, contato e data_nascimento são obrigatórios"
+            }
+
+        if not nome_curso or not codigo_turma or not nome_enc_principal:
+            return {
+                "success": False,
+                "message": "Faltam curso, turma ou encarregado principal.",
+                "error": "curso, turma e encarregado_principal são obrigatórios"
+            }
+
+        conn.start_transaction()
+
+        # verificar duplicados
+        cur.execute("SELECT id FROM users WHERE username = %s", (email,))
+        if cur.fetchone():
+            conn.rollback()
+            return {
+                "success": False,
+                "message": "Já existe utilizador com este email.",
+                "error": email
+            }
+
+        cur.execute("SELECT numero_aluno FROM aluno WHERE email = %s OR bi = %s", (email, bi))
+        if cur.fetchone():
+            conn.rollback()
+            return {
+                "success": False,
+                "message": "Já existe aluno com este email ou BI.",
+                "error": f"{email} / {bi}"
+            }
+
+        # buscar curso_id pelo nome
+        cur.execute("SELECT id FROM curso WHERE nome = %s LIMIT 1", (nome_curso,))
+        curso = cur.fetchone()
+        if not curso:
+            conn.rollback()
+            return {
+                "success": False,
+                "message": "Curso não encontrado.",
+                "error": nome_curso
+            }
+        curso_id = curso["id"]
+
+        # buscar turma_id pelo código e curso
+        cur.execute(
+            "SELECT id FROM turma WHERE codigo = %s AND curso_id = %s LIMIT 1",
+            (codigo_turma, curso_id)
+        )
+        turma = cur.fetchone()
+        if not turma:
+            conn.rollback()
+            return {
+                "success": False,
+                "message": "Turma não encontrada para o curso indicado.",
+                "error": codigo_turma
+            }
+        turma_id = turma["id"]
+
+        # buscar encarregado principal
+        cur.execute("SELECT id FROM encarregado WHERE nome = %s LIMIT 1", (nome_enc_principal,))
+        enc_principal = cur.fetchone()
+        if not enc_principal:
+            conn.rollback()
+            return {
+                "success": False,
+                "message": "Encarregado principal não encontrado.",
+                "error": nome_enc_principal
+            }
+        encarregado_principal_id = enc_principal["id"]
+
+        # buscar encarregado secundário, se existir
+        encarregado_secundario_id = None
+        if nome_enc_secundario:
+            cur.execute("SELECT id FROM encarregado WHERE nome = %s LIMIT 1", (nome_enc_secundario,))
+            enc_secundario = cur.fetchone()
+            if not enc_secundario:
+                conn.rollback()
+                return {
+                    "success": False,
+                    "message": "Encarregado secundário não encontrado.",
+                    "error": nome_enc_secundario
+                }
+            encarregado_secundario_id = enc_secundario["id"]
+
+        # criar utilizador
+        senha_hash = hashlib.sha256(bi.encode("utf-8")).hexdigest()
+
+        cur.execute("""
+            INSERT INTO users (username, senha, categoria, foto, primeiro_login)
+            VALUES (%s, %s, %s, %s, %s)
+        """, (email, senha_hash, "aluno", None, 0))
+
+        user_id = cur.lastrowid
+
+        # inserir aluno
+        cur.execute("""
+            INSERT INTO aluno (
+                user_id,
+                curso_id,
+                turma_id,
+                encarregado_principal_id,
+                encarregado_secundario_id,
+                nome,
+                email,
+                bi,
+                contato,
+                data_nascimento,
+                morada,
+                genero,
+                distrito,
+                freguesia
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (
+            user_id,
+            curso_id,
+            turma_id,
+            encarregado_principal_id,
+            encarregado_secundario_id,
+            nome,
+            email,
+            bi,
+            contato,
+            data_nascimento,
+            morada or None,
+            genero or None,
+            distrito or None,
+            freguesia or None
+        ))
+
+        numero_aluno = cur.lastrowid
         conn.commit()
 
-        return {"success": True, "message": "Aluno inserido com sucesso",
-                "row_id": cur.lastrowid, "rows_affected": cur.rowcount, "error": None}
+        return {
+            "success": True,
+            "message": "Aluno inserido com sucesso.",
+            "data": {
+                "numero_aluno": numero_aluno,
+                "user_id": user_id,
+                "curso_id": curso_id,
+                "turma_id": turma_id,
+                "encarregado_principal_id": encarregado_principal_id,
+                "encarregado_secundario_id": encarregado_secundario_id
+            },
+            "error": None
+        }
 
     except Exception as e:
         conn.rollback()
-        return {"success": False, "message": "Erro ao inserir aluno", "error": str(e)}
+        return {
+            "success": False,
+            "message": "Erro ao inserir aluno.",
+            "error": str(e)
+        }
     finally:
         cur.close()
         conn.close()
         
-        
-
-
 
 
 @mcp.tool
@@ -294,10 +467,13 @@ def update_aluno(numero_aluno: int, updates: str) -> dict:
         cur.close()
         conn.close()
         
+        
+        
 @mcp.tool
-def delete_aluno_por_user_id(user_id: int) -> dict:
+def delete_aluno(identifier: str) -> dict:
     """
-    Remove um aluno e o respectivo utilizador com base no user_id.
+    Remove um aluno e o respectivo usuário.
+    O identifier pode ser numero_aluno (int em string) ou nome.
     """
     conn = get_connection()
     if not conn:
@@ -306,47 +482,49 @@ def delete_aluno_por_user_id(user_id: int) -> dict:
     cur = conn.cursor()
 
     try:
-        # Iniciar transação
-        conn.begin()
+        
+        conn.start_transaction()
 
-        # 1. Verificar se existe aluno com esse user_id
-        cur.execute("""
-            SELECT numero_aluno 
-            FROM aluno 
-            WHERE user_id = %s
-            LIMIT 1
-        """, (user_id,))
+        if identifier.isdigit():
+            cur.execute("""
+                SELECT numero_aluno, user_id 
+                FROM aluno 
+                WHERE numero_aluno = %s
+                LIMIT 1
+            """, (int(identifier),))
+        else:
+            cur.execute("""
+                SELECT numero_aluno, user_id 
+                FROM aluno 
+                WHERE nome = %s
+                LIMIT 1
+            """, (identifier,))
 
         aluno = cur.fetchone()
 
         if not aluno:
-            raise Exception("Aluno não encontrado para esse user_id.")
+            raise Exception("Aluno não encontrado.")
 
-        numero_aluno = aluno[0]
+        numero_aluno, user_id = aluno
 
-        # 2. Apagar aluno
+        # Apagar aluno
         cur.execute("""
             DELETE FROM aluno 
-            WHERE user_id = %s
-        """, (user_id,))
-        alunos_removidos = cur.rowcount
+            WHERE numero_aluno = %s
+        """, (numero_aluno,))
 
-        # 3. Apagar user
-        cur.execute("""
-            DELETE FROM users 
-            WHERE id = %s
-        """, (user_id,))
-        users_removidos = cur.rowcount
+        # Apagar user
+        if user_id:
+            cur.execute("""
+                DELETE FROM users 
+                WHERE id = %s
+            """, (user_id,))
 
-        # Commit
         conn.commit()
 
         return {
             "success": True,
-            "message": "Aluno e usuário removidos com sucesso",
-            "numero_aluno": numero_aluno,
-            "alunos_removidos": alunos_removidos,
-            "users_removidos": users_removidos,
+            "message": f"Aluno {numero_aluno} removido com sucesso",
             "error": None
         }
 
