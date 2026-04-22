@@ -1,0 +1,9 @@
+inseri o encarregado:
+nome: Bubacar Camará
+bi: 1852HH55
+email: bubacarcamara@gmail.com
+contato: 910211221
+morada: Rua bernando de Matos
+genero: masculino
+distrito: Évora
+freguesia: Sr. da Saúde
