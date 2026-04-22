@@ -35,19 +35,12 @@ require_once(__DIR__ . '/../../lib/enrollib.php');
  */
 final class time_splittings_test extends \advanced_testcase {
 
-    /** @var \stdClass course record. */
-    protected $course;
-
-    /** @var course Moodle course analysable. */
-    protected $analysable;
-
     /**
      * setUp
      *
      * @return void
      */
     public function setUp(): void {
-        parent::setUp();
 
         $this->resetAfterTest(true);
 
@@ -65,7 +58,7 @@ final class time_splittings_test extends \advanced_testcase {
      *
      * @return void
      */
-    public function test_valid_ranges(): void {
+    public function test_valid_ranges() {
 
         // All core time splitting methods.
         $timesplittings = array(
@@ -90,7 +83,7 @@ final class time_splittings_test extends \advanced_testcase {
      *
      * @return void
      */
-    public function test_range_dates(): void {
+    public function test_range_dates() {
 
         $nov2015 = mktime(0, 0, 0, 11, 24, 2015);
         $aug2016 = mktime(0, 0, 0, 8, 29, 2016);
@@ -159,7 +152,7 @@ final class time_splittings_test extends \advanced_testcase {
      *
      * @return void
      */
-    public function test_ready_predict(): void {
+    public function test_ready_predict() {
 
         $quarters = new \core\analytics\time_splitting\quarters();
         $nosplitting = new \core\analytics\time_splitting\no_splitting();
@@ -195,7 +188,7 @@ final class time_splittings_test extends \advanced_testcase {
      *
      * @return void
      */
-    public function test_periodic(): void {
+    public function test_periodic() {
 
         // Using a finished course.
 

@@ -97,18 +97,9 @@ class cron_task extends \core\task\scheduled_task {
         $timenow = time();
 
         // Delete any really old posts in the digest queue.
-        $weekago = $timenow - WEEKSECS;
+        $weekago = $timenow - (7 * 24 * 3600);
         $this->log_start("Removing old digest records from 7 days ago.");
-
-        $selectsqlcondition = "timemodified < :weekago
-            AND discussionid IN (SELECT id FROM {forum_discussions} WHERE timestart < :holdperiod)";
-
-        $params = [
-            'weekago' => $weekago,
-            'holdperiod' => $weekago,
-        ];
-
-        $DB->delete_records_select('forum_queue', $selectsqlcondition, $params);
+        $DB->delete_records_select('forum_queue', "timemodified < ?", array($weekago));
         $this->log_finish("Removed all old digest records.");
 
         $endtime   = $timenow - $CFG->maxeditingtime;
@@ -338,7 +329,7 @@ class cron_task extends \core\task\scheduled_task {
 
             $send = false;
             // Setup this user so that the capabilities are cached, and environment matches receiving user.
-            \core\cron::setup_user($user);
+            cron_setup_user($user);
 
             list($individualpostdata, $digestpostdata) = $this->fetch_posts_for_user($user);
 

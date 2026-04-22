@@ -78,9 +78,7 @@ class index implements renderable {
         ];
         $table->align = ['center', 'left', 'center', 'center', 'center', 'center', 'center'];
 
-        $modinfo = get_fast_modinfo($this->course);
-        foreach ($modinfo->instances['bigbluebuttonbn'] as $cm) {
-            $instance = $this->instances[$cm->id];
+        foreach ($this->instances as $instance) {
             $this->add_instance_to_table($output, $table, $instance);
         }
 

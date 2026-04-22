@@ -39,7 +39,7 @@ final class events_test extends \advanced_testcase {
     /**
      * Test that the assessable_uploaded event is fired when a file submission has been made.
      */
-    public function test_assessable_uploaded(): void {
+    public function test_assessable_uploaded() {
         $this->resetAfterTest();
 
         $course = $this->getDataGenerator()->create_course();
@@ -96,13 +96,14 @@ final class events_test extends \advanced_testcase {
         $expected->file = $files;
         $expected->files = $files;
         $expected->pathnamehashes = array($fi->get_pathnamehash(), $fi2->get_pathnamehash());
+        $this->assertEventLegacyData($expected, $event);
         $this->assertEventContextNotUsed($event);
     }
 
     /**
      * Test that the submission_created event is fired when a file submission is saved.
      */
-    public function test_submission_created(): void {
+    public function test_submission_created() {
         $this->resetAfterTest();
 
         $course = $this->getDataGenerator()->create_course();
@@ -156,7 +157,7 @@ final class events_test extends \advanced_testcase {
     /**
      * Test that the submission_updated event is fired when a file submission is saved when an existing submission already exists.
      */
-    public function test_submission_updated(): void {
+    public function test_submission_updated() {
         $this->resetAfterTest();
 
         $course = $this->getDataGenerator()->create_course();

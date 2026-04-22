@@ -16,8 +16,6 @@
 
 namespace mod_quiz;
 
-// phpcs:disable moodle.PHPUnit.TestCaseNames.Missing
-
 /**
  * Quiz attempt walk through using data from csv file.
  *
@@ -27,7 +25,15 @@ namespace mod_quiz;
  * @author     Jamie Pratt <me@jamiep.org>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-final class attempt_walkthrough_from_csv_test extends \mod_quiz\tests\attempt_walkthrough_testcase {
+class attempt_walkthrough_from_csv_test extends \mod_quiz\tests\attempt_walkthrough_testcase {
+    #[\Override]
+    public static function setUpBeforeClass(): void {
+        global $CFG;
+
+        parent::setUpBeforeClass();
+        require_once($CFG->dirroot . '/mod/quiz/locallib.php');
+    }
+
     #[\Override]
     protected static function get_test_files(): array {
         return ['questions', 'steps', 'results'];

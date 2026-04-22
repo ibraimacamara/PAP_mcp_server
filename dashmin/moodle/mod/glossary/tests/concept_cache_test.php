@@ -28,7 +28,7 @@ final class concept_cache_test extends \advanced_testcase {
     /**
      * Test convect fetching.
      */
-    public function test_concept_fetching(): void {
+    public function test_concept_fetching() {
         global $CFG, $DB;
         $this->resetAfterTest(true);
         $this->setAdminUser();

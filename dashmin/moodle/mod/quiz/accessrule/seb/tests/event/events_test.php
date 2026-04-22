@@ -16,7 +16,7 @@
 
 namespace quizaccess_seb\event;
 
-use mod_quiz\quiz_settings;
+use quiz;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -48,12 +48,12 @@ final class events_test extends \advanced_testcase {
      *
      * @covers \quizaccess_seb\event\access_prevented
      */
-    public function test_event_access_prevented(): void {
+    public function test_event_access_prevented() {
         $this->resetAfterTest();
 
         $this->setAdminUser();
         $quiz = $this->create_test_quiz($this->course, \quizaccess_seb\settings_provider::USE_SEB_CONFIG_MANUALLY);
-        $accessmanager = new \quizaccess_seb\seb_access_manager(new quiz_settings($quiz,
+        $accessmanager = new \quizaccess_seb\access_manager(new quiz($quiz,
             get_coursemodule_from_id('quiz', $quiz->cmid), $this->course));
 
         // Set up event with data.
@@ -98,12 +98,12 @@ final class events_test extends \advanced_testcase {
      *
      * @covers \quizaccess_seb\event\access_prevented
      */
-    public function test_event_access_prevented_with_keys(): void {
+    public function test_event_access_prevented_with_keys() {
         $this->resetAfterTest();
 
         $this->setAdminUser();
         $quiz = $this->create_test_quiz($this->course, \quizaccess_seb\settings_provider::USE_SEB_CONFIG_MANUALLY);
-        $accessmanager = new \quizaccess_seb\seb_access_manager(new quiz_settings($quiz,
+        $accessmanager = new \quizaccess_seb\access_manager(new quiz($quiz,
             get_coursemodule_from_id('quiz', $quiz->cmid), $this->course));
 
         // Set up event with data.
@@ -146,7 +146,7 @@ final class events_test extends \advanced_testcase {
      *
      * @covers \quizaccess_seb\event\template_created
      */
-    public function test_event_create_template(): void {
+    public function test_event_create_template() {
         $this->resetAfterTest();
         // Set up event with data.
         $user = $this->getDataGenerator()->create_user();

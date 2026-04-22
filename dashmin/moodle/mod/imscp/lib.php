@@ -40,8 +40,7 @@ function imscp_supports($feature) {
         case FEATURE_GRADE_OUTCOMES:          return false;
         case FEATURE_BACKUP_MOODLE2:          return true;
         case FEATURE_SHOW_DESCRIPTION:        return true;
-        case FEATURE_MOD_PURPOSE:
-            return MOD_PURPOSE_INTERACTIVECONTENT;
+        case FEATURE_MOD_PURPOSE:             return MOD_PURPOSE_CONTENT;
 
         default: return null;
     }
@@ -249,7 +248,7 @@ function imscp_get_file_areas($course, $cm, $context) {
  *
  * @package  mod_imscp
  * @category files
- * @param file_browser $browser file browser
+ * @param stdClass $browser file browser
  * @param stdClass $areas file areas
  * @param stdClass $course course object
  * @param stdClass $cm course module object

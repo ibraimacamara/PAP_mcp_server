@@ -64,7 +64,6 @@ Feature: Access to preferences page
       | blockname | contextlevel | reference | pagetypepattern | defaultregion |
       | mentees   | System       | 1         | site-index      | side-pre      |
     When I log in as "admin"
-    And I am on site homepage
     And I am on the "student1" "user > profile" page
     And I click on "Preferences" "link" in the ".profile_tree" "css_element"
     And I follow "Assign roles relative to this user"
@@ -76,9 +75,3 @@ Feature: Access to preferences page
     And I am on site homepage
     When I follow "Student 1"
     Then I should see "Preferences" in the "region-main" "region"
-
-  @accessibility @javascript
-  Scenario: Check the user preferences page against accessibility standards
-    Given I log in as "admin"
-    When I follow "Preferences" in the user menu
-    Then the page should meet accessibility standards with "best-practice" extra tests

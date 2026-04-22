@@ -10,9 +10,6 @@
         var $temp_dir;
         var $error;
 
-        /** @var bool To store value of supported_platform. */
-        protected $supported_platform;
-
         /**
          * Constructor - create temporary directories and build paths to
          * external 'helper' binaries.
@@ -73,7 +70,7 @@
          * @param file $log valid open file handle - log info will be written to this file
          * @return return code from execution of command
          */
-        function execute($command, $log=null ) {
+        function execute( $command, $log=null ) {
             $output = array();
             exec( $command, $output, $return_code );
             if ($log) {
@@ -95,7 +92,7 @@
          * @param file $log valid open file handle for optional logging (debugging only)
          * @return bool true if successful
          */
-        function render($formula, $filename, $fontsize=12, $density=240, $background='', $log=null ) {
+        function render( $formula, $filename, $fontsize=12, $density=240, $background='', $log=null ) {
 
             global $CFG;
 
@@ -143,7 +140,7 @@
 
             // Run convert on document (.ps to .gif/.png) or run dvisvgm (.ps to .svg).
             if ($background) {
-                $bg_opt = '-transparent ' . escapeshellarg($background); // Makes transparent background
+                $bg_opt = "-transparent \"$background\""; // Makes transparent background
             } else {
                 $bg_opt = "";
             }

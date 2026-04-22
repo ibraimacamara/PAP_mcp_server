@@ -21,7 +21,7 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->dirroot . '/webservice/tests/helpers.php');
 
-use core_external\external_api;
+use external_api;
 use mod_data\manager;
 
 /**
@@ -141,7 +141,7 @@ final class get_mapping_information_test extends \advanced_testcase {
         string $pluginname,
         string $fieldstocreate,
         string $fieldstoremove
-    ): void {
+    ) {
         global $USER;
 
         $this->resetAfterTest();
@@ -191,7 +191,7 @@ final class get_mapping_information_test extends \advanced_testcase {
      * @covers ::execute
      *
      */
-    public function test_get_mapping_information_for_wrong_preset(): void {
+    public function test_get_mapping_information_for_wrong_preset() {
         global $USER;
 
         $this->resetAfterTest();

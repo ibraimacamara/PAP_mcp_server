@@ -49,7 +49,7 @@ final class lib_test extends \advanced_testcase {
     /**
      * Test that assign_print_recent_activity shows ungraded submitted assignments.
      */
-    public function test_print_recent_activity(): void {
+    public function test_print_recent_activity() {
         $this->resetAfterTest();
         $course = $this->getDataGenerator()->create_course();
         $teacher = $this->getDataGenerator()->create_and_enrol($course, 'teacher');
@@ -65,7 +65,7 @@ final class lib_test extends \advanced_testcase {
     /**
      * Test that assign_print_recent_activity does not display any warnings when a custom fullname has been configured.
      */
-    public function test_print_recent_activity_fullname(): void {
+    public function test_print_recent_activity_fullname() {
         $this->resetAfterTest();
         $course = $this->getDataGenerator()->create_course();
         $teacher = $this->getDataGenerator()->create_and_enrol($course, 'teacher');
@@ -82,7 +82,7 @@ final class lib_test extends \advanced_testcase {
     /**
      * Test that assign_print_recent_activity shows the blind marking ID.
      */
-    public function test_print_recent_activity_fullname_blind_marking(): void {
+    public function test_print_recent_activity_fullname_blind_marking() {
         $this->resetAfterTest();
         $course = $this->getDataGenerator()->create_course();
         $teacher = $this->getDataGenerator()->create_and_enrol($course, 'teacher');
@@ -104,7 +104,7 @@ final class lib_test extends \advanced_testcase {
     /**
      * Test that assign_get_recent_mod_activity fetches the assignment correctly.
      */
-    public function test_assign_get_recent_mod_activity(): void {
+    public function test_assign_get_recent_mod_activity() {
         $this->resetAfterTest();
         $course = $this->getDataGenerator()->create_course();
         $teacher = $this->getDataGenerator()->create_and_enrol($course, 'teacher');
@@ -132,7 +132,7 @@ final class lib_test extends \advanced_testcase {
     /**
      * Ensure that assign_user_complete displays information about drafts.
      */
-    public function test_assign_user_complete(): void {
+    public function test_assign_user_complete() {
         global $PAGE, $DB;
 
         $this->resetAfterTest();
@@ -155,7 +155,7 @@ final class lib_test extends \advanced_testcase {
     /**
      * Ensure that assign_user_outline fetches updated grades.
      */
-    public function test_assign_user_outline(): void {
+    public function test_assign_user_outline() {
         $this->resetAfterTest();
         $course = $this->getDataGenerator()->create_course();
         $teacher = $this->getDataGenerator()->create_and_enrol($course, 'teacher');
@@ -177,9 +177,41 @@ final class lib_test extends \advanced_testcase {
     }
 
     /**
+     * Ensure that assign_get_completion_state reflects the correct status at each point.
+     */
+    public function test_assign_get_completion_state() {
+        global $DB;
+
+        $this->resetAfterTest();
+        $course = $this->getDataGenerator()->create_course();
+        $teacher = $this->getDataGenerator()->create_and_enrol($course, 'teacher');
+        $student = $this->getDataGenerator()->create_and_enrol($course, 'student');
+        $assign = $this->create_instance($course, [
+                'submissiondrafts' => 0,
+                'completionsubmit' => 1
+            ]);
+
+        $this->setUser($student);
+        $result = assign_get_completion_state($course, $assign->get_course_module(), $student->id, false);
+        $this->assertFalse($result);
+
+        $this->add_submission($student, $assign);
+        $result = assign_get_completion_state($course, $assign->get_course_module(), $student->id, false);
+        $this->assertFalse($result);
+
+        $this->submit_for_grading($student, $assign);
+        $result = assign_get_completion_state($course, $assign->get_course_module(), $student->id, false);
+        $this->assertTrue($result);
+
+        $this->mark_submission($teacher, $assign, $student, 50.0);
+        $result = assign_get_completion_state($course, $assign->get_course_module(), $student->id, false);
+        $this->assertTrue($result);
+    }
+
+    /**
      * Tests for mod_assign_refresh_events.
      */
-    public function test_assign_refresh_events(): void {
+    public function test_assign_refresh_events() {
         global $DB;
 
         $this->resetAfterTest();
@@ -264,7 +296,7 @@ final class lib_test extends \advanced_testcase {
         $this->assertFalse(assign_refresh_events('aaa'));
     }
 
-    public function test_assign_core_calendar_is_event_visible_duedate_event_as_teacher(): void {
+    public function test_assign_core_calendar_is_event_visible_duedate_event_as_teacher() {
         $this->resetAfterTest();
         $course = $this->getDataGenerator()->create_course();
         $teacher = $this->getDataGenerator()->create_and_enrol($course, 'teacher');
@@ -280,7 +312,7 @@ final class lib_test extends \advanced_testcase {
         $this->assertTrue(mod_assign_core_calendar_is_event_visible($event));
     }
 
-    public function test_assign_core_calendar_is_event_visible_duedate_event_for_teacher(): void {
+    public function test_assign_core_calendar_is_event_visible_duedate_event_for_teacher() {
         $this->resetAfterTest();
         $course = $this->getDataGenerator()->create_course();
         $teacher = $this->getDataGenerator()->create_and_enrol($course, 'teacher');
@@ -298,7 +330,7 @@ final class lib_test extends \advanced_testcase {
         $this->assertTrue(mod_assign_core_calendar_is_event_visible($event, $teacher->id));
     }
 
-    public function test_assign_core_calendar_is_event_visible_duedate_event_as_student(): void {
+    public function test_assign_core_calendar_is_event_visible_duedate_event_as_student() {
         $this->resetAfterTest();
         $course = $this->getDataGenerator()->create_course();
         $teacher = $this->getDataGenerator()->create_and_enrol($course, 'teacher');
@@ -315,7 +347,7 @@ final class lib_test extends \advanced_testcase {
         $this->assertTrue(mod_assign_core_calendar_is_event_visible($event));
     }
 
-    public function test_assign_core_calendar_is_event_visible_duedate_event_for_student(): void {
+    public function test_assign_core_calendar_is_event_visible_duedate_event_for_student() {
         $this->resetAfterTest();
         $course = $this->getDataGenerator()->create_course();
         $teacher = $this->getDataGenerator()->create_and_enrol($course, 'teacher');
@@ -334,7 +366,7 @@ final class lib_test extends \advanced_testcase {
         $this->assertTrue(mod_assign_core_calendar_is_event_visible($event, $student->id));
     }
 
-    public function test_assign_core_calendar_is_event_visible_gradingduedate_event_as_teacher(): void {
+    public function test_assign_core_calendar_is_event_visible_gradingduedate_event_as_teacher() {
         $this->resetAfterTest();
         $course = $this->getDataGenerator()->create_course();
         $teacher = $this->getDataGenerator()->create_and_enrol($course, 'teacher');
@@ -350,7 +382,7 @@ final class lib_test extends \advanced_testcase {
     }
 
 
-    public function test_assign_core_calendar_is_event_visible_gradingduedate_event_for_teacher(): void {
+    public function test_assign_core_calendar_is_event_visible_gradingduedate_event_for_teacher() {
         $this->resetAfterTest();
         $course = $this->getDataGenerator()->create_course();
         $teacher = $this->getDataGenerator()->create_and_enrol($course, 'teacher');
@@ -367,7 +399,7 @@ final class lib_test extends \advanced_testcase {
         $this->assertTrue(mod_assign_core_calendar_is_event_visible($event, $teacher->id));
     }
 
-    public function test_assign_core_calendar_is_event_visible_gradingduedate_event_as_student(): void {
+    public function test_assign_core_calendar_is_event_visible_gradingduedate_event_as_student() {
         $this->resetAfterTest();
         $course = $this->getDataGenerator()->create_course();
         $student = $this->getDataGenerator()->create_and_enrol($course, 'student');
@@ -383,7 +415,7 @@ final class lib_test extends \advanced_testcase {
     }
 
 
-    public function test_assign_core_calendar_is_event_visible_gradingduedate_event_for_student(): void {
+    public function test_assign_core_calendar_is_event_visible_gradingduedate_event_for_student() {
         $this->resetAfterTest();
         $course = $this->getDataGenerator()->create_course();
         $student = $this->getDataGenerator()->create_and_enrol($course, 'student');
@@ -400,7 +432,7 @@ final class lib_test extends \advanced_testcase {
         $this->assertFalse(mod_assign_core_calendar_is_event_visible($event, $student->id));
     }
 
-    public function test_assign_core_calendar_provide_event_action_duedate_as_teacher(): void {
+    public function test_assign_core_calendar_provide_event_action_duedate_as_teacher() {
         $this->resetAfterTest();
         $course = $this->getDataGenerator()->create_course();
         $teacher = $this->getDataGenerator()->create_and_enrol($course, 'teacher');
@@ -419,7 +451,7 @@ final class lib_test extends \advanced_testcase {
         $this->assertNull($actionevent);
     }
 
-    public function test_assign_core_calendar_provide_event_action_duedate_for_teacher(): void {
+    public function test_assign_core_calendar_provide_event_action_duedate_for_teacher() {
         $this->resetAfterTest();
         $course = $this->getDataGenerator()->create_course();
         $teacher = $this->getDataGenerator()->create_and_enrol($course, 'teacher');
@@ -440,7 +472,7 @@ final class lib_test extends \advanced_testcase {
         $this->assertNull($actionevent);
     }
 
-    public function test_assign_core_calendar_provide_event_action_duedate_as_student(): void {
+    public function test_assign_core_calendar_provide_event_action_duedate_as_student() {
         $this->resetAfterTest();
         $course = $this->getDataGenerator()->create_course();
         $student = $this->getDataGenerator()->create_and_enrol($course, 'student');
@@ -463,7 +495,7 @@ final class lib_test extends \advanced_testcase {
         $this->assertTrue($actionevent->is_actionable());
     }
 
-    public function test_assign_core_calendar_provide_event_action_duedate_for_student(): void {
+    public function test_assign_core_calendar_provide_event_action_duedate_for_student() {
         $this->resetAfterTest();
         $course = $this->getDataGenerator()->create_course();
         $student = $this->getDataGenerator()->create_and_enrol($course, 'student');
@@ -551,7 +583,7 @@ final class lib_test extends \advanced_testcase {
         $this->assertNull($actionevent2);
     }
 
-    public function test_assign_core_calendar_provide_event_action_gradingduedate_as_teacher(): void {
+    public function test_assign_core_calendar_provide_event_action_gradingduedate_as_teacher() {
         $this->resetAfterTest();
         $course = $this->getDataGenerator()->create_course();
         $teacher = $this->getDataGenerator()->create_and_enrol($course, 'teacher');
@@ -573,7 +605,7 @@ final class lib_test extends \advanced_testcase {
         $this->assertTrue($actionevent->is_actionable());
     }
 
-    public function test_assign_core_calendar_provide_event_action_gradingduedate_for_teacher(): void {
+    public function test_assign_core_calendar_provide_event_action_gradingduedate_for_teacher() {
         $this->resetAfterTest();
         $course = $this->getDataGenerator()->create_course();
         $teacher = $this->getDataGenerator()->create_and_enrol($course, 'teacher');
@@ -598,7 +630,7 @@ final class lib_test extends \advanced_testcase {
         $this->assertTrue($actionevent->is_actionable());
     }
 
-    public function test_assign_core_calendar_provide_event_action_gradingduedate_as_student(): void {
+    public function test_assign_core_calendar_provide_event_action_gradingduedate_as_student() {
         $this->resetAfterTest();
         $course = $this->getDataGenerator()->create_course();
         $student = $this->getDataGenerator()->create_and_enrol($course, 'student');
@@ -620,7 +652,7 @@ final class lib_test extends \advanced_testcase {
         $this->assertFalse($actionevent->is_actionable());
     }
 
-    public function test_assign_core_calendar_provide_event_action_gradingduedate_for_student(): void {
+    public function test_assign_core_calendar_provide_event_action_gradingduedate_for_student() {
         $this->resetAfterTest();
         $course = $this->getDataGenerator()->create_course();
         $student = $this->getDataGenerator()->create_and_enrol($course, 'student');
@@ -645,7 +677,7 @@ final class lib_test extends \advanced_testcase {
         $this->assertFalse($actionevent->is_actionable());
     }
 
-    public function test_assign_core_calendar_provide_event_action_duedate_as_student_submitted(): void {
+    public function test_assign_core_calendar_provide_event_action_duedate_as_student_submitted() {
         $this->resetAfterTest();
         $course = $this->getDataGenerator()->create_course();
         $teacher = $this->getDataGenerator()->create_and_enrol($course, 'teacher');
@@ -670,7 +702,7 @@ final class lib_test extends \advanced_testcase {
         $this->assertNull($actionevent);
     }
 
-    public function test_assign_core_calendar_provide_event_action_duedate_for_student_submitted(): void {
+    public function test_assign_core_calendar_provide_event_action_duedate_for_student_submitted() {
         $this->resetAfterTest();
         $course = $this->getDataGenerator()->create_course();
         $teacher = $this->getDataGenerator()->create_and_enrol($course, 'teacher');
@@ -698,7 +730,7 @@ final class lib_test extends \advanced_testcase {
         $this->assertNull($actionevent);
     }
 
-    public function test_assign_core_calendar_provide_event_action_already_completed(): void {
+    public function test_assign_core_calendar_provide_event_action_already_completed() {
         $this->resetAfterTest();
         set_config('enablecompletion', 1);
         $this->setAdminUser();
@@ -729,7 +761,7 @@ final class lib_test extends \advanced_testcase {
         $this->assertNull($actionevent);
     }
 
-    public function test_assign_core_calendar_provide_event_action_already_completed_for_user(): void {
+    public function test_assign_core_calendar_provide_event_action_already_completed_for_user() {
         $this->resetAfterTest();
         set_config('enablecompletion', 1);
         $this->setAdminUser();
@@ -789,7 +821,7 @@ final class lib_test extends \advanced_testcase {
      * This function should work given either an instance of the module (cm_info), such as when checking the active rules,
      * or if passed a stdClass of similar structure, such as when checking the the default completion settings for a mod type.
      */
-    public function test_mod_assign_completion_get_active_rule_descriptions(): void {
+    public function test_mod_assign_completion_get_active_rule_descriptions() {
         $this->resetAfterTest();
         $course = $this->getDataGenerator()->create_course(['enablecompletion' => 1]);
 
@@ -821,7 +853,7 @@ final class lib_test extends \advanced_testcase {
     /**
      * Test that if some grades are not set, they are left alone and not rescaled
      */
-    public function test_assign_rescale_activity_grades_some_unset(): void {
+    public function test_assign_rescale_activity_grades_some_unset() {
         $this->resetAfterTest();
         $course = $this->getDataGenerator()->create_course();
         $teacher = $this->getDataGenerator()->create_and_enrol($course, 'teacher');
@@ -854,7 +886,7 @@ final class lib_test extends \advanced_testcase {
     /**
      * Return false when there are not overrides for this assign instance.
      */
-    public function test_assign_is_override_calendar_event_no_override(): void {
+    public function test_assign_is_override_calendar_event_no_override() {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/calendar/lib.php');
 
@@ -880,7 +912,7 @@ final class lib_test extends \advanced_testcase {
     /**
      * Return false if the given event isn't an assign module event.
      */
-    public function test_assign_is_override_calendar_event_no_nodule_event(): void {
+    public function test_assign_is_override_calendar_event_no_nodule_event() {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/calendar/lib.php');
 
@@ -906,7 +938,7 @@ final class lib_test extends \advanced_testcase {
      * Return false if there is overrides for this use but they belong to another assign
      * instance.
      */
-    public function test_assign_is_override_calendar_event_different_assign_instance(): void {
+    public function test_assign_is_override_calendar_event_different_assign_instance() {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/calendar/lib.php');
 
@@ -940,7 +972,7 @@ final class lib_test extends \advanced_testcase {
     /**
      * Return true if there is a user override for this event and assign instance.
      */
-    public function test_assign_is_override_calendar_event_user_override(): void {
+    public function test_assign_is_override_calendar_event_user_override() {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/calendar/lib.php');
 
@@ -972,7 +1004,7 @@ final class lib_test extends \advanced_testcase {
     /**
      * Return true if there is a group override for the event and assign instance.
      */
-    public function test_assign_is_override_calendar_event_group_override(): void {
+    public function test_assign_is_override_calendar_event_group_override() {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/calendar/lib.php');
 
@@ -1003,7 +1035,7 @@ final class lib_test extends \advanced_testcase {
     /**
      * Unknown event types should not have any limit restrictions returned.
      */
-    public function test_mod_assign_core_calendar_get_valid_event_timestart_range_unkown_event_type(): void {
+    public function test_mod_assign_core_calendar_get_valid_event_timestart_range_unkown_event_type() {
         global $CFG;
         require_once($CFG->dirroot . '/calendar/lib.php');
 
@@ -1031,7 +1063,7 @@ final class lib_test extends \advanced_testcase {
     /**
      * Override events should not have any limit restrictions returned.
      */
-    public function test_mod_assign_core_calendar_get_valid_event_timestart_range_override_event(): void {
+    public function test_mod_assign_core_calendar_get_valid_event_timestart_range_override_event() {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/calendar/lib.php');
 
@@ -1069,7 +1101,7 @@ final class lib_test extends \advanced_testcase {
      * Assignments configured without a submissions from and cutoff date should not have
      * any limits applied.
      */
-    public function test_mod_assign_core_calendar_get_valid_event_timestart_range_due_no_limit(): void {
+    public function test_mod_assign_core_calendar_get_valid_event_timestart_range_due_no_limit() {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/calendar/lib.php');
 
@@ -1102,7 +1134,7 @@ final class lib_test extends \advanced_testcase {
      * Assignments should be bottom and top bound by the submissions from date and cutoff date
      * respectively.
      */
-    public function test_mod_assign_core_calendar_get_valid_event_timestart_range_due_with_limits(): void {
+    public function test_mod_assign_core_calendar_get_valid_event_timestart_range_due_with_limits() {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/calendar/lib.php');
 
@@ -1138,7 +1170,7 @@ final class lib_test extends \advanced_testcase {
     /**
      * Assignment grading due date should not have any limits of no due date and cutoff date is set.
      */
-    public function test_mod_assign_core_calendar_get_valid_event_timestart_range_gradingdue_no_limit(): void {
+    public function test_mod_assign_core_calendar_get_valid_event_timestart_range_gradingdue_no_limit() {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/calendar/lib.php');
 
@@ -1169,7 +1201,7 @@ final class lib_test extends \advanced_testcase {
     /**
      * Assignment grading due event is minimum bound by the due date, if it is set.
      */
-    public function test_mod_assign_core_calendar_get_valid_event_timestart_range_gradingdue_with_due_date(): void {
+    public function test_mod_assign_core_calendar_get_valid_event_timestart_range_gradingdue_with_due_date() {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/calendar/lib.php');
 
@@ -1198,7 +1230,7 @@ final class lib_test extends \advanced_testcase {
     /**
      * Non due date events should not update the assignment due date.
      */
-    public function test_mod_assign_core_calendar_event_timestart_updated_non_due_event(): void {
+    public function test_mod_assign_core_calendar_event_timestart_updated_non_due_event() {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/calendar/lib.php');
 
@@ -1235,7 +1267,7 @@ final class lib_test extends \advanced_testcase {
     /**
      * Due date override events should not change the assignment due date.
      */
-    public function test_mod_assign_core_calendar_event_timestart_updated_due_event_override(): void {
+    public function test_mod_assign_core_calendar_event_timestart_updated_due_event_override() {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/calendar/lib.php');
 
@@ -1281,7 +1313,7 @@ final class lib_test extends \advanced_testcase {
     /**
      * Due date events should update the assignment due date.
      */
-    public function test_mod_assign_core_calendar_event_timestart_updated_due_event(): void {
+    public function test_mod_assign_core_calendar_event_timestart_updated_due_event() {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/calendar/lib.php');
 
@@ -1321,7 +1353,7 @@ final class lib_test extends \advanced_testcase {
      * then the callback should not be executed to update the assignment due
      * date as well otherwise that would be a security issue.
      */
-    public function test_student_role_cant_update_due_event(): void {
+    public function test_student_role_cant_update_due_event() {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/calendar/lib.php');
 
@@ -1377,7 +1409,7 @@ final class lib_test extends \advanced_testcase {
      * able to update the assignment due date by changing the due date calendar
      * event.
      */
-    public function test_teacher_role_can_update_due_event(): void {
+    public function test_teacher_role_can_update_due_event() {
         global $CFG, $DB;
         require_once($CFG->dirroot . '/calendar/lib.php');
 
@@ -1439,7 +1471,7 @@ final class lib_test extends \advanced_testcase {
     /**
      * A user who does not have capabilities to add events to the calendar should be able to create an assignment.
      */
-    public function test_creation_with_no_calendar_capabilities(): void {
+    public function test_creation_with_no_calendar_capabilities() {
         $this->resetAfterTest();
         $course = self::getDataGenerator()->create_course();
         $context = \context_course::instance($course->id);

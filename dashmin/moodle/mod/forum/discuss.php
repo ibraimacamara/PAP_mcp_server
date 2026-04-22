@@ -327,8 +327,7 @@ if (!$isnestedv2displaymode) {
     if (!$PAGE->has_secondary_navigation()) {
         echo $OUTPUT->heading(format_string($forum->get_name()), 2);
     }
-    $headinglevel = $PAGE->activityheader->get_heading_level();
-    echo $OUTPUT->heading(format_string($discussion->get_name()), $headinglevel, 'discussionname');
+    echo $OUTPUT->heading(format_string($discussion->get_name()), 3, 'discussionname');
 }
 
 $rendererfactory = mod_forum\local\container::get_renderer_factory();

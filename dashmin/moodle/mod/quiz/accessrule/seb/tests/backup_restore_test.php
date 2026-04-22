@@ -54,11 +54,11 @@ final class backup_restore_test extends \advanced_testcase {
     /**
      * A helper method to create a quiz with template usage of SEB.
      *
-     * @return seb_quiz_settings
+     * @return quiz_settings
      */
     protected function create_quiz_with_template() {
         $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
-        $quizsettings = seb_quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
         $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_TEMPLATE);
         $quizsettings->set('templateid', $this->template->get('id'));
         $quizsettings->save();
@@ -129,10 +129,10 @@ final class backup_restore_test extends \advanced_testcase {
      * @param cm_info $newcm Restored course_module object.
      */
     protected function validate_backup_restore(\cm_info $newcm) {
-        $this->assertEquals(2, seb_quiz_settings::count_records());
-        $actual = seb_quiz_settings::get_record(['quizid' => $newcm->instance]);
+        $this->assertEquals(2, quiz_settings::count_records());
+        $actual = quiz_settings::get_record(['quizid' => $newcm->instance]);
 
-        $expected = seb_quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $expected = quiz_settings::get_record(['quizid' => $this->quiz->id]);
         $this->assertEquals($expected->get('templateid'), $actual->get('templateid'));
         $this->assertEquals($expected->get('requiresafeexambrowser'), $actual->get('requiresafeexambrowser'));
         $this->assertEquals($expected->get('showsebdownloadlink'), $actual->get('showsebdownloadlink'));
@@ -150,26 +150,26 @@ final class backup_restore_test extends \advanced_testcase {
     /**
      * Test backup and restore when no seb.
      */
-    public function test_backup_restore_no_seb(): void {
+    public function test_backup_restore_no_seb() {
         $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_NO);
-        $this->assertEquals(0, seb_quiz_settings::count_records());
+        $this->assertEquals(0, quiz_settings::count_records());
 
         $this->backup_and_restore_quiz();
-        $this->assertEquals(0, seb_quiz_settings::count_records());
+        $this->assertEquals(0, quiz_settings::count_records());
     }
 
     /**
      * Test backup and restore when manually configured.
      */
-    public function test_backup_restore_manual_config(): void {
+    public function test_backup_restore_manual_config() {
         $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
 
-        $expected = seb_quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $expected = quiz_settings::get_record(['quizid' => $this->quiz->id]);
         $expected->set('showsebdownloadlink', 0);
         $expected->set('quitpassword', '123');
         $expected->save();
 
-        $this->assertEquals(1, seb_quiz_settings::count_records());
+        $this->assertEquals(1, quiz_settings::count_records());
 
         $newcm = $this->backup_and_restore_quiz();
         $this->validate_backup_restore($newcm);
@@ -178,76 +178,34 @@ final class backup_restore_test extends \advanced_testcase {
     /**
      * Test backup and restore when using template.
      */
-    public function test_backup_restore_template_config(): void {
+    public function test_backup_restore_template_config() {
         $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
 
-        $expected = seb_quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $expected = quiz_settings::get_record(['quizid' => $this->quiz->id]);
         $template = $this->create_template();
         $expected->set('requiresafeexambrowser', settings_provider::USE_SEB_TEMPLATE);
         $expected->set('templateid', $template->get('id'));
         $expected->save();
 
-        $this->assertEquals(1, seb_quiz_settings::count_records());
+        $this->assertEquals(1, quiz_settings::count_records());
 
         $newcm = $this->backup_and_restore_quiz();
         $this->validate_backup_restore($newcm);
     }
 
     /**
-     * Test backup and restore when using template when said template is disabled.
-     *
-     * @covers \quizaccess_seb\seb_quiz_settings::get_record
-     * @covers \restore_quizaccess_seb_subplugin::process_quizaccess_seb_quizsettings
-     */
-    public function test_backup_restore_disabled_template_config(): void {
-        $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
-
-        $expected = seb_quiz_settings::get_record(['quizid' => $this->quiz->id]);
-        $template = $this->create_template();
-        $expected->set('requiresafeexambrowser', settings_provider::USE_SEB_TEMPLATE);
-        $expected->set('templateid', $template->get('id'));
-        $expected->save();
-
-        // Disable template.
-        $template->set('enabled', 0);
-        $template->save();
-
-        $this->assertEquals(1, seb_quiz_settings::count_records());
-
-        $newcm = $this->backup_and_restore_quiz();
-
-        $this->assertEquals(2, seb_quiz_settings::count_records());
-        $actual = seb_quiz_settings::get_record(['quizid' => $newcm->instance]);
-
-        // Test that the restored quiz no longer uses SEB.
-        $expected = seb_quiz_settings::get_record(['quizid' => $this->quiz->id]);
-        $this->assertEquals(0, $actual->get('templateid'));
-        $this->assertEquals(settings_provider::USE_SEB_NO, $actual->get('requiresafeexambrowser'));
-        $this->assertEquals($expected->get('showsebdownloadlink'), $actual->get('showsebdownloadlink'));
-        $this->assertEquals($expected->get('allowuserquitseb'), $actual->get('allowuserquitseb'));
-        $this->assertEquals($expected->get('quitpassword'), $actual->get('quitpassword'));
-        $this->assertEquals($expected->get('allowedbrowserexamkeys'), $actual->get('allowedbrowserexamkeys'));
-
-        // Validate specific SEB config settings.
-        foreach (settings_provider::get_seb_config_elements() as $name => $notused) {
-            $name = preg_replace("/^seb_/", "", $name);
-            $this->assertEquals($expected->get($name), $actual->get($name));
-        }
-    }
-
-    /**
      * Test backup and restore when using uploaded file.
      */
-    public function test_backup_restore_uploaded_config(): void {
+    public function test_backup_restore_uploaded_config() {
         $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
 
-        $expected = seb_quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $expected = quiz_settings::get_record(['quizid' => $this->quiz->id]);
         $expected->set('requiresafeexambrowser', settings_provider::USE_SEB_UPLOAD_CONFIG);
-        $xml = file_get_contents(self::get_fixture_path(__NAMESPACE__, 'unencrypted.seb'));
+        $xml = file_get_contents(__DIR__ . '/fixtures/unencrypted.seb');
         $this->create_module_test_file($xml, $this->quiz->cmid);
         $expected->save();
 
-        $this->assertEquals(1, seb_quiz_settings::count_records());
+        $this->assertEquals(1, quiz_settings::count_records());
 
         $newcm = $this->backup_and_restore_quiz();
         $this->validate_backup_restore($newcm);
@@ -262,18 +220,18 @@ final class backup_restore_test extends \advanced_testcase {
      * No new template should be restored if restoring to a different site,
      * but the template with  the same name and content exists..
      */
-    public function test_restore_template_to_a_different_site_when_the_same_template_exists(): void {
+    public function test_restore_template_to_a_different_site_when_the_same_template_exists() {
         $this->create_quiz_with_template();
         $backupid = $this->backup_quiz();
 
-        $this->assertEquals(1, seb_quiz_settings::count_records());
+        $this->assertEquals(1, quiz_settings::count_records());
         $this->assertEquals(1, template::count_records());
 
         $this->change_site();
         $this->restore_quiz($backupid);
 
         // Should see additional setting record, but no new template record.
-        $this->assertEquals(2, seb_quiz_settings::count_records());
+        $this->assertEquals(2, quiz_settings::count_records());
         $this->assertEquals(1, template::count_records());
     }
 
@@ -281,11 +239,11 @@ final class backup_restore_test extends \advanced_testcase {
      * A new template should be restored if restoring to a different site, but existing template
      * has the same content, but different name.
      */
-    public function test_restore_template_to_a_different_site_when_the_same_content_but_different_name(): void {
+    public function test_restore_template_to_a_different_site_when_the_same_content_but_different_name() {
         $this->create_quiz_with_template();
         $backupid = $this->backup_quiz();
 
-        $this->assertEquals(1, seb_quiz_settings::count_records());
+        $this->assertEquals(1, quiz_settings::count_records());
         $this->assertEquals(1, template::count_records());
 
         $this->template->set('name', 'New name for template');
@@ -295,7 +253,7 @@ final class backup_restore_test extends \advanced_testcase {
         $this->restore_quiz($backupid);
 
         // Should see additional setting record, and new template record.
-        $this->assertEquals(2, seb_quiz_settings::count_records());
+        $this->assertEquals(2, quiz_settings::count_records());
         $this->assertEquals(2, template::count_records());
     }
 
@@ -303,13 +261,13 @@ final class backup_restore_test extends \advanced_testcase {
      * A new template should be restored if restoring to a different site, but existing template
      * has the same name, but different content.
      */
-    public function test_restore_template_to_a_different_site_when_the_same_name_but_different_content(): void {
+    public function test_restore_template_to_a_different_site_when_the_same_name_but_different_content() {
         global $CFG;
 
         $this->create_quiz_with_template();
         $backupid = $this->backup_quiz();
 
-        $this->assertEquals(1, seb_quiz_settings::count_records());
+        $this->assertEquals(1, quiz_settings::count_records());
         $this->assertEquals(1, template::count_records());
 
         $newxml = file_get_contents($CFG->dirroot . '/mod/quiz/accessrule/seb/tests/fixtures/simpleunencrypted.seb');
@@ -320,7 +278,7 @@ final class backup_restore_test extends \advanced_testcase {
         $this->restore_quiz($backupid);
 
         // Should see additional setting record, and new template record.
-        $this->assertEquals(2, seb_quiz_settings::count_records());
+        $this->assertEquals(2, quiz_settings::count_records());
         $this->assertEquals(2, template::count_records());
     }
 

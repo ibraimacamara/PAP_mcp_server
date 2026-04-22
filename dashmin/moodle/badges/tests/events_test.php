@@ -27,7 +27,7 @@ final class events_test extends badges_testcase {
     /**
      * Test badge awarded event.
      */
-    public function test_badge_awarded(): void {
+    public function test_badge_awarded() {
         $systemcontext = context_system::instance();
 
         $sink = $this->redirectEvents();
@@ -80,7 +80,7 @@ final class events_test extends badges_testcase {
      * Test the badge archived event.
      *
      */
-    public function test_badge_archived(): void {
+    public function test_badge_archived() {
         $badge = new badge($this->badgeid);
         $sink = $this->redirectEvents();
 
@@ -101,7 +101,7 @@ final class events_test extends badges_testcase {
      * Test the badge updated event.
      *
      */
-    public function test_badge_updated(): void {
+    public function test_badge_updated() {
         $badge = new badge($this->badgeid);
         $sink = $this->redirectEvents();
 
@@ -121,7 +121,7 @@ final class events_test extends badges_testcase {
     /**
      * Test the badge deleted event.
      */
-    public function test_badge_deleted(): void {
+    public function test_badge_deleted() {
         $badge = new badge($this->badgeid);
         $sink = $this->redirectEvents();
 
@@ -142,7 +142,7 @@ final class events_test extends badges_testcase {
      * Test the badge duplicated event.
      *
      */
-    public function test_badge_duplicated(): void {
+    public function test_badge_duplicated() {
         $badge = new badge($this->badgeid);
         $sink = $this->redirectEvents();
 
@@ -163,7 +163,7 @@ final class events_test extends badges_testcase {
      * Test the badge disabled event.
      *
      */
-    public function test_badge_disabled(): void {
+    public function test_badge_disabled() {
         $badge = new badge($this->badgeid);
         $sink = $this->redirectEvents();
 
@@ -185,7 +185,7 @@ final class events_test extends badges_testcase {
      * Test the badge enabled event.
      *
      */
-    public function test_badge_enabled(): void {
+    public function test_badge_enabled() {
         $badge = new badge($this->badgeid);
         $sink = $this->redirectEvents();
 

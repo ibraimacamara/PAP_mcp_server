@@ -30,7 +30,7 @@ final class entities_discussion_test extends \advanced_testcase {
     /**
      * Test the entity returns expected values.
      */
-    public function test_entity(): void {
+    public function test_entity() {
         $this->resetAfterTest();
 
         // In the past to ensure the time started is true.
@@ -124,7 +124,7 @@ final class entities_discussion_test extends \advanced_testcase {
      * @param bool $isvisible Expected result from the is_timed_discussion_visible function
      */
     public function test_display_period_settings($testdescription, $startoffset, $endoffset,
-                                                 $timestartresult, $timeendresult, $isvisible): void {
+                                                 $timestartresult, $timeendresult, $isvisible) {
         global $CFG;
         $this->resetAfterTest();
 

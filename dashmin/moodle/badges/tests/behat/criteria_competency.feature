@@ -47,6 +47,7 @@ Feature: Award badges based on competency completion
     And I am on "Course 1" course homepage
     And I change window size to "large"
     And I navigate to "Badges" in current page administration
+    And I press "Manage badges"
     And I follow "Course Badge"
     And I select "Criteria" from the "jump" singleselect
     # Set the competency as a criteria for the badge
@@ -58,7 +59,7 @@ Feature: Award badges based on competency completion
     And I wait until the page is ready
     # Enable the badge
     And I press "Enable access"
-    And I click on "Enable" "button" in the "Confirm" "dialogue"
+    And I press "Continue"
     # Rate the competency in the course
     And I am on "Course 1" course homepage
     And I navigate to "Competencies" in current page administration
@@ -93,7 +94,7 @@ Feature: Award badges based on competency completion
     And I click on "Add" "button" in the "Competency picker" "dialogue"
     # Add a badge to the site
     And I navigate to "Badges > Manage badges" in site administration
-    And I press "Edit" action in the "Site Badge" report row
+    And I click on "Edit" "link" in the "Site Badge" "table_row"
     And I select "Criteria" from the "jump" singleselect
     # Set the competency as a criteria for the badge
     And I set the field "type" to "Competencies"
@@ -111,7 +112,7 @@ Feature: Award badges based on competency completion
     # Enable the badge
     And I wait until the page is ready
     And I press "Enable access"
-    And I click on "Enable" "button" in the "Confirm" "dialogue"
+    And I press "Continue"
     # Rate the competency in the course
     And I am on "Course 1" course homepage
     And I navigate to "Competencies" in current page administration
@@ -146,7 +147,7 @@ Feature: Award badges based on competency completion
     And I click on "Add" "button" in the "Competency picker" "dialogue"
     # Add a badge to the site
     And I navigate to "Badges > Manage badges" in site administration
-    And I press "Edit" action in the "Site Badge" report row
+    And I click on "Edit" "link" in the "Site Badge" "table_row"
     And I select "Criteria" from the "jump" singleselect
     # Set the competency as a criteria for the badge
     And I set the field "type" to "Competencies"
@@ -166,7 +167,7 @@ Feature: Award badges based on competency completion
     # Enable the badge
     And I wait until the page is ready
     And I press "Enable access"
-    And I click on "Enable" "button" in the "Confirm" "dialogue"
+    And I press "Continue"
     # Rate the competency in the course
     And I am on "Course 1" course homepage
     And I navigate to "Competencies" in current page administration

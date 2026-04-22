@@ -68,4 +68,3 @@ defined('MOODLE_INTERNAL') || die;
         break;
     }
     echo html_writer::empty_tag('hr');
-    echo html_writer::end_div();

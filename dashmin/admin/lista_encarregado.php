@@ -42,7 +42,7 @@ include 'nav-menu.php';
                                     <td><?= htmlspecialchars($e['email']) ?></td>
                                     <td><?= htmlspecialchars($e['contato']) ?></td>
                                     <td><?= htmlspecialchars($e['morada']) ?></td>
-                                    <td>
+        
                                     <td>
                                         <a href="editar_encarregado.php?id=<?= htmlspecialchars($e['id']) ?>"
                                             class="btn btn-sm btn-primary mb-1">Editar</a>
@@ -53,7 +53,7 @@ include 'nav-menu.php';
                                             <button type="submit" class="btn btn-sm btn-danger mb-1">Remover</button>
                                         </form>
                                     </td>
-                                    </td>
+                                    
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>

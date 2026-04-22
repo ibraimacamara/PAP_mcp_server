@@ -44,7 +44,6 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
      * Basic setup for these tests.
      */
     public function setUp(): void {
-        parent::setUp();
         $this->resetAfterTest(true);
     }
 
@@ -52,7 +51,7 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
     /**
      * Ensure that export_user_preferences returns no data if the user has no data.
      */
-    public function test_export_user_preferences_not_defined(): void {
+    public function test_export_user_preferences_not_defined() {
         $user = \core_user::get_user_by_username('admin');
         provider::export_user_preferences($user->id);
 
@@ -64,11 +63,12 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
      * Ensure that export_user_preferences returns single preferences.
      * These preferences can be set on each course, but the value is shared in the whole site.
      */
-    public function test_export_user_preferences_single(): void {
+    public function test_export_user_preferences_single() {
         // Create test user, add some preferences.
         $user = $this->getDataGenerator()->create_user();
         $this->setUser($user);
 
+        set_user_preference('grade_report_showcalculations', 1, $user);
         set_user_preference('grade_report_meanselection', GRADE_REPORT_MEAN_GRADED, $user);
         set_user_preference('grade_report_studentsperpage', 50, $user);
 
@@ -78,11 +78,14 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
         // Validate exported data for our test user.
         provider::export_user_preferences($user->id);
         $context = \context_user::instance($user->id);
-        /** @var \core_privacy\tests\request\content_writer $writer */
         $writer = writer::with_context($context);
         $this->assertTrue($writer->has_any_data());
         $prefs = $writer->get_user_preferences('gradereport_grader');
-        $this->assertCount(2, (array) $prefs);
+        $this->assertCount(3, (array) $prefs);
+        $this->assertEquals(
+            get_string('privacy:metadata:preference:grade_report_showcalculations', 'gradereport_grader'),
+            $prefs->grade_report_showcalculations->description
+        );
         $this->assertEquals(get_string('meangraded', 'grades'), $prefs->grade_report_meanselection->value);
         $this->assertEquals(50, $prefs->grade_report_studentsperpage->value);
     }
@@ -90,47 +93,24 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
     /**
      * Ensure that export_user_preferences returns preferences.
      */
-    public function test_export_user_preferences_multiple(): void {
+    public function test_export_user_preferences_multiple() {
+        // Create a course and add a user preference.
         $user = $this->getDataGenerator()->create_user();
         $this->setUser($user);
-
-        // Set preference for an invalid course.
-        set_user_preference('grade_report_grader_collapsed_categories42', serialize(['gradesonly' => []]));
-
-        // Set preferences for a couple of valid courses.
-        $courseone = $this->getDataGenerator()->create_course();
-        $courseonepreferencename = "grade_report_grader_collapsed_categories{$courseone->id}";
-        $courseonepreferencevalue = serialize(['aggregatesonly' => [], 'gradesonly' => []]);
-        set_user_preference($courseonepreferencename, $courseonepreferencevalue);
-
-        $coursetwo = $this->getDataGenerator()->create_course();
-        $coursetwopreferencename = "grade_report_grader_collapsed_categories{$coursetwo->id}";
-        $coursetwopreferencevalue = serialize(['gradesonly' => [], 'aggregatesonly' => []]);
-        set_user_preference($coursetwopreferencename, $coursetwopreferencevalue);
+        $course = $this->getDataGenerator()->create_course();
+        $collapsed = serialize(['aggregatesonly' => array(), 'gradesonly' => array()]);
+        set_user_preference('grade_report_grader_collapsed_categories'.$course->id, $collapsed, $user);
 
         // Validate exported data.
         provider::export_user_preferences($user->id);
         $context = \context_user::instance($user->id);
-        /** @var \core_privacy\tests\request\content_writer $writer */
         $writer = writer::with_context($context);
         $this->assertTrue($writer->has_any_data());
         $prefs = $writer->get_user_preferences('gradereport_grader');
-        $this->assertCount(2, (array) $prefs);
-
-        $this->assertEquals($courseonepreferencevalue, $prefs->{$courseonepreferencename}->value);
+        $this->assertCount(1, (array) $prefs);
         $this->assertEquals(
-            get_string('privacy:request:preference:grade_report_grader_collapsed_categories', 'gradereport_grader', [
-                'name' => $courseone->fullname,
-            ]),
-            $prefs->{$courseonepreferencename}->description,
-        );
-
-        $this->assertEquals($coursetwopreferencevalue, $prefs->{$coursetwopreferencename}->value);
-        $this->assertEquals(
-            get_string('privacy:request:preference:grade_report_grader_collapsed_categories', 'gradereport_grader', [
-                'name' => $coursetwo->fullname,
-            ]),
-            $prefs->{$coursetwopreferencename}->description,
+            get_string('privacy:request:preference:grade_report_grader_collapsed_categories', 'gradereport_grader', ['name' => $course->fullname]),
+            $prefs->grade_report_grader_collapsed_categories->description
         );
     }
 }

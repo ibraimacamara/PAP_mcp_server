@@ -50,7 +50,7 @@ final class grading_manager_test extends \advanced_testcase {
     /**
      * Unit test to set and get grading areas
      */
-    public function test_set_and_get_grading_area(): void {
+    public function test_set_and_get_grading_area() {
         global $DB;
 
         $this->resetAfterTest(true);
@@ -92,7 +92,7 @@ final class grading_manager_test extends \advanced_testcase {
     /**
      * Unit test to check the tokenize method
      */
-    public function test_tokenize(): void {
+    public function test_tokenize() {
 
         $UTFfailuremessage = 'A test using UTF-8 characters has failed. Consider updating PHP and PHP\'s PCRE or INTL extensions (MDL-30494)';
 

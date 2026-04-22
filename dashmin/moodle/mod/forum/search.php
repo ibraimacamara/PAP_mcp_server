@@ -279,10 +279,8 @@ if (!$posts = forum_search_posts($searchterms, $course->id, $page*$perpage, $per
     if (!$PAGE->has_secondary_navigation()) {
         echo $OUTPUT->heading($strforums, 2);
     }
-    $PAGE->activityheader->set_title($strsearchresults);
-    $searchresultsheadinglevel = $PAGE->activityheader->get_heading_level();
-    echo $OUTPUT->heading($strsearchresults, $searchresultsheadinglevel);
-    echo $OUTPUT->heading(get_string("noposts", "forum"), $searchresultsheadinglevel + 1);
+    echo $OUTPUT->heading($strsearchresults, 3);
+    echo $OUTPUT->heading(get_string("noposts", "forum"), 4);
 
     if (!$individualparams) {
         $words = $search;

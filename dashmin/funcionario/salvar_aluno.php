@@ -103,6 +103,7 @@ if (!empty($_FILES['foto']['name'])) {
 
     $tiposPermitidos = [
         'image/jpeg' => 'jpg',
+        'image/jpg' => 'jpg',
         'image/png' => 'png',
         'image/gif' => 'gif'
     ];

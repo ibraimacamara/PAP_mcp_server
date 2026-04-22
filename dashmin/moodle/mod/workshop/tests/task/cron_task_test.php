@@ -37,7 +37,7 @@ final class cron_task_test extends \advanced_testcase {
     /**
      * Test that the phase is automatically switched after the submissions deadline.
      */
-    public function test_phase_switching(): void {
+    public function test_phase_switching() {
         global $DB;
 
         $this->resetAfterTest();
@@ -60,7 +60,7 @@ final class cron_task_test extends \advanced_testcase {
 
         // Execute the cron.
         ob_start();
-        \core\cron::setup_user();
+        cron_setup_user();
         $cron = new \mod_workshop\task\cron_task();
         $cron->execute();
         $output = ob_get_contents();
@@ -96,7 +96,7 @@ final class cron_task_test extends \advanced_testcase {
         // Execute the cron.
         $eventsink = $this->redirectEvents();
         ob_start();
-        \core\cron::setup_user();
+        cron_setup_user();
         $cron = new \mod_workshop\task\cron_task();
         $cron->execute();
         ob_end_clean();

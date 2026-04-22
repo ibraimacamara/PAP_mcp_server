@@ -39,7 +39,6 @@ final class events_test extends \advanced_testcase {
      * Setup testcase.
      */
     public function setUp(): void {
-        parent::setUp();
         $this->setAdminUser();
         $this->resetAfterTest();
     }
@@ -50,7 +49,7 @@ final class events_test extends \advanced_testcase {
      * It's not possible to use the moodle API to simulate the viewing of log report, so here we
      * simply create the event and trigger it.
      */
-    public function test_report_viewed(): void {
+    public function test_report_viewed() {
         $course = $this->getDataGenerator()->create_course();
         $context = \context_course::instance($course->id);
         // Trigger event for completion report viewed.
@@ -75,7 +74,7 @@ final class events_test extends \advanced_testcase {
      * It's not possible to use the moodle API to simulate the viewing of log report, so here we
      * simply create the event and trigger it.
      */
-    public function test_user_report_viewed(): void {
+    public function test_user_report_viewed() {
         $course = $this->getDataGenerator()->create_course();
         $context = \context_course::instance($course->id);
         // Trigger event for completion report viewed.
@@ -92,6 +91,9 @@ final class events_test extends \advanced_testcase {
         $this->assertEquals(3, $event->relateduserid);
         $this->assertEquals(new \moodle_url('/report/completion/user.php', array('id' => 3, 'course' => $course->id)),
                 $event->get_url());
+        $expected = array($course->id, 'course', 'report completion', "report/completion/user.php?id=3&course=$course->id",
+                $course->id);
+        $this->assertEventLegacyLogData($expected, $event);
         $this->assertEventContextNotUsed($event);
     }
 }

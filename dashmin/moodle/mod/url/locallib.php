@@ -75,7 +75,7 @@ function url_fix_submitted_url($url) {
  *
  * This function does not include any XSS protection.
  *
- * @param stdClass $url
+ * @param string $url
  * @param object $cm
  * @param object $course
  * @param object $config
@@ -114,12 +114,11 @@ function url_get_full_url($url, $cm, $course, $config=null) {
         $fullurl = str_replace('>', '%3E', $fullurl);
     }
 
-    if (!$config) {
-        $config = get_config('url');
-    }
-
     // add variable url parameters
-    if ($config->allowvariables && !empty($parameters)) {
+    if (!empty($parameters)) {
+        if (!$config) {
+            $config = get_config('url');
+        }
         $paramvalues = url_get_variable_values($url, $cm, $course, $config);
 
         foreach ($parameters as $parse=>$parameter) {
@@ -182,8 +181,8 @@ function url_print_header($url, $cm, $course) {
  */
 function url_get_intro(object $url, object $cm, bool $ignoresettings = false): string {
     $options = empty($url->displayoptions) ? [] : (array) unserialize_array($url->displayoptions);
-    if ($ignoresettings || !empty($options['printintro'])) {
-        if (!html_is_blank($url->intro)) {
+    if ($ignoresettings or !empty($options['printintro'])) {
+        if (trim(strip_tags($url->intro))) {
             return format_module_intro('url', $url, $cm->id);
         }
     }
@@ -255,7 +254,7 @@ EOF;
 function url_print_workaround($url, $cm, $course) {
     global $OUTPUT, $PAGE, $USER;
 
-    $PAGE->activityheader->set_description(url_get_intro($url, $cm));
+    $PAGE->activityheader->set_description(url_get_intro($url, $cm, true));
     url_print_header($url, $cm, $course);
 
     $fullurl = new moodle_url(url_get_full_url($url, $cm, $course));
@@ -528,16 +527,12 @@ function url_get_encrypted_parameter($url, $config) {
 /**
  * Optimised mimetype detection from general URL
  * @param $fullurl
- * @param null $unused This parameter has been deprecated since 4.3 and should not be used anymore.
+ * @param int $size of the icon.
  * @return string|null mimetype or null when the filetype is not relevant.
  */
-function url_guess_icon($fullurl, $unused = null) {
+function url_guess_icon($fullurl, $size = null) {
     global $CFG;
     require_once("$CFG->libdir/filelib.php");
-
-    if ($unused !== null) {
-        debugging('Deprecated argument passed to ' . __FUNCTION__, DEBUG_DEVELOPER);
-    }
 
     if (substr_count($fullurl, '/') < 3 or substr($fullurl, -1) === '/') {
         // Most probably default directory - index.php, index.html, etc. Return null because
@@ -555,10 +550,10 @@ function url_guess_icon($fullurl, $unused = null) {
         return null;
     }
 
-    $icon = file_extension_icon($fullurl);
-    $htmlicon = file_extension_icon('.htm');
-    $unknownicon = file_extension_icon('');
-    $phpicon = file_extension_icon('.php'); // Exception for php files.
+    $icon = file_extension_icon($fullurl, $size);
+    $htmlicon = file_extension_icon('.htm', $size);
+    $unknownicon = file_extension_icon('', $size);
+    $phpicon = file_extension_icon('.php', $size); // Exception for php files.
 
     // We do not want to return those icon types, the module icon is more appropriate.
     if ($icon === $unknownicon || $icon === $htmlicon || $icon === $phpicon) {

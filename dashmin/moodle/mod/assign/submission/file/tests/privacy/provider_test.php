@@ -62,7 +62,7 @@ final class provider_test extends \mod_assign\tests\provider_testcase {
     /**
      * Quick test to make sure that get_metadata returns something.
      */
-    public function test_get_metadata(): void {
+    public function test_get_metadata() {
         $collection = new \core_privacy\local\metadata\collection('assignsubmission_file');
         $collection = \assignsubmission_file\privacy\provider::get_metadata($collection);
         $this->assertNotEmpty($collection);
@@ -71,7 +71,7 @@ final class provider_test extends \mod_assign\tests\provider_testcase {
     /**
      * Test that submission files are exported for a user.
      */
-    public function test_export_submission_user_data(): void {
+    public function test_export_submission_user_data() {
         $this->resetAfterTest();
         // Create course, assignment, submission, and then a feedback comment.
         $course = $this->getDataGenerator()->create_course();
@@ -103,7 +103,7 @@ final class provider_test extends \mod_assign\tests\provider_testcase {
     /**
      * Test that all submission files are deleted for this context.
      */
-    public function test_delete_submission_for_context(): void {
+    public function test_delete_submission_for_context() {
         $this->resetAfterTest();
         // Create course, assignment, submission, and then a feedback comment.
         $course = $this->getDataGenerator()->create_course();
@@ -134,7 +134,7 @@ final class provider_test extends \mod_assign\tests\provider_testcase {
     /**
      * Test that the comments for a user are deleted.
      */
-    public function test_delete_submission_for_userid(): void {
+    public function test_delete_submission_for_userid() {
         $this->resetAfterTest();
         // Create course, assignment, submission, and then a feedback comment.
         $course = $this->getDataGenerator()->create_course();
@@ -166,7 +166,7 @@ final class provider_test extends \mod_assign\tests\provider_testcase {
     /**
      * Test deletion of bulk submissions for a context.
      */
-    public function test_delete_submissions(): void {
+    public function test_delete_submissions() {
         global $DB;
 
         $this->resetAfterTest();

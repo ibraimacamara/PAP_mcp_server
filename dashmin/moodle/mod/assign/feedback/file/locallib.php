@@ -25,8 +25,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-use mod_assign\output\assign_header;
-use core_external\external_value;
+use \mod_assign\output\assign_header;
 
 // File areas for file feedback assignment.
 define('ASSIGNFEEDBACK_FILE_FILEAREA', 'feedback_files');
@@ -433,18 +432,14 @@ class assign_feedback_file extends assign_feedback_plugin {
         return true;
     }
 
-    public function get_grading_batch_operation_details() {
-        global $OUTPUT;
-
-        return [
-            (object) [
-                'key' => 'uploadfiles',
-                'label' => get_string('batchoperationuploadfiles', 'assignfeedback_file'),
-                'icon' => $OUTPUT->pix_icon('i/upload', ''),
-                'confirmationtitle' => get_string('uploadfiles', 'assignfeedback_file'),
-                'confirmationquestion' => get_string('batchoperationconfirmuploadfiles', 'assignfeedback_file'),
-            ],
-        ];
+    /**
+     * Return a list of the batch grading operations performed by this plugin.
+     * This plugin supports batch upload files and upload zip.
+     *
+     * @return array The list of batch grading operations
+     */
+    public function get_grading_batch_operations() {
+        return array('uploadfiles'=>get_string('uploadfiles', 'assignfeedback_file'));
     }
 
     /**
@@ -698,7 +693,7 @@ class assign_feedback_file extends assign_feedback_plugin {
     /**
      * Return a description of external params suitable for uploading a feedback file from a webservice.
      *
-     * @return \core_external\external_description|null
+     * @return external_description|null
      */
     public function get_external_parameters() {
         return array(

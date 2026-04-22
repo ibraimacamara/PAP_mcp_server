@@ -23,6 +23,9 @@
  */
 
 namespace core_auth\output;
+defined('MOODLE_INTERNAL') || die();
+
+require_once($CFG->libdir . '/externallib.php');
 
 use context_system;
 use help_icon;
@@ -53,8 +56,6 @@ class login implements renderable, templatable {
     public $cookieshelpicon;
     /** @var string The error message, if any. */
     public $error;
-    /** @var string The info message, if any. */
-    public $info;
     /** @var moodle_url Forgot password URL. */
     public $forgotpasswordurl;
     /** @var array Additional identify providers, contains the keys 'url', 'name' and 'icon'. */
@@ -73,12 +74,6 @@ class login implements renderable, templatable {
     public $logintoken;
     /** @var string Maintenance message, if Maintenance is enabled. */
     public $maintenance;
-    /** @var string ReCaptcha element HTML. */
-    public $recaptcha;
-    /** @var bool Toggle the password visibility icon. */
-    public $togglepassword;
-    /** @var bool Toggle the password visibility icon for small screens only. */
-    public $smallscreensonly;
 
     /**
      * Constructor.
@@ -128,17 +123,6 @@ class login implements renderable, templatable {
         // Identity providers.
         $this->identityproviders = \auth_plugin_base::get_identity_providers($authsequence);
         $this->logintoken = \core\session\manager::get_login_token();
-
-        // ReCaptcha.
-        if (login_captcha_enabled()) {
-            require_once($CFG->libdir . '/recaptchalib_v2.php');
-            $this->recaptcha = recaptcha_get_challenge_html(RECAPTCHA_API_URL, $CFG->recaptchapublickey);
-        }
-
-        // Toggle password visibility icon.
-        $this->togglepassword = get_config('core', 'loginpasswordtoggle') == TOGGLE_SENSITIVE_ENABLED ||
-            get_config('core', 'loginpasswordtoggle') == TOGGLE_SENSITIVE_SMALL_SCREENS_ONLY;
-        $this->smallscreensonly = get_config('core', 'loginpasswordtoggle') == TOGGLE_SENSITIVE_SMALL_SCREENS_ONLY;
     }
 
     /**
@@ -148,15 +132,6 @@ class login implements renderable, templatable {
      */
     public function set_error($error) {
         $this->error = $error;
-    }
-
-    /**
-     * Set the info message.
-     *
-     * @param string $info The info message.
-     */
-    public function set_info(string $info): void {
-        $this->info = $info;
     }
 
     public function export_for_template(renderer_base $output) {
@@ -170,12 +145,11 @@ class login implements renderable, templatable {
         $data->cansignup = $this->cansignup;
         $data->cookieshelpicon = $this->cookieshelpicon->export_for_template($output);
         $data->error = $this->error;
-        $data->info = $this->info;
         $data->forgotpasswordurl = $this->forgotpasswordurl->out(false);
         $data->hasidentityproviders = !empty($this->identityproviders);
         $data->hasinstructions = !empty($this->instructions) || $this->cansignup;
         $data->identityproviders = $identityproviders;
-        list($data->instructions, $data->instructionsformat) = \core_external\util::format_text($this->instructions, FORMAT_MOODLE,
+        list($data->instructions, $data->instructionsformat) = external_format_text($this->instructions, FORMAT_MOODLE,
             context_system::instance()->id);
         $data->loginurl = $this->loginurl->out(false);
         $data->signupurl = $this->signupurl->out(false);
@@ -183,10 +157,6 @@ class login implements renderable, templatable {
         $data->logintoken = $this->logintoken;
         $data->maintenance = format_text($this->maintenance, FORMAT_MOODLE);
         $data->languagemenu = $this->languagemenu;
-        $data->recaptcha = $this->recaptcha;
-        $data->togglepassword = $this->togglepassword;
-        $data->smallscreensonly = $this->smallscreensonly;
-        $data->showloginform = get_config('core', 'showloginform') === false || get_config('core', 'showloginform');
 
         return $data;
     }

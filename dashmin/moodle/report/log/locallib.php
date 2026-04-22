@@ -41,10 +41,9 @@ require_once(__DIR__.'/lib.php');
  * @param  string $typeormode type of logs graph needed (usercourse.png/userday.png) or the mode (today, all).
  * @param  int $date timestamp in GMT (seconds since epoch)
  * @param  string $logreader Log reader.
- * @param  int $sitecoursefilter use a course filter in site context.
  * @return void
  */
-function report_log_print_graph($course, $user, $typeormode, $date=0, $logreader='', $sitecoursefilter = 0) {
+function report_log_print_graph($course, $user, $typeormode, $date=0, $logreader='') {
     global $CFG, $OUTPUT;
 
     if (!is_object($user)) {
@@ -60,7 +59,7 @@ function report_log_print_graph($course, $user, $typeormode, $date=0, $logreader
         $reader = $readers[$logreader];
     }
     // If reader is not a sql_internal_table_reader and not legacy store then don't show graph.
-    if (!($reader instanceof \core\log\sql_internal_table_reader)) {
+    if (!($reader instanceof \core\log\sql_internal_table_reader) && !($reader instanceof logstore_legacy\log\store)) {
         return array();
     }
     $coursecontext = context_course::instance($course->id);
@@ -70,10 +69,10 @@ function report_log_print_graph($course, $user, $typeormode, $date=0, $logreader
     $a->username = fullname($user, true);
 
     if ($typeormode == 'today' || $typeormode == 'userday.png') {
-        $logs = report_log_usertoday_data($course, $user, $date, $logreader, $sitecoursefilter);
+        $logs = report_log_usertoday_data($course, $user, $date, $logreader);
         $title = get_string("hitsoncoursetoday", "", $a);
     } else if ($typeormode == 'all' || $typeormode == 'usercourse.png') {
-        $logs = report_log_userall_data($course, $user, $logreader, $sitecoursefilter);
+        $logs = report_log_userall_data($course, $user, $logreader);
         $title = get_string("hitsoncourse", "", $a);
     }
 
@@ -115,15 +114,23 @@ function report_log_usercourse($userid, $courseid, $coursestart, $logreader = ''
     }
 
     // If reader is not a sql_internal_table_reader and not legacy store then return.
-    if (!($reader instanceof \core\log\sql_internal_table_reader)) {
+    if (!($reader instanceof \core\log\sql_internal_table_reader) && !($reader instanceof logstore_legacy\log\store)) {
         return array();
     }
 
     $coursestart = (int)$coursestart; // Note: unfortunately pg complains if you use name parameter or column alias in GROUP BY.
-    $logtable = $reader->get_internal_log_table_name();
-    $timefield = 'timecreated';
-    $coursefield = 'courseid';
-    $nonanonymous = 'AND anonymous = 0';
+    if ($reader instanceof logstore_legacy\log\store) {
+        $logtable = 'log';
+        $timefield = 'time';
+        $coursefield = 'course';
+        // Anonymous actions are never logged in legacy log.
+        $nonanonymous = '';
+    } else {
+        $logtable = $reader->get_internal_log_table_name();
+        $timefield = 'timecreated';
+        $coursefield = 'courseid';
+        $nonanonymous = 'AND anonymous = 0';
+    }
 
     $params = array();
     $courseselect = '';
@@ -159,16 +166,24 @@ function report_log_userday($userid, $courseid, $daystart, $logreader = '') {
     }
 
     // If reader is not a sql_internal_table_reader and not legacy store then return.
-    if (!($reader instanceof \core\log\sql_internal_table_reader)) {
+    if (!($reader instanceof \core\log\sql_internal_table_reader) && !($reader instanceof logstore_legacy\log\store)) {
         return array();
     }
 
     $daystart = (int)$daystart; // Note: unfortunately pg complains if you use name parameter or column alias in GROUP BY.
 
-    $logtable = $reader->get_internal_log_table_name();
-    $timefield = 'timecreated';
-    $coursefield = 'courseid';
-    $nonanonymous = 'AND anonymous = 0';
+    if ($reader instanceof logstore_legacy\log\store) {
+        $logtable = 'log';
+        $timefield = 'time';
+        $coursefield = 'course';
+        // Anonymous actions are never logged in legacy log.
+        $nonanonymous = '';
+    } else {
+        $logtable = $reader->get_internal_log_table_name();
+        $timefield = 'timecreated';
+        $coursefield = 'courseid';
+        $nonanonymous = 'AND anonymous = 0';
+    }
     $params = array('userid' => $userid);
 
     $courseselect = '';
@@ -528,16 +543,15 @@ function report_log_print_mnet_selector_form($hostid, $course, $selecteduser=0, 
  * @param stdClass $course the course object
  * @param stdClass $user user object
  * @param string $logreader the log reader where the logs are.
- * @param int $sitecoursefilter use a course filter in site context.
  * @return array structured array to be sent to chart API, split in two indexes (series and labels).
  */
-function report_log_userall_data($course, $user, $logreader, $sitecoursefilter = 0) {
+function report_log_userall_data($course, $user, $logreader) {
     global $CFG;
     $site = get_site();
     $timenow = time();
     $logs = [];
     if ($course->id == $site->id) {
-        $courseselect = $sitecoursefilter;
+        $courseselect = 0;
     } else {
         $courseselect = $course->id;
     }
@@ -584,15 +598,14 @@ function report_log_userall_data($course, $user, $logreader, $sitecoursefilter =
  * @param stdClass $user user object
  * @param int $date A time of a day (in GMT).
  * @param string $logreader the log reader where the logs are.
- * @param int $sitecoursefilter use a course filter in site context.
  * @return array $logs structured array to be sent to chart API, split in two indexes (series and labels).
  */
-function report_log_usertoday_data($course, $user, $date, $logreader, $sitecoursefilter = 0) {
+function report_log_usertoday_data($course, $user, $date, $logreader) {
     $site = get_site();
     $logs = [];
 
     if ($course->id == $site->id) {
-        $courseselect = $sitecoursefilter;
+        $courseselect = 0;
     } else {
         $courseselect = $course->id;
     }

@@ -36,7 +36,7 @@ Feature: Users can use the Image gallery preset
     And I should not see "first.png"
     And I should not see "Alice Student" in the "#imagegallery-list" "css_element"
     And "//a/child::img[contains(@src, 'first.png')]" "xpath_element" should exist
-    And "Actions" "button" should exist in the "#imagegallery-list" "css_element"
+    And "Actions" "icon" should exist in the "#imagegallery-list" "css_element"
     And I should see "Second image"
     And I should not see "And this is the description text for image 2"
     And I should not see "second.png"
@@ -48,7 +48,7 @@ Feature: Users can use the Image gallery preset
     And I should see "Alice Student" in the ".imagegallery-single" "css_element"
     And I should see "This is the description text for image 1"
     And "//a/child::img[contains(@src, 'first.png')]" "xpath_element" should exist
-    And "Actions" "button" should exist in the ".imagegallery-single" "css_element"
+    And "Actions" "icon" should exist in the ".imagegallery-single" "css_element"
     And I should not see "Second image"
     And I should not see "And this is the description text for image 2"
     And I should not see "Pau Teacher"
@@ -59,7 +59,7 @@ Feature: Users can use the Image gallery preset
     And I should see "And this is the description text for image 2"
     And "//a/child::img[contains(@src, 'second.png')]" "xpath_element" should exist
     # This student can't edit or delete this entry, so the Actions menu shouldn't be displayed.
-    And "Actions" "button" should not exist in the ".imagegallery-single" "css_element"
+    And "Actions" "icon" should not exist in the ".imagegallery-single" "css_element"
     And I should not see "First image"
     And I should not see "Alice Student" in the ".imagegallery-single" "css_element"
     And I should not see "This is the description text for image 1"
@@ -90,29 +90,3 @@ Feature: Users can use the Image gallery preset
     And I press "Save"
     Then I should see "New image"
     And I should see "This is the description for the new image."
-
-  @javascript
-  Scenario: Image gallery. Renaming a field should affect the template
-    Given I am on the "Mountain landscapes" "data activity" page logged in as teacher1
-    And I navigate to "Fields" in current page administration
-    And I open the action menu in "title" "table_row"
-    And I choose "Edit" in the open action menu
-    And I set the field "Field name" to "Edited field name"
-    And I press "Save"
-    And I should see "Field updated"
-    When I navigate to "Database" in current page administration
-    Then I click on "Advanced search" "checkbox"
-    And I should see "Edited field name"
-    And I click on "Add entry" "button"
-    And I should see "Edited field name"
-
-  @javascript
-  Scenario: Image gallery. Has otherfields tag
-    Given the following "mod_data > fields" exist:
-      | database | type | name        | description            |
-      | data1    | text | Extra field | Test field description |
-    And I am on the "Mountain landscapes" "data activity" page logged in as teacher1
-    When I select "Single view" from the "jump" singleselect
-    Then I should see "Extra field"
-    And I click on "Add entry" "button"
-    And I should see "Extra field"

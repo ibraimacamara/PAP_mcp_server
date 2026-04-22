@@ -86,7 +86,7 @@ class behat_report_competency extends behat_base {
      */
     public function set_competency_filter(
         string $fieldlocator,
-        string $value,
+        string $value
     ): void {
         $field = behat_field_manager::get_form_field_from_label($fieldlocator, $this)->get_node();
         $session = $this->getSession();

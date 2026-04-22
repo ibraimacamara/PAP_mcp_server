@@ -84,67 +84,67 @@ final class custom_completion_test extends advanced_testcase {
 
         return [
             'Undefined completion requirement' => [
-                'somenonexistentrule', COMPLETION_ENABLED, [$completionincomplete], 0, null, coding_exception::class,
+                'somenonexistentrule', COMPLETION_ENABLED, [$completionincomplete], 0, null, coding_exception::class
             ],
             'Completion status requirement not available' => [
-                'completionstatusrequired', COMPLETION_DISABLED, [$completionincomplete], 0, null, moodle_exception::class,
+                'completionstatusrequired', COMPLETION_DISABLED, [$completionincomplete], 0, null, moodle_exception::class
             ],
             'Completion status Passed required, user has no completion status recorded' => [
-                'completionstatusrequired', 2, [], 0, COMPLETION_INCOMPLETE, null,
+                'completionstatusrequired', 2, [], 0, COMPLETION_INCOMPLETE, null
             ],
             'Completion status Passed required, user has not passed, can make another attempt' => [
-                'completionstatusrequired', 2, [$completionincomplete], 0, COMPLETION_INCOMPLETE, null,
+                'completionstatusrequired', 2, [$completionincomplete], 0, COMPLETION_INCOMPLETE, null
             ],
             'Completion status Passed required, user has passed' => [
-                'completionstatusrequired', 2, [$completionpassed], 0, COMPLETION_COMPLETE, null,
+                'completionstatusrequired', 2, [$completionpassed], 0, COMPLETION_COMPLETE, null
             ],
             'Completion status Completed required, user has not completed, can make another attempt' => [
-                'completionstatusrequired', 4, [$completionincomplete], 2, COMPLETION_INCOMPLETE, null,
+                'completionstatusrequired', 4, [$completionincomplete], 2, COMPLETION_INCOMPLETE, null
             ],
             'Completion status Completed required, user has completed' => [
-                'completionstatusrequired', 4, [$completioncompleted], 1, COMPLETION_COMPLETE, null,
+                'completionstatusrequired', 4, [$completioncompleted], 1, COMPLETION_COMPLETE, null
             ],
             'Completion status Passed or Completed required, user has only completed, can make another attempt' => [
-                'completionstatusrequired', 6, [$completioncompleted], 0, COMPLETION_COMPLETE, null,
+                'completionstatusrequired', 6, [$completioncompleted], 0, COMPLETION_COMPLETE, null
             ],
             'Completion status Passed or Completed required, user has completed and passed' => [
-                'completionstatusrequired', 6, [$completionpassed, $completioncompleted], 0, COMPLETION_COMPLETE, null,
+                'completionstatusrequired', 6, [$completionpassed, $completioncompleted], 0, COMPLETION_COMPLETE, null
             ],
             'Completion status Passed or Completed required, user has not passed or completed, but has another attempt' => [
-                'completionstatusrequired', 6, [$completionincomplete], 2, COMPLETION_INCOMPLETE, null,
+                'completionstatusrequired', 6, [$completionincomplete], 2, COMPLETION_INCOMPLETE, null
             ],
             'Completion status Passed or Completed required, user has used all attempts, but not passed or completed' => [
-                'completionstatusrequired', 6, [$completionincomplete], 1, COMPLETION_INCOMPLETE, null,
+                'completionstatusrequired', 6, [$completionincomplete], 1, COMPLETION_COMPLETE_FAIL, null
             ],
             'Completion status Passed required, user has used all attempts and completed, but not passed' => [
-                'completionstatusrequired', 2, [$completioncompleted], 1, COMPLETION_INCOMPLETE, null,
+                'completionstatusrequired', 2, [$completioncompleted], 1, COMPLETION_COMPLETE_FAIL, null
             ],
             'Completion status Completed required, user has used all attempts, but not completed' => [
-                'completionstatusrequired', 4, [$completionincomplete], 1, COMPLETION_INCOMPLETE, null,
+                'completionstatusrequired', 4, [$completionincomplete], 1, COMPLETION_COMPLETE_FAIL, null
             ],
             'Completion status Passed or Completed required, user has used all attempts, but not passed' => [
-                'completionstatusrequired', 6, [$completionincomplete, $completioncompleted], 2, COMPLETION_COMPLETE, null,
+                'completionstatusrequired', 6, [$completionincomplete, $completioncompleted], 2, COMPLETION_COMPLETE, null
             ],
             'Completion score required, user has no score' => [
-                'completionscorerequired', 80, [], 0, COMPLETION_INCOMPLETE, null,
+                'completionscorerequired', 80, [], 0, COMPLETION_INCOMPLETE, null
             ],
             'Completion score required, user score does not meet requirement, can make another attempt' => [
-                'completionscorerequired', 80, [$completionscorefail], 0, COMPLETION_INCOMPLETE, null,
+                'completionscorerequired', 80, [$completionscorefail], 0, COMPLETION_INCOMPLETE, null
             ],
             'Completion score required, user has used all attempts, but not reached the score' => [
-                'completionscorerequired', 80, [$completionscorefail], 1, COMPLETION_INCOMPLETE, null,
+                'completionscorerequired', 80, [$completionscorefail], 1, COMPLETION_COMPLETE_FAIL, null
             ],
             'Completion score required, user score meets requirement' => [
-                'completionscorerequired', 80, [$completionscorepass], 0, COMPLETION_COMPLETE, null,
+                'completionscorerequired', 80, [$completionscorepass], 0, COMPLETION_COMPLETE, null
             ],
             'Completion of all scos required, user has not completed, can make another attempt' => [
-                'completionstatusallscos', 1, [$completionincomplete, $completioncompleted], 3, COMPLETION_INCOMPLETE, null,
+                'completionstatusallscos', 1, [$completionincomplete, $completioncompleted], 3, COMPLETION_INCOMPLETE, null
             ],
             'Completion of all scos required, user has completed' => [
-                'completionstatusallscos', 1, [$completionpassed, $completioncompleted], 2, COMPLETION_COMPLETE, null,
+                'completionstatusallscos', 1, [$completionpassed, $completioncompleted], 2, COMPLETION_COMPLETE, null
             ],
             'Completion of all scos required, user has used all attempts, but not completed all scos' => [
-                'completionstatusallscos', 1, [$completionincomplete, $completioncompleted], 2, COMPLETION_INCOMPLETE, null,
+                'completionstatusallscos', 1, [$completionincomplete, $completioncompleted], 2, COMPLETION_COMPLETE_FAIL, null
             ],
         ];
     }
@@ -161,7 +161,7 @@ final class custom_completion_test extends advanced_testcase {
      * @param string|null $exception Expected exception.
      */
     public function test_get_state(string $rule, int $rulevalue, array $uservalue, int $maxattempts, ?int $status,
-            ?string $exception): void {
+            ?string $exception) {
         global $DB;
 
         if (!is_null($exception)) {
@@ -235,7 +235,7 @@ final class custom_completion_test extends advanced_testcase {
     /**
      * Test for get_defined_custom_rules().
      */
-    public function test_get_defined_custom_rules(): void {
+    public function test_get_defined_custom_rules() {
         $expectedrules = [
             'completionstatusrequired',
             'completionscorerequired',
@@ -253,7 +253,7 @@ final class custom_completion_test extends advanced_testcase {
     /**
      * Test for get_defined_custom_rule_descriptions().
      */
-    public function test_get_custom_rule_descriptions(): void {
+    public function test_get_custom_rule_descriptions() {
         // Get defined custom rules.
         $rules = custom_completion::get_defined_custom_rules();
 
@@ -279,7 +279,7 @@ final class custom_completion_test extends advanced_testcase {
     /**
      * Test for is_defined().
      */
-    public function test_is_defined(): void {
+    public function test_is_defined() {
         // Build a mock cm_info instance.
         $mockcminfo = $this->getMockBuilder(cm_info::class)
             ->disableOriginalConstructor()
@@ -353,7 +353,7 @@ final class custom_completion_test extends advanced_testcase {
      * @param array $completionrulesvalues
      * @param array $expected
      */
-    public function test_get_available_custom_rules(array $completionrulesvalues, array $expected): void {
+    public function test_get_available_custom_rules(array $completionrulesvalues, array $expected) {
         $customcompletionrules = [
             'customcompletionrules' => $completionrulesvalues,
         ];

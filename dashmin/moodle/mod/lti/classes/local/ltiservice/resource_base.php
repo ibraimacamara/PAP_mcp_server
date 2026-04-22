@@ -135,7 +135,7 @@ abstract class resource_base {
     /**
      * Get the resource's service.
      *
-     * @return service_base
+     * @return mixed
      */
     public function get_service() {
 
@@ -207,7 +207,7 @@ abstract class resource_base {
      *
      * @param response $response  Response object for this request.
      */
-    abstract public function execute($response);
+    public abstract function execute($response);
 
     /**
      * Check to make sure the request is valid.

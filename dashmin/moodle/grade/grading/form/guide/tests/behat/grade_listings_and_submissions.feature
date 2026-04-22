@@ -35,10 +35,10 @@ Feature: Verify listings and grading submissions
   @javascript
   Scenario: Mark and view all grades in submissions table
     Given I am on the "Assign1" "assign activity" page
-    And I navigate to "Submissions" in current page administration
-    And I click on "Grade" "link" in the ".tertiary-navigation" "css_element"
+    And I click on "View all submission" "link"
+    And I click on "Grade" "link" in the "Student One" "table_row"
     And I grade by filling the marking guide with:
       | Criteria 1 | 50 | Excellent work! |
     And I press "Save changes"
     When I follow "View all submissions"
-    Then "Student One" row "Grade" column of "submissions" table should contain "50.00"
+    Then "Student One" row "Grade" column of "generaltable" table should contain "50"

@@ -80,7 +80,7 @@ Feature: Edit quiz page - pagination
     # Add a question.
     And I open the "last" add to quiz menu
     And I choose "from question bank" in the open action menu
-    And I apply question bank filter "Category" with value "Quiz questions"
+    And I set the field "Select a category" to "Quiz questions"
     When I click on "Add to quiz" "link" in the "Question10 text" "table_row"
     # Confirm that all questions are on quiz page 1.
     Then I should see "Question1 text" on quiz page "1"

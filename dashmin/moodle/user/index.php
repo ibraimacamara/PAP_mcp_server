@@ -116,6 +116,8 @@ echo $OUTPUT->render_participants_tertiary_nav($course, html_writer::div($enrolb
     'data-table-uniqueid' => $participanttable->uniqueid,
 ]));
 
+echo $OUTPUT->heading(get_string('enrolledusers', 'enrol'));
+
 $filterset = new \core_user\table\participants_filterset();
 $filterset->add_filter(new integer_filter('courseid', filter::JOINTYPE_DEFAULT, [(int)$course->id]));
 
@@ -205,7 +207,7 @@ $bulkoptions = (object) [
     'uniqueid' => $participanttable->uniqueid,
 ];
 
-echo '<br /><div class="buttons"><div class="d-flex flex-wrap align-items-center">';
+echo '<br /><div class="buttons"><div class="form-inline">';
 
 echo html_writer::start_tag('div', array('class' => 'btn-group'));
 
@@ -271,7 +273,7 @@ if ($context->id != $frontpagectx->id) {
 
 $selectactionparams = array(
     'id' => 'formactionid',
-    'class' => 'ms-2',
+    'class' => 'ml-2',
     'data-action' => 'toggle',
     'data-togglegroup' => 'participants-table',
     'data-toggle' => 'action',

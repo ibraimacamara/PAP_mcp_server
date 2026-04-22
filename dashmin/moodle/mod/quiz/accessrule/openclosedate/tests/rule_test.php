@@ -16,7 +16,7 @@
 
 namespace quizaccess_openclosedate;
 
-use mod_quiz\quiz_settings;
+use quiz;
 use quizaccess_openclosedate;
 
 defined('MOODLE_INTERNAL') || die();
@@ -41,7 +41,7 @@ final class rule_test extends \basic_testcase {
         $quiz->overduehandling = 'autosubmit';
         $cm = new \stdClass();
         $cm->id = 0;
-        $quizobj = new quiz_settings($quiz, $cm, null);
+        $quizobj = new quiz($quiz, $cm, null);
         $attempt = new \stdClass();
         $attempt->preview = 0;
 
@@ -61,14 +61,14 @@ final class rule_test extends \basic_testcase {
         $this->assertFalse($rule->time_left_display($attempt, 0));
     }
 
-    public function test_start_date(): void {
+    public function test_start_date() {
         $quiz = new \stdClass();
         $quiz->timeopen = 10000;
         $quiz->timeclose = 0;
         $quiz->overduehandling = 'autosubmit';
         $cm = new \stdClass();
         $cm->id = 0;
-        $quizobj = new quiz_settings($quiz, $cm, null);
+        $quizobj = new quiz($quiz, $cm, null);
         $attempt = new \stdClass();
         $attempt->preview = 0;
 
@@ -88,14 +88,14 @@ final class rule_test extends \basic_testcase {
         $this->assertFalse($rule->time_left_display($attempt, 0));
     }
 
-    public function test_close_date(): void {
+    public function test_close_date() {
         $quiz = new \stdClass();
         $quiz->timeopen = 0;
         $quiz->timeclose = 20000;
         $quiz->overduehandling = 'autosubmit';
         $cm = new \stdClass();
         $cm->id = 0;
-        $quizobj = new quiz_settings($quiz, $cm, null);
+        $quizobj = new quiz($quiz, $cm, null);
         $attempt = new \stdClass();
         $attempt->preview = 0;
 
@@ -122,14 +122,14 @@ final class rule_test extends \basic_testcase {
         $this->assertEquals($rule->time_left_display($attempt, 20100), -100);
     }
 
-    public function test_both_dates(): void {
+    public function test_both_dates() {
         $quiz = new \stdClass();
         $quiz->timeopen = 10000;
         $quiz->timeclose = 20000;
         $quiz->overduehandling = 'autosubmit';
         $cm = new \stdClass();
         $cm->id = 0;
-        $quizobj = new quiz_settings($quiz, $cm, null);
+        $quizobj = new quiz($quiz, $cm, null);
         $attempt = new \stdClass();
         $attempt->preview = 0;
 
@@ -162,7 +162,7 @@ final class rule_test extends \basic_testcase {
         $this->assertEquals($rule->time_left_display($attempt, 20100), -100);
     }
 
-    public function test_close_date_with_overdue(): void {
+    public function test_close_date_with_overdue() {
         $quiz = new \stdClass();
         $quiz->timeopen = 0;
         $quiz->timeclose = 20000;
@@ -170,7 +170,7 @@ final class rule_test extends \basic_testcase {
         $quiz->graceperiod = 1000;
         $cm = new \stdClass();
         $cm->id = 0;
-        $quizobj = new quiz_settings($quiz, $cm, null);
+        $quizobj = new quiz($quiz, $cm, null);
         $attempt = new \stdClass();
         $attempt->preview = 0;
 

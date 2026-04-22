@@ -57,7 +57,7 @@ final class formatduration_test extends \basic_testcase {
         }
     }
 
-    public function test_scorm12_format(): void {
+    public function test_scorm12_format() {
         $stryears = get_string('years');
         $strmonths = trim(get_string('nummonths'));
         $strdays = get_string('days');
@@ -83,6 +83,6 @@ final class formatduration_test extends \basic_testcase {
         }
     }
 
-    public function test_non_datetime(): void {
+    public function test_non_datetime() {
     }
 }

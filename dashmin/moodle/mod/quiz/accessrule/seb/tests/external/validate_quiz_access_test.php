@@ -16,11 +16,13 @@
 
 namespace quizaccess_seb\external;
 
-use quizaccess_seb\seb_quiz_settings;
-
 defined('MOODLE_INTERNAL') || die();
 
-require_once(__DIR__ . '/../test_helper_trait.php');
+global $CFG;
+
+use quizaccess_seb\quiz_settings;
+
+require_once($CFG->libdir . '/externallib.php');
 
 /**
  * PHPUnit tests for external function.
@@ -99,7 +101,7 @@ final class validate_quiz_access_test extends \advanced_testcase {
      *
      * @dataProvider bad_parameters_provider
      */
-    public function test_invalid_parameters($cmid, $url, $configkey, $messageregex): void {
+    public function test_invalid_parameters($cmid, $url, $configkey, $messageregex) {
         $params = [];
         if (!empty($cmid)) {
             $params['cmid'] = $cmid;
@@ -113,13 +115,13 @@ final class validate_quiz_access_test extends \advanced_testcase {
 
         $this->expectException(\invalid_parameter_exception::class);
         $this->expectExceptionMessageMatches($messageregex);
-        \core_external\external_api::validate_parameters(validate_quiz_keys::execute_parameters(), $params);
+        \external_api::validate_parameters(validate_quiz_keys::execute_parameters(), $params);
     }
 
     /**
      * Test that the user has permissions to access context.
      */
-    public function test_context_is_not_valid_for_user(): void {
+    public function test_context_is_not_valid_for_user() {
         // Set user as user not enrolled in course and quiz.
         $this->user = $this->getDataGenerator()->create_user();
         $this->setUser($this->user);
@@ -132,7 +134,7 @@ final class validate_quiz_access_test extends \advanced_testcase {
     /**
      * Test exception thrown when no key provided.
      */
-    public function test_no_keys_provided(): void {
+    public function test_no_keys_provided() {
         $this->expectException(\invalid_parameter_exception::class);
         $this->expectExceptionMessage('At least one Safe Exam Browser key must be provided.');
         validate_quiz_keys::execute($this->quiz->cmid, 'https://www.example.com/moodle');
@@ -141,7 +143,7 @@ final class validate_quiz_access_test extends \advanced_testcase {
     /**
      * Test exception thrown if cmid doesn't match a quiz.
      */
-    public function test_quiz_does_not_exist(): void {
+    public function test_quiz_does_not_exist() {
         $this->setAdminUser();
         $forum = $this->getDataGenerator()->create_module('forum', ['course' => $this->course->id]);
         $this->expectException(\invalid_parameter_exception::class);
@@ -152,7 +154,7 @@ final class validate_quiz_access_test extends \advanced_testcase {
     /**
      * Test config key is valid.
      */
-    public function test_config_key_valid(): void {
+    public function test_config_key_valid() {
         $sink = $this->redirectEvents();
         // Test settings to populate the quiz.
         $settings = $this->get_test_settings([
@@ -162,7 +164,7 @@ final class validate_quiz_access_test extends \advanced_testcase {
         $url = 'https://www.example.com/moodle';
 
         // Create the quiz settings.
-        $quizsettings = new seb_quiz_settings(0, $settings);
+        $quizsettings = new quiz_settings(0, $settings);
         $quizsettings->save();
 
         $fullconfigkey = hash('sha256', $url . $quizsettings->get_config_key());
@@ -177,7 +179,7 @@ final class validate_quiz_access_test extends \advanced_testcase {
     /**
      * Test config key is not valid.
      */
-    public function test_config_key_not_valid(): void {
+    public function test_config_key_not_valid() {
         $sink = $this->redirectEvents();
         // Test settings to populate the quiz.
         $settings = $this->get_test_settings([
@@ -186,7 +188,7 @@ final class validate_quiz_access_test extends \advanced_testcase {
         ]);
 
         // Create the quiz settings.
-        $quizsettings = new seb_quiz_settings(0, $settings);
+        $quizsettings = new quiz_settings(0, $settings);
         $quizsettings->save();
 
         $result = validate_quiz_keys::execute($this->quiz->cmid, 'https://www.example.com/moodle', 'badconfigkey');
@@ -202,7 +204,7 @@ final class validate_quiz_access_test extends \advanced_testcase {
     /**
      * Test browser exam key is valid.
      */
-    public function test_browser_exam_key_valid(): void {
+    public function test_browser_exam_key_valid() {
         $sink = $this->redirectEvents();
         // Test settings to populate the quiz.
         $url = 'https://www.example.com/moodle';
@@ -215,7 +217,7 @@ final class validate_quiz_access_test extends \advanced_testcase {
         ]);
 
         // Create the quiz settings.
-        $quizsettings = new seb_quiz_settings(0, $settings);
+        $quizsettings = new quiz_settings(0, $settings);
         $quizsettings->save();
 
         $fullbrowserexamkey = hash('sha256', $url . $validbrowserexamkey);
@@ -229,7 +231,7 @@ final class validate_quiz_access_test extends \advanced_testcase {
     /**
      * Test browser exam key is not valid.
      */
-    public function test_browser_exam_key_not_valid(): void {
+    public function test_browser_exam_key_not_valid() {
         $sink = $this->redirectEvents();
         // Test settings to populate the quiz.
         $validbrowserexamkey = hash('sha256', 'validbrowserexamkey');
@@ -241,7 +243,7 @@ final class validate_quiz_access_test extends \advanced_testcase {
         ]);
 
         // Create the quiz settings.
-        $quizsettings = new seb_quiz_settings(0, $settings);
+        $quizsettings = new quiz_settings(0, $settings);
         $quizsettings->save();
 
         $result = validate_quiz_keys::execute($this->quiz->cmid, 'https://www.example.com/moodle', null,

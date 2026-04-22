@@ -60,12 +60,7 @@ $feedback_url = new moodle_url('/mod/feedback/index.php', array('id'=>$course->i
 $PAGE->navbar->add($strfeedbacks, $feedback_url);
 $PAGE->navbar->add(format_string($feedback->name));
 
-$renderer = $PAGE->get_renderer('mod_feedback');
-$renderer->set_title(
-        [format_string($feedback->name), format_string($course->fullname)],
-        get_string('previewquestions', 'feedback')
-);
-
+$PAGE->set_title($feedback->name);
 $PAGE->set_heading($course->fullname);
 $PAGE->activityheader->set_title(format_string($feedback->name));
 echo $OUTPUT->header();

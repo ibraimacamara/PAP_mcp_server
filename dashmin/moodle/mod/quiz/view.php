@@ -23,12 +23,6 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use mod_quiz\access_manager;
-use mod_quiz\output\list_of_attempts;
-use mod_quiz\output\renderer;
-use mod_quiz\output\view_page;
-use mod_quiz\quiz_attempt;
-use mod_quiz\quiz_settings;
 
 require_once(__DIR__ . '/../../config.php');
 require_once($CFG->libdir.'/gradelib.php');
@@ -40,17 +34,27 @@ $id = optional_param('id', 0, PARAM_INT); // Course Module ID, or ...
 $q = optional_param('q',  0, PARAM_INT);  // Quiz ID.
 
 if ($id) {
-    $quizobj = quiz_settings::create_for_cmid($id, $USER->id);
+    if (!$cm = get_coursemodule_from_id('quiz', $id)) {
+        throw new \moodle_exception('invalidcoursemodule');
+    }
+    if (!$course = $DB->get_record('course', array('id' => $cm->course))) {
+        throw new \moodle_exception('coursemisconf');
+    }
 } else {
-    $quizobj = quiz_settings::create($q, $USER->id);
+    if (!$quiz = $DB->get_record('quiz', array('id' => $q))) {
+        throw new \moodle_exception('invalidquizid', 'quiz');
+    }
+    if (!$course = $DB->get_record('course', array('id' => $quiz->course))) {
+        throw new \moodle_exception('invalidcourseid');
+    }
+    if (!$cm = get_coursemodule_from_instance("quiz", $quiz->id, $course->id)) {
+        throw new \moodle_exception('invalidcoursemodule');
+    }
 }
-$quiz = $quizobj->get_quiz();
-$cm = $quizobj->get_cm();
-$course = $quizobj->get_course();
 
 // Check login and get context.
 require_login($course, false, $cm);
-$context = $quizobj->get_context();
+$context = context_module::instance($cm->id);
 require_capability('mod/quiz:view', $context);
 
 // Cache some other capabilities we use several times.
@@ -60,19 +64,19 @@ $canpreview = has_capability('mod/quiz:preview', $context);
 
 // Create an object to manage all the other (non-roles) access rules.
 $timenow = time();
-$accessmanager = new access_manager($quizobj, $timenow,
+$quizobj = quiz::create($cm->instance, $USER->id);
+$accessmanager = new quiz_access_manager($quizobj, $timenow,
         has_capability('mod/quiz:ignoretimelimits', $context, null, false));
+$quiz = $quizobj->get_quiz();
 
 // Trigger course_module_viewed event and completion.
 quiz_view($quiz, $course, $cm, $context);
 
 // Initialize $PAGE, compute blocks.
-$PAGE->set_url('/mod/quiz/view.php', ['id' => $cm->id]);
-// On the quiz view page, the browser back/forwards buttons should force a reload.
-$PAGE->set_cacheable(false);
+$PAGE->set_url('/mod/quiz/view.php', array('id' => $cm->id));
 
 // Create view object which collects all the information the renderer will need.
-$viewobj = new view_page();
+$viewobj = new mod_quiz_view_object();
 $viewobj->accessmanager = $accessmanager;
 $viewobj->canreviewmine = $canreviewmine || $canpreview;
 
@@ -98,24 +102,13 @@ if ($unfinishedattempt = quiz_get_user_attempt_unfinished($quiz->id, $USER->id))
 }
 $numattempts = count($attempts);
 
-$gradeitemmarks = $quizobj->get_grade_calculator()->compute_grade_item_totals_for_attempts(
-    array_column($attempts, 'uniqueid'));
-
 $viewobj->attempts = $attempts;
-$viewobj->attemptobjs = [];
+$viewobj->attemptobjs = array();
 foreach ($attempts as $attempt) {
-    $attemptobj = new quiz_attempt($attempt, $quiz, $cm, $course, false);
-    $attemptobj->set_grade_item_totals($gradeitemmarks[$attempt->uniqueid]);
-    $viewobj->attemptobjs[] = $attemptobj;
-
-}
-$viewobj->attemptslist = new list_of_attempts($timenow);
-foreach (array_reverse($viewobj->attemptobjs) as $attemptobj) {
-    $viewobj->attemptslist->add_attempt($attemptobj);
+    $viewobj->attemptobjs[] = new quiz_attempt($attempt, $quiz, $cm, $course, false);
 }
 
 // Work out the final grade, checking whether it was overridden in the gradebook.
-// First, get an initial grade to display.
 if (!$canpreview) {
     $mygrade = quiz_get_best_grade($quiz, $USER->id);
 } else if ($lastfinishedattempt) {
@@ -126,35 +119,24 @@ if (!$canpreview) {
     $mygrade = null;
 }
 
-// Now, check the grade in the gradebook, if there is one.
 $mygradeoverridden = false;
 $gradebookfeedback = '';
 
-$gradeitem = grade_item::fetch([
-    'itemtype' => 'mod',
-    'itemmodule' => 'quiz',
-    'iteminstance' => $quiz->id,
-    'itemnumber' => 0,
-    'courseid' => $course->id,
-]);
+$item = null;
 
-// If there's a grade item grade, then get that grade for this user.
-// Users who can preview the quiz (eg teachers) won't have a proper grade,
-// so no point getting their grades here.
-if (!$canpreview && $gradeitem) {
-    $grade = $gradeitem->get_grade($USER->id, false);
-    $mygrade = $grade->finalgrade; // Use this grade to display in the view page.
+$grading_info = grade_get_grades($course->id, 'mod', 'quiz', $quiz->id, $USER->id);
+if (!empty($grading_info->items)) {
+    $item = $grading_info->items[0];
+    if (isset($item->grades[$USER->id])) {
+        $grade = $item->grades[$USER->id];
 
-    if ($grade->overridden) {
-        if ($gradeitem->needsupdate) {
-            // It is Error, but let's be consistent with the old code.
-            $mygrade = 0;
+        if ($grade->overridden) {
+            $mygrade = $grade->grade + 0; // Convert to number.
+            $mygradeoverridden = true;
         }
-        $mygradeoverridden = true;
-    }
-
-    if (!empty($grade->feedback)) {
-        $gradebookfeedback = $grade->feedback;
+        if (!empty($grade->str_feedback)) {
+            $gradebookfeedback = $grade->str_feedback;
+        }
     }
 }
 
@@ -165,10 +147,10 @@ if (html_is_blank($quiz->intro)) {
     $PAGE->activityheader->set_description('');
 }
 $PAGE->add_body_class('limitedwidth');
-/** @var renderer $output */
+/** @var mod_quiz_renderer $output */
 $output = $PAGE->get_renderer('mod_quiz');
 
-// Print overall stats and table with existing attempts.
+// Print table with existing attempts.
 if ($attempts) {
     // Work out which columns we need, taking account what data is available in each attempt.
     list($someoptions, $alloptions) = quiz_get_combined_reviewoptions($quiz, $attempts);
@@ -192,8 +174,8 @@ $viewobj->mygradeoverridden = $mygradeoverridden;
 $viewobj->gradebookfeedback = $gradebookfeedback;
 $viewobj->lastfinishedattempt = $lastfinishedattempt;
 $viewobj->canedit = has_capability('mod/quiz:manage', $context);
-$viewobj->editurl = new moodle_url('/mod/quiz/edit.php', ['cmid' => $cm->id]);
-$viewobj->backtocourseurl = new moodle_url('/course/view.php', ['id' => $course->id]);
+$viewobj->editurl = new moodle_url('/mod/quiz/edit.php', array('cmid' => $cm->id));
+$viewobj->backtocourseurl = new moodle_url('/course/view.php', array('id' => $course->id));
 $viewobj->startattempturl = $quizobj->start_attempt_url();
 
 if ($accessmanager->is_preflight_check_required($unfinishedattemptid)) {
@@ -211,16 +193,16 @@ if ($quiz->attempts != 1) {
 }
 
 // Inform user of the grade to pass if non-zero.
-if ($gradeitem && grade_floats_different($gradeitem->gradepass, 0)) {
+if ($item && grade_floats_different($item->gradepass, 0)) {
     $a = new stdClass();
-    $a->grade = quiz_format_grade($quiz, $gradeitem->gradepass);
+    $a->grade = quiz_format_grade($quiz, $item->gradepass);
     $a->maxgrade = quiz_format_grade($quiz, $quiz->grade);
     $viewobj->infomessages[] = get_string('gradetopassoutof', 'quiz', $a);
 }
 
-// Determine whether a start attempt button should be displayed.
+// Determine wheter a start attempt button should be displayed.
 $viewobj->quizhasquestions = $quizobj->has_questions();
-$viewobj->preventmessages = [];
+$viewobj->preventmessages = array();
 if (!$viewobj->quizhasquestions) {
     $viewobj->buttontext = '';
 
@@ -267,13 +249,6 @@ $viewobj->showbacktocourse = ($viewobj->buttontext === '' &&
         course_get_format($course)->has_view_page());
 
 echo $OUTPUT->header();
-
-if (!empty($gradinginfo->errors)) {
-    foreach ($gradinginfo->errors as $error) {
-        $errortext = new \core\output\notification($error, \core\output\notification::NOTIFY_ERROR);
-        echo $OUTPUT->render($errortext);
-    }
-}
 
 if (isguestuser()) {
     // Guests can't do a quiz, so offer them a choice of logging in or going back.

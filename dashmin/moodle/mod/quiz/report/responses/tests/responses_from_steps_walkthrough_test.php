@@ -16,8 +16,8 @@
 
 namespace quiz_responses;
 
-use mod_quiz\quiz_attempt;
 use question_bank;
+use quiz_attempt;
 
 /**
  * Quiz attempt walk through using data from csv file.
@@ -96,7 +96,7 @@ final class responses_from_steps_walkthrough_test extends \mod_quiz\tests\attemp
                 throw new \coding_exception("There is no step no {$responses['submittedstepno']} ".
                                            "for slot $slot in quizattempt {$responses['quizattempt']}!");
             }
-            foreach (['responsesummary', 'fraction', 'state'] as $column) {
+            foreach (array('responsesummary', 'fraction', 'state') as $column) {
                 if (isset($tests[$column]) && $tests[$column] != '') {
                     switch($column) {
                         case 'responsesummary' :

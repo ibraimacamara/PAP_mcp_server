@@ -3,70 +3,63 @@ session_start();
 include('../conexao.php');
 include('menu.php');
 
+if (empty($_SESSION['csrf_token_professor'])) {
+    $_SESSION['csrf_token_professor'] = bin2hex(random_bytes(32));
+}
 
-if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
-function old($campo)
+function old_professor(string $campo): string
 {
-    return htmlspecialchars($_SESSION['old'][$campo] ?? '', ENT_QUOTES, 'UTF-8');
+    global $oldProfessor;
+    return htmlspecialchars($oldProfessor[$campo] ?? '', ENT_QUOTES, 'UTF-8');
 }
+
+$alertaProfessor = $_SESSION['alerta_professor'] ?? null;
+$oldProfessor = $_SESSION['old_professor'] ?? [];
+$tinhaFotoProfessor = $_SESSION['tinha_foto_professor'] ?? false;
+
+/* limpa logo após mostrar */
+unset($_SESSION['alerta_professor']);
+unset($_SESSION['old_professor']);
+unset($_SESSION['tinha_foto_professor']);
 ?>
 
 
 <!-- Form Start -->
 <div class="col-12">
-    <?php if (!empty($_SESSION['alerta'])): ?>
-        <div id="alerta"
-            class="alert alert-<?= htmlspecialchars($_SESSION['alerta']['tipo']) ?> alert-dismissible fade show"
+    <?php if (!empty($alertaProfessor)): ?>
+        <div id="alerta_professor"
+            class="alert alert-<?= htmlspecialchars($alertaProfessor['tipo']) ?> alert-dismissible fade show"
             role="alert">
-            <?= htmlspecialchars($_SESSION['alerta']['msg'], ENT_QUOTES, 'UTF-8') ?>
+            <?= htmlspecialchars($alertaProfessor['msg'], ENT_QUOTES, 'UTF-8') ?>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
 
         <script>
-            setTimeout(() => document.getElementById('alerta')?.remove(), 3000);
+            setTimeout(() => document.getElementById('alerta_professor')?.remove(), 3000);
         </script>
 
-        <?php unset($_SESSION['alerta']); ?>
     <?php endif; ?>
 </div>
 
 <div class="container-fluid pt-4 px-4">
     <div class="row g-4">
         <div class="col-12">
-            <?php
-            $professorInserido = isset($_GET['professor_inserido']) && $_GET['professor_inserido'] == 1;
-            ?>
-
-            <?php if ($professorInserido): ?>
-                <div class="alert alert-success">
-                    Professor inserido com sucesso.
-                </div>
-            <?php endif; ?>
-
-            <?php if (!empty($_SESSION['mensagem_sucesso'])): ?>
-                <div class="alert alert-success">
-                    <?= htmlspecialchars($_SESSION['mensagem_sucesso'], ENT_QUOTES, 'UTF-8') ?>
-                </div>
-                <?php unset($_SESSION['mensagem_sucesso']); ?>
-            <?php endif; ?>
-            <?php if (!empty($_SESSION['old']['foto'])): ?>
+            <?php if ($tinhaFotoProfessor): ?>
                 <small class="text-danger">Selecione novamente a foto.</small>
             <?php endif; ?>
             <div class="bg-white shadow rounded  p-4">
                 <h6 class="mb-4">Registar Professor</h6>
                 <form action="salvar_professor.php" method="POST" enctype="multipart/form-data">
-                    <input type="hidden" name="csrf_token"
-                        value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+                    <input type="hidden" name="csrf_token_professor"
+                        value="<?= htmlspecialchars($_SESSION['csrf_token_professor'], ENT_QUOTES, 'UTF-8') ?>">
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Nome completo</label>
-                            <input type="text" name="nome" class="form-control" value="<?= old('nome') ?>" required>
+                            <input type="text" name="nome" class="form-control" value="<?= old_professor('nome') ?>" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Email</label>
-                            <input type="email" name="email" class="form-control" value="<?= old('email') ?>" required>
+                            <input type="email" name="email" class="form-control" value="<?= old_professor('email') ?>" required>
                         </div>
 
                     </div>
@@ -74,11 +67,11 @@ function old($campo)
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">BI</label>
-                            <input type="text" name="bi" class="form-control" value="<?= old('bi') ?>" required>
+                            <input type="text" name="bi" class="form-control" value="<?= old_professor('bi') ?>" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Contacto</label>
-                            <input type="text" name="contato" class="form-control" value="<?= old('contato') ?>"
+                            <input type="text" name="contato" class="form-control" value="<?= old_professor('contato') ?>"
                                 required>
                         </div>
 
@@ -88,35 +81,35 @@ function old($campo)
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Data de Nascimento</label>
                             <input type="date" name="data_nascimento" class="form-control"
-                                value="<?= old('data_nascimento') ?>" required>
+                                value="<?= old_professor('data_nascimento') ?>" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Morada</label>
-                            <input type="text" name="morada" class="form-control" value="<?= old('morada') ?>" required>
+                            <input type="text" name="morada" class="form-control" value="<?= old_professor('morada') ?>" required>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Nacionalidade</label>
                             <input type="text" name="nacionalidade" class="form-control"
-                                value="<?= old('nacionalidade') ?>" required>
+                                value="<?= old_professor('nacionalidade') ?>" required>
                         </div>
 
                         <div class="col-md-6 mb-3">
                             <label class="form-label">NIF</label>
-                            <input type="text" name="nif" class="form-control" value="<?= old('nif') ?>" required>
+                            <input type="text" name="nif" class="form-control" value="<?= old_professor('nif') ?>" required>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Distrito</label>
-                            <input type="text" name="distrito" class="form-control" value="<?= old('distrito') ?>"
+                            <input type="text" name="distrito" class="form-control" value="<?= old_professor('distrito') ?>"
                                 required>
                         </div>
 
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Freguesia</label>
-                            <input type="text" name="freguesia" class="form-control" value="<?= old('freguesia') ?>"
+                            <input type="text" name="freguesia" class="form-control" value="<?= old_professor('freguesia') ?>"
                                 required>
                         </div>
                     </div>
@@ -127,11 +120,11 @@ function old($campo)
                             <select name="genero" class="form-select" required>
                                 <option value="">Escolha...</option>
 
-                                <option value="Masculino" <?= old('genero') == 'Masculino' ? 'selected' : '' ?>>
+                                <option value="Masculino" <?= old_professor('genero') == 'Masculino' ? 'selected' : '' ?>>
                                     Masculino
                                 </option>
 
-                                <option value="Feminino" <?= old('genero') == 'Feminino' ? 'selected' : '' ?>>
+                                <option value="Feminino" <?= old_professor('genero') == 'Feminino' ? 'selected' : '' ?>>
                                     Feminino
                                 </option>
 
@@ -139,8 +132,7 @@ function old($campo)
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="formFile" class="form-label">Foto</label>
-                            <input class="form-control" name="foto" type="file" value="<?= old('foto') ?>"
-                                accept="image/*">
+                            <input class="form-control" name="foto" type="file" accept="image/*">
                         </div>
                     </div>
 
@@ -148,7 +140,7 @@ function old($campo)
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Grupo Disciplinar</label>
                             <input type="text" name="grupo_disciplinar" class="form-control"
-                                value="<?= old('grupo_disciplinar') ?>" required>
+                                value="<?= old_professor('grupo_disciplinar') ?>" required>
                         </div>
 
                         <div class="col-md-6 mb-3">
@@ -156,15 +148,15 @@ function old($campo)
                             <select name="t_contrato" class="form-select" required>
                                 <option value="">Escolha...</option>
 
-                                <option value="Contrato com termo" <?= old('t_contrato') == 'Contrato com termo' ? 'selected' : '' ?>>
+                                <option value="Contrato com termo" <?= old_professor('t_contrato') == 'Contrato com termo' ? 'selected' : '' ?>>
                                     Contrato com Termo
                                 </option>
 
-                                <option value="Contrato sem termo" <?= old('t_contrato') == 'Contrato sem termo' ? 'selected' : '' ?>>
+                                <option value="Contrato sem termo" <?= old_professor('t_contrato') == 'Contrato sem termo' ? 'selected' : '' ?>>
                                     Contrato sem Termo
                                 </option>
 
-                                <option value="Prestação de serviços" <?= old('t_contrato') == 'Prestação de serviços' ? 'selected' : '' ?>>
+                                <option value="Prestação de serviços" <?= old_professor('t_contrato') == 'Prestação de serviços' ? 'selected' : '' ?>>
                                     Prestação de Serviços
                                 </option>
 
@@ -175,12 +167,12 @@ function old($campo)
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Habilitação Profissional</label>
                             <input type="text" name="h_profissional" class="form-control"
-                                value="<?= old('h_profissional') ?>" required>
+                                value="<?= old_professor('h_profissional') ?>" required>
                         </div>
 
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Habilitação Académica</label>
-                            <input type="text" name="h_academica" class="form-control" value="<?= old('h_academico') ?>"
+                            <input type="text" name="h_academica" class="form-control" value="<?= old_professor('h_academica') ?>"
                                 required>
                         </div>
                     </div>
@@ -191,14 +183,6 @@ function old($campo)
     </div>
 </div>
 <!-- Form End -->
-<?php if (!empty($_SESSION['mensagem_sucesso'])): ?>
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <?= htmlspecialchars($_SESSION['mensagem_sucesso'], ENT_QUOTES, 'UTF-8') ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-    <?php unset($_SESSION['mensagem_sucesso']); endif; ?>
-
-
 <!-- Footer Start -->
 <?php
 include 'footer.php';

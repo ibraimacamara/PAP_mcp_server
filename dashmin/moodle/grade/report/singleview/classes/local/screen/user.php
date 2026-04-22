@@ -24,7 +24,6 @@
 
 namespace gradereport_singleview\local\screen;
 
-use context_course;
 use grade_seq;
 use gradereport_singleview;
 use moodle_url;
@@ -52,9 +51,6 @@ class user extends tablelike implements selectable_items {
 
     /** @var int $requirespaging Do we have more items than the paging limit? */
     private $requirespaging = true;
-
-    /** @var array get a valid user.  */
-    public $item = [];
 
     /**
      * Get the label for the select box that chooses items for this page.
@@ -122,16 +118,6 @@ class user extends tablelike implements selectable_items {
             }
         }
 
-        // If we change perpage on pagination we might end up with a page that doesn't exist.
-        if ($this->perpage) {
-            $numpages = intval(count($this->items) / $this->perpage) + 1;
-            if ($numpages <= $this->page) {
-                $this->page = 0;
-            }
-        } else {
-            $this->page = 0;
-        }
-
         $this->requirespaging = count($this->items) > $this->perpage;
 
         $this->setup_structure();
@@ -152,7 +138,7 @@ class user extends tablelike implements selectable_items {
             get_string('assessmentname', 'gradereport_singleview'),
             '', // For filter icon.
             get_string('gradecategory', 'grades'),
-            get_string('gradenoun'),
+            get_string('grade', 'grades'),
             get_string('range', 'grades'),
             get_string('feedback', 'grades'),
             get_string('override', 'gradereport_singleview'),
@@ -170,20 +156,18 @@ class user extends tablelike implements selectable_items {
         global $OUTPUT;
 
         $grade = $this->fetch_grade_or_default($item, $this->item->id);
-        $gradestatus = '';
+        $lockicon = '';
 
-        // Show hidden icon if the grade is hidden and the user has permission to view hidden grades.
-        $showhiddenicon = ($grade->is_hidden() || $item->is_hidden()) &&
-            has_capability('moodle/grade:viewhidden', context_course::instance($item->courseid));
-
-        $context = [
-            'hidden' => $showhiddenicon,
-            'locked' => $grade->is_locked(),
-        ];
-
-        if (in_array(true, $context)) {
-            $context['classes'] = 'gradestatus';
-            $gradestatus = $OUTPUT->render_from_template('core_grades/status_icons', $context);
+        $lockeditem = $lockeditemgrade = 0;
+        if (!empty($grade->locked)) {
+            $lockeditem = 1;
+        }
+        if (!empty($grade->grade_item->locked)) {
+            $lockeditemgrade = 1;
+        }
+        // Check both grade and grade item.
+        if ($lockeditem || $lockeditemgrade) {
+             $lockicon = $OUTPUT->pix_icon('t/locked', 'grade is locked', 'moodle', ['class' => 'ml-3']);
         }
 
         // Create a fake gradetreeitem so we can call get_element_header().
@@ -195,23 +179,23 @@ class user extends tablelike implements selectable_items {
         $gradetreeitem['object'] = $item;
         $gradetreeitem['userid'] = $this->item->id;
 
-        $itemname = \grade_helper::get_element_header($gradetreeitem, true, false, false, false, true);
+        $itemname = $this->structure->get_element_header($gradetreeitem, true, false, false, false, true);
         $grade->label = $item->get_name();
 
         $formatteddefinition = $this->format_definition($grade);
 
-        $itemicon = html_writer::div($this->format_icon($item), 'me-1');
-        $itemtype = \html_writer::span(\grade_helper::get_element_type_string($gradetreeitem),
+        $itemicon = html_writer::div($this->format_icon($item), 'mr-1');
+        $itemtype = \html_writer::span($this->structure->get_element_type_string($gradetreeitem),
             'd-block text-uppercase small dimmed_text');
 
         $itemtitle = html_writer::div($itemname, 'rowtitle');
         $itemcontent = html_writer::div($itemtype . $itemtitle);
 
         $line = [
-            html_writer::div($itemicon . $itemcontent, "{$type} d-flex align-items-center"),
+            html_writer::div($itemicon . $itemcontent .  $lockicon, "{$type} d-flex align-items-center"),
             $this->get_item_action_menu($item),
             $this->category($item),
-            $formatteddefinition['finalgrade'] . $gradestatus,
+            $formatteddefinition['finalgrade'],
             new range($item),
             $formatteddefinition['feedback'],
             $formatteddefinition['override'],
@@ -251,7 +235,7 @@ class user extends tablelike implements selectable_items {
      */
     private function format_icon($item): string {
         $element = ['type' => 'item', 'object' => $item];
-        return \grade_helper::get_element_icon($element);
+        return $this->structure->get_element_icon($element);
     }
 
     /**
@@ -268,11 +252,9 @@ class user extends tablelike implements selectable_items {
         $title = get_string('showallgrades', 'core_grades');
         $menuitems[] = new \action_menu_link_secondary($url, null, $title);
         $menu = new \action_menu($menuitems);
-        $label = get_string('actions');
-        $icon = $OUTPUT->pix_icon('i/moremenu', '')  . \core\output\html_writer::span($label, 'sr-only d-inline-block');
+        $icon = $OUTPUT->pix_icon('i/moremenu', get_string('actions'));
         $extraclasses = 'btn btn-link btn-icon icon-size-3 d-flex align-items-center justify-content-center';
         $menu->set_menu_trigger($icon, $extraclasses);
-        $menu->triggerattributes['title'] = $label;
         $menu->set_menu_left();
         $menu->set_boundary('window');
 

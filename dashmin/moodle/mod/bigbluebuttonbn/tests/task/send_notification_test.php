@@ -27,12 +27,12 @@ use advanced_testcase;
  * @covers \mod_bigbluebuttonbn\task\send_notification
  * @coversDefaultClass \mod_bigbluebuttonbn\task\send_notification
  */
-final class send_notification_test extends advanced_testcase {
+class send_notification_test extends advanced_testcase {
     /**
      * Test that the debug message is correctly output.
      *
      */
-    public function test_generate_message(): void {
+    public function test_generate_message() {
         $this->resetAfterTest();
         $task = new send_notification();
         $message = $task->generate_message();

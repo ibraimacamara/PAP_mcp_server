@@ -21,12 +21,12 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->dirroot . '/webservice/tests/helpers.php');
 
-use core_external\external_api;
+use external_api;
 use externallib_advanced_testcase;
 use mod_glossary_external;
 use context_module;
 use context_user;
-use core_external\util as external_util;
+use external_util;
 
 /**
  * External function test for update_entry.
@@ -43,7 +43,7 @@ final class update_entry_test extends externallib_advanced_testcase {
     /**
      * test_update_entry_without_optional_settings
      */
-    public function test_update_entry_without_optional_settings(): void {
+    public function test_update_entry_without_optional_settings() {
         global $CFG, $DB;
         $this->resetAfterTest(true);
 
@@ -78,7 +78,7 @@ final class update_entry_test extends externallib_advanced_testcase {
     /**
      * test_update_entry_duplicated
      */
-    public function test_update_entry_duplicated(): void {
+    public function test_update_entry_duplicated() {
         global $CFG, $DB;
         $this->resetAfterTest(true);
 
@@ -115,7 +115,7 @@ final class update_entry_test extends externallib_advanced_testcase {
     /**
      * test_update_entry_with_aliases
      */
-    public function test_update_entry_with_aliases(): void {
+    public function test_update_entry_with_aliases() {
         global $DB;
         $this->resetAfterTest(true);
 
@@ -152,7 +152,7 @@ final class update_entry_test extends externallib_advanced_testcase {
     /**
      * test_update_entry_in_categories
      */
-    public function test_update_entry_in_categories(): void {
+    public function test_update_entry_in_categories() {
         global $DB;
         $this->resetAfterTest(true);
 
@@ -193,7 +193,7 @@ final class update_entry_test extends externallib_advanced_testcase {
     /**
      * test_update_entry_with_attachments
      */
-    public function test_update_entry_with_attachments(): void {
+    public function test_update_entry_with_attachments() {
         global $DB, $USER;
         $this->resetAfterTest(true);
 

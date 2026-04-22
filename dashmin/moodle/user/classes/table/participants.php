@@ -250,8 +250,8 @@ class participants extends \table_sql implements dynamic_table {
      */
     public function col_fullname($data) {
         global $OUTPUT;
-        return $OUTPUT->render(\core_user::get_profile_picture($data, null,
-            ['courseid' => $this->course->id, 'includefullname' => true]));
+
+        return $OUTPUT->user_picture($data, array('size' => 35, 'courseid' => $this->course->id, 'includefullname' => true));
     }
 
     /**
@@ -404,17 +404,19 @@ class participants extends \table_sql implements dynamic_table {
      * @param bool $useinitialsbar do you want to use the initials bar.
      */
     public function query_db($pagesize, $useinitialsbar = true) {
-        global $DB;
-
         list($twhere, $tparams) = $this->get_sql_where();
         $psearch = new participants_search($this->course, $this->context, $this->filterset);
 
-        $sort = $this->get_sql_sort();
+        $total = $psearch->get_total_participants_count($twhere, $tparams);
 
-        $this->use_pages = true;
-        $rawdata = $psearch->get_participants($twhere, $tparams, $sort, $this->get_page_start(), $this->get_page_size());
-        $total = $rawdata->current()->fullcount ?? 0;
         $this->pagesize($pagesize, $total);
+
+        $sort = $this->get_sql_sort();
+        if ($sort) {
+            $sort = 'ORDER BY ' . $sort;
+        }
+
+        $rawdata = $psearch->get_participants($twhere, $tparams, $sort, $this->get_page_start(), $this->get_page_size());
 
         $this->rawdata = [];
         foreach ($rawdata as $user) {

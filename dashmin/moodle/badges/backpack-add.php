@@ -169,13 +169,15 @@ if (!empty($issuedbadge->recipient->id)) {
         }
     }
 
+    $message = '';
+    $messagetype = \core\output\notification::NOTIFY_INFO;
     if ($badgeadded) {
         $message = get_string('addedtobackpack', 'badges');
         $messagetype = \core\output\notification::NOTIFY_SUCCESS;
     } else {
         if (isset($userapi) && !empty($userapi->get_errors())) {
             // If the api used to import the badge to the backpack has errors, show them to inform the user.
-            if (array_filter($userapi->get_errors(), fn($element) => str_contains($element, "DUPLICATE_BADGE"))) {
+            if (array_filter($userapi->get_errors(), fn($element) => (strpos($element, "DUPLICATE_BADGE") !== false))) {
                 // Duplicated badges are displayed as a warning.
                 $message = get_string('existsinbackpack', 'badges');
                 $messagetype = \core\output\notification::NOTIFY_WARNING;
@@ -200,11 +202,7 @@ if (!empty($issuedbadge->recipient->id)) {
         }
     }
 
-    redirect(
-        url: new \core\url('/badges/mybadges.php'),
-        message: $message,
-        messagetype: $messagetype,
-    );
+    redirect(new moodle_url('/badges/mybadges.php'), $message, null, $messagetype);
 } else {
-    redirect(new \core\url('/badges/mybadges.php'));
+    redirect(new moodle_url('/badges/mybadges.php'));
 }

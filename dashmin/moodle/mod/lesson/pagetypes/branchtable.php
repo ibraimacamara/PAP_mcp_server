@@ -339,9 +339,8 @@ class lesson_add_page_form_branchtable extends lesson_add_page_form_base {
         $mform->addElement('hidden', 'qtype');
         $mform->setType('qtype', PARAM_INT);
 
-        $mform->addElement('text', 'title', get_string("pagetitle", "lesson"), ['size' => 70, 'maxlength' => 255]);
-        $mform->addRule('title', null, 'required', null, 'client');
-        $mform->addRule('title', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
+        $mform->addElement('text', 'title', get_string("pagetitle", "lesson"), array('size'=>70));
+        $mform->addRule('title', null, 'required', null, 'server');
         if (!empty($CFG->formatstringstriptags)) {
             $mform->setType('title', PARAM_TEXT);
         } else {

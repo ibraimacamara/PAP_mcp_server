@@ -55,8 +55,8 @@ Feature: Basic use of the Manual grading report
       | quiz     | Quiz 1 | C1     | quiz1    | 1         | tging    |
       | quiz     | Quiz 2 | C1     | quiz2    | 1         | tging    |
     And quiz "Quiz 1" contains the following questions:
-      | question         | page | displaynumber |
-      | Short answer 001 | 1    | 1a            |
+      | question         | page |
+      | Short answer 001 | 1    |
 
   Scenario: Manual grading report without attempts
     When I am on the "Quiz 1" "mod_quiz > Manual grading report" page logged in as "teacher1"
@@ -98,7 +98,6 @@ Feature: Basic use of the Manual grading report
     And I set the field "Mark" to "0.6"
     And I press "Save and show next"
     And I should see "All selected attempts have been graded. Returning to the list of questions."
-    And "Short answer 001" row "Q #" column of "questionstograde" table should contain "1a"
     And "Short answer 001" row "To grade" column of "questionstograde" table should contain "0"
     And "Short answer 001" row "Already graded" column of "questionstograde" table should contain "1"
 
@@ -131,15 +130,15 @@ Feature: Basic use of the Manual grading report
     And I click on "update grades" "link" in the "Short answer 001" "table_row"
     When I set the following fields to these values:
       | Questions per page | 0 |
-    Then I should see "You must enter a whole number that is greater than 0."
+    Then I should see "You must enter a number that is greater than 0."
     And I set the following fields to these values:
       | Questions per page | -1 |
     And I press "Change options"
-    And I should see "You must enter a whole number that is greater than 0."
+    And I should see "You must enter a number that is greater than 0."
     And I set the following fields to these values:
       | Questions per page | abc |
     And I press "Change options"
-    And I should see "You must enter a whole number that is greater than 0."
+    And I should see "You must enter a number that is greater than 0."
     And I set the following fields to these values:
       | Questions per page | 1 |
     And I press "Change options"
@@ -153,7 +152,7 @@ Feature: Basic use of the Manual grading report
     And I follow "Also show questions that have been graded automatically"
     And I click on "update grades" "link" in the "Short answer 001" "table_row"
     Then I should see "Attempt number 1 for S1 Student1 (student1, S1000, student1@example.com, little yellow frog)"
-    And I should not see "You must enter a whole number that is greater than 0."
+    And I should not see "You must enter a number that is greater than 0."
 
   Scenario: A marker cannot access the report in separate group
     Given user "student1" has attempted "Quiz 1" with responses:
@@ -199,7 +198,7 @@ Feature: Basic use of the Manual grading report
     And "Essay Q1" row "To grade" column of "questionstograde" table should contain "3"
     And "Essay Q1" row "Already graded" column of "questionstograde" table should contain "0"
     # Go to the grading page.
-    And I click on "Grade" "link" in the "Essay Q1" "table_row"
+    And I click on "grade" "link" in the "Essay Q1" "table_row"
     And I should see "Grading attempts 1 to 3 of 3"
     And I set the following fields to these values:
       | Questions per page | 1         |
@@ -245,7 +244,7 @@ Feature: Basic use of the Manual grading report
       | Essay 2       | 1        | 0              | 0                    |
       | TF1           | 0        | 0              | 1                    |
     # Grade the not yet graded Essay 2.
-    And I click on "Grade" "link" in the "Essay 2" "table_row"
+    And I click on "grade" "link" in the "Essay 2" "table_row"
     And I set the field "Mark" to "20"
     And I press "Save and show next"
     # Update the already graded Essay 1.

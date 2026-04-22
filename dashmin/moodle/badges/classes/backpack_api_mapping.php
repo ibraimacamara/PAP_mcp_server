@@ -31,6 +31,10 @@ global $CFG;
 require_once($CFG->libdir . '/filelib.php');
 
 use context_system;
+use core_badges\external\assertion_exporter;
+use core_badges\external\collection_exporter;
+use core_badges\external\issuer_exporter;
+use core_badges\external\badgeclass_exporter;
 use curl;
 
 /**
@@ -75,12 +79,6 @@ class backpack_api_mapping {
     /** @var string Error string from authentication request. */
     private static $authenticationerror = '';
 
-    /** @var mixed List of parameters for this method. */
-    protected $postparams;
-
-    /** @var int OpenBadges version. */
-    protected $backpackapiversion;
-
     /** @var array Errors encountered during the request. */
     protected $errors = [];
 
@@ -97,7 +95,7 @@ class backpack_api_mapping {
      * @param boolean $json json decode the response.
      * @param boolean $authrequired Authentication is required for this request.
      * @param boolean $isuserbackpack user backpack or a site backpack.
-     * @param integer $backpackapiversion OpenBadges version.
+     * @param integer $backpackapiversion OpenBadges version 1 or 2.
      */
     public function __construct($action, $url, $postparams, $requestexporter, $responseexporter,
                                 $multiple, $method, $json, $authrequired, $isuserbackpack, $backpackapiversion) {
@@ -253,6 +251,32 @@ class backpack_api_mapping {
     }
 
     /**
+     * Read the response from a V1 user request and save the userID.
+     *
+     * @param string $response The request response.
+     * @param integer $backpackid The backpack id.
+     * @return mixed
+     */
+    private function convert_email_response($response, $backpackid) {
+        global $SESSION;
+
+        if (isset($response->status) && $response->status == 'okay') {
+
+            // Remember the tokens.
+            $useridkey = $this->get_token_key(BADGE_USER_ID_TOKEN);
+            $backpackidkey = $this->get_token_key(BADGE_BACKPACK_ID_TOKEN);
+
+            $SESSION->$useridkey = $response->userId;
+            $SESSION->$backpackidkey = $backpackid;
+            return $response->userId;
+        }
+        if (!empty($response->error)) {
+            self::set_authentication_error($response->error);
+        }
+        return false;
+    }
+
+    /**
      * Get the user id from a previous user request.
      *
      * @return integer
@@ -373,7 +397,7 @@ class backpack_api_mapping {
             // If the response wasn't successful, store the errors and return null.
             if (isset($response->validationErrors)) {
                 $error = implode(', ', $response->validationErrors);
-            } else if (isset($response->status->description)) {
+            } else if (isset($response->status)) {
                 $error = $response->status->description;
             } else {
                 $error = get_string('invalidrequest', 'error');

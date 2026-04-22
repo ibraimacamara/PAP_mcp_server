@@ -46,14 +46,13 @@ final class lib_test extends \advanced_testcase {
     public static function setUpBeforeClass(): void {
         global $CFG;
         require_once($CFG->dirroot . '/mod/resource/lib.php');
-        parent::setUpBeforeClass();
     }
 
     /**
      * Test resource_view
      * @return void
      */
-    public function test_resource_view(): void {
+    public function test_resource_view() {
         global $CFG;
 
         $CFG->enablecompletion = 1;
@@ -97,7 +96,7 @@ final class lib_test extends \advanced_testcase {
      *
      * Note: This currently doesn't test every aspect of the function, mainly focusing on the icon.
      */
-    public function test_get_coursemodule_info(): void {
+    public function test_get_coursemodule_info() {
         global $DB, $USER;
 
         $this->resetAfterTest();
@@ -145,16 +144,16 @@ final class lib_test extends \advanced_testcase {
         $info = resource_get_coursemodule_info(
                 $DB->get_record('course_modules', array('id' => $resource2->cmid)));
         $this->assertEquals('R2', $info->name);
-        $this->assertEquals('f/text', $info->icon);
+        $this->assertEquals('f/text-24', $info->icon);
 
         // For third one, it should use the highest sortorder icon.
         $info = resource_get_coursemodule_info(
                 $DB->get_record('course_modules', array('id' => $resource3->cmid)));
         $this->assertEquals('R3', $info->name);
-        $this->assertEquals('f/document', $info->icon);
+        $this->assertEquals('f/document-24', $info->icon);
     }
 
-    public function test_resource_core_calendar_provide_event_action(): void {
+    public function test_resource_core_calendar_provide_event_action() {
         $this->resetAfterTest();
         $this->setAdminUser();
 
@@ -180,7 +179,7 @@ final class lib_test extends \advanced_testcase {
         $this->assertTrue($actionevent->is_actionable());
     }
 
-    public function test_resource_core_calendar_provide_event_action_already_completed(): void {
+    public function test_resource_core_calendar_provide_event_action_already_completed() {
         global $CFG;
 
         $this->resetAfterTest();
@@ -217,7 +216,7 @@ final class lib_test extends \advanced_testcase {
     /**
      * Test mod_resource_core_calendar_provide_event_action with user override
      */
-    public function test_resource_core_calendar_provide_event_action_user_override(): void {
+    public function test_resource_core_calendar_provide_event_action_user_override() {
         global $CFG, $USER;
 
         $this->resetAfterTest();

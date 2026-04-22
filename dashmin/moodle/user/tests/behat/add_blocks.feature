@@ -17,7 +17,7 @@ Feature: Add blocks to my profile page
       | student1 | C1 | student |
       | student2 | C1 | student |
     And I log in as "admin"
-    And I follow "Profile" in the user menu
+    And I follow "View profile"
 
   Scenario: Add blocks to page
     When I turn editing mode on

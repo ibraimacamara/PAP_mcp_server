@@ -36,7 +36,7 @@ Feature: As a teacher, I can see users who have responded or not responded to a 
       | Description       | x                                                 |
       | Record user names | User's name will be logged and shown with answers |
     And I am on the Frogs "feedback activity" page
-    And I navigate to "Questions" in current page administration
+    And I click on "Edit questions" "link" in the "[role=main]" "css_element"
     And I add a "Short text answer" question to the feedback with:
       | Question | Y/N? |
     And I log out

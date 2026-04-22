@@ -37,14 +37,13 @@ final class events_test extends \advanced_testcase {
      * This is executed before running any test in this file.
      */
     public function setUp(): void {
-        parent::setUp();
         $this->resetAfterTest();
     }
 
     /**
      * Test the field created event.
      */
-    public function test_field_created(): void {
+    public function test_field_created() {
         $this->setAdminUser();
 
         // Create a course we are going to add a data module to.
@@ -72,6 +71,10 @@ final class events_test extends \advanced_testcase {
         // Check that the event data is valid.
         $this->assertInstanceOf('\mod_data\event\field_created', $event);
         $this->assertEquals(\context_module::instance($data->cmid), $event->get_context());
+        $expected = array($course->id, 'data', 'fields add', 'field.php?d=' . $data->id . '&amp;mode=display&amp;fid=' .
+            $field->field->id, $field->field->id, $data->cmid);
+        $this->assertEventLegacyLogData($expected, $event);
+        $this->assertEventContextNotUsed($event);
         $url = new \moodle_url('/mod/data/field.php', array('d' => $data->id));
         $this->assertEquals($url, $event->get_url());
     }
@@ -79,7 +82,7 @@ final class events_test extends \advanced_testcase {
     /**
      * Test the field updated event.
      */
-    public function test_field_updated(): void {
+    public function test_field_updated() {
         $this->setAdminUser();
 
         // Create a course we are going to add a data module to.
@@ -108,6 +111,10 @@ final class events_test extends \advanced_testcase {
         // Check that the event data is valid.
         $this->assertInstanceOf('\mod_data\event\field_updated', $event);
         $this->assertEquals(\context_module::instance($data->cmid), $event->get_context());
+        $expected = array($course->id, 'data', 'fields update', 'field.php?d=' . $data->id . '&amp;mode=display&amp;fid=' .
+            $field->field->id, $field->field->id, $data->cmid);
+        $this->assertEventLegacyLogData($expected, $event);
+        $this->assertEventContextNotUsed($event);
         $url = new \moodle_url('/mod/data/field.php', array('d' => $data->id));
         $this->assertEquals($url, $event->get_url());
     }
@@ -115,7 +122,7 @@ final class events_test extends \advanced_testcase {
     /**
      * Test the field deleted event.
      */
-    public function test_field_deleted(): void {
+    public function test_field_deleted() {
         $this->setAdminUser();
 
         // Create a course we are going to add a data module to.
@@ -144,6 +151,9 @@ final class events_test extends \advanced_testcase {
         // Check that the event data is valid.
         $this->assertInstanceOf('\mod_data\event\field_deleted', $event);
         $this->assertEquals(\context_module::instance($data->cmid), $event->get_context());
+        $expected = array($course->id, 'data', 'fields delete', 'field.php?d=' . $data->id, $field->field->name, $data->cmid);
+        $this->assertEventLegacyLogData($expected, $event);
+        $this->assertEventContextNotUsed($event);
         $url = new \moodle_url('/mod/data/field.php', array('d' => $data->id));
         $this->assertEquals($url, $event->get_url());
     }
@@ -151,7 +161,7 @@ final class events_test extends \advanced_testcase {
     /**
      * Test the record created event.
      */
-    public function test_record_created(): void {
+    public function test_record_created() {
         // Create a course we are going to add a data module to.
         $course = $this->getDataGenerator()->create_course();
 
@@ -170,6 +180,10 @@ final class events_test extends \advanced_testcase {
         // Check that the event data is valid.
         $this->assertInstanceOf('\mod_data\event\record_created', $event);
         $this->assertEquals(\context_module::instance($data->cmid), $event->get_context());
+        $expected = array($course->id, 'data', 'add', 'view.php?d=' . $data->id . '&amp;rid=' . $recordid,
+            $data->id, $data->cmid);
+        $this->assertEventLegacyLogData($expected, $event);
+        $this->assertEventContextNotUsed($event);
         $url = new \moodle_url('/mod/data/view.php', array('d' => $data->id, 'rid' => $recordid));
         $this->assertEquals($url, $event->get_url());
     }
@@ -180,7 +194,7 @@ final class events_test extends \advanced_testcase {
      * There is no external API for updating a record, so the unit test will simply create
      * and trigger the event and ensure the legacy log data is returned as expected.
      */
-    public function test_record_updated(): void {
+    public function test_record_updated() {
         // Create a course we are going to add a data module to.
         $course = $this->getDataGenerator()->create_course();
 
@@ -209,6 +223,9 @@ final class events_test extends \advanced_testcase {
         // Check that the event data is valid.
         $this->assertInstanceOf('\mod_data\event\record_updated', $event);
         $this->assertEquals(\context_module::instance($data->cmid), $event->get_context());
+        $expected = array($course->id, 'data', 'update', 'view.php?d=' . $data->id . '&amp;rid=1', $data->id, $data->cmid);
+        $this->assertEventLegacyLogData($expected, $event);
+        $this->assertEventContextNotUsed($event);
         $url = new \moodle_url('/mod/data/view.php', array('d' => $data->id, 'rid' => $event->objectid));
         $this->assertEquals($url, $event->get_url());
     }
@@ -216,7 +233,7 @@ final class events_test extends \advanced_testcase {
     /**
      * Test the record deleted event.
      */
-    public function test_record_deleted(): void {
+    public function test_record_deleted() {
         global $DB;
 
         // Create a course we are going to add a data module to.
@@ -257,6 +274,9 @@ final class events_test extends \advanced_testcase {
         // Check that the event data is valid.
         $this->assertInstanceOf('\mod_data\event\record_deleted', $event);
         $this->assertEquals(\context_module::instance($data->cmid), $event->get_context());
+        $expected = array($course->id, 'data', 'record delete', 'view.php?id=' . $data->cmid, $data->id, $data->cmid);
+        $this->assertEventLegacyLogData($expected, $event);
+        $this->assertEventContextNotUsed($event);
         $url = new \moodle_url('/mod/data/view.php', array('d' => $data->id));
         $this->assertEquals($url, $event->get_url());
     }
@@ -267,7 +287,7 @@ final class events_test extends \advanced_testcase {
      * There is no external API for viewing templates, so the unit test will simply create
      * and trigger the event and ensure the legacy log data is returned as expected.
      */
-    public function test_template_viewed(): void {
+    public function test_template_viewed() {
         // Create a course we are going to add a data module to.
         $course = $this->getDataGenerator()->create_course();
 
@@ -295,6 +315,10 @@ final class events_test extends \advanced_testcase {
         // Check that the event data is valid.
         $this->assertInstanceOf('\mod_data\event\template_viewed', $event);
         $this->assertEquals(\context_module::instance($data->cmid), $event->get_context());
+        $expected = array($course->id, 'data', 'templates view', 'templates.php?id=' . $data->cmid . '&amp;d=' .
+            $data->id, $data->id, $data->cmid);
+        $this->assertEventLegacyLogData($expected, $event);
+        $this->assertEventContextNotUsed($event);
         $url = new \moodle_url('/mod/data/templates.php', array('d' => $data->id));
         $this->assertEquals($url, $event->get_url());
     }
@@ -305,7 +329,7 @@ final class events_test extends \advanced_testcase {
      * There is no external API for updating a template, so the unit test will simply create
      * and trigger the event and ensure the legacy log data is returned as expected.
      */
-    public function test_template_updated(): void {
+    public function test_template_updated() {
         // Create a course we are going to add a data module to.
         $course = $this->getDataGenerator()->create_course();
 
@@ -333,6 +357,10 @@ final class events_test extends \advanced_testcase {
         // Check that the event data is valid.
         $this->assertInstanceOf('\mod_data\event\template_updated', $event);
         $this->assertEquals(\context_module::instance($data->cmid), $event->get_context());
+        $expected = array($course->id, 'data', 'templates saved', 'templates.php?id=' . $data->cmid . '&amp;d=' .
+            $data->id, $data->id, $data->cmid);
+        $this->assertEventLegacyLogData($expected, $event);
+        $this->assertEventContextNotUsed($event);
         $url = new \moodle_url('/mod/data/templates.php', array('d' => $data->id));
         $this->assertEquals($url, $event->get_url());
     }
@@ -411,7 +439,7 @@ final class events_test extends \advanced_testcase {
         array $currentfields,
         array $newfields,
         array $expected
-    ): void {
+    ) {
 
         global $USER;
 

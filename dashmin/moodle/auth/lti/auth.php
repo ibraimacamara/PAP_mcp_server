@@ -104,14 +104,15 @@ class auth_plugin_lti extends \auth_plugin_base {
      * @param int $provisioningmode the desired account provisioning mode, which controls the auth flow for unbound users.
      * @param array $legacyconsumersecrets an array of secrets used by the legacy consumer if a migration claim exists.
      * @throws coding_exception if the specified provisioning mode is invalid.
-     * @throws \core\exception\moodle_exception if user authentication fails.
+     * @throws moodle_exception if user authentication fails.
      */
     public function complete_login(array $launchdata, moodle_url $returnurl, int $provisioningmode,
             array $legacyconsumersecrets = []): void {
 
         // The platform user is already linked with a user account.
         if ($this->get_user_binding($launchdata['iss'], $launchdata['sub'])) {
-            $user = $this->find_or_create_user_from_launch($launchdata);
+            // Always sync the PII, regardless of whether we're already authenticated as this user or not.
+            $user = $this->find_or_create_user_from_launch($launchdata, true);
 
             if ($user->suspended) {
                 $failurereason = AUTH_LOGIN_SUSPENDED;
@@ -123,7 +124,7 @@ class auth_plugin_lti extends \auth_plugin_base {
                     ]
                 ]);
                 $event->trigger();
-                throw new \core\exception\moodle_exception('invalidlogin', 'core');
+                throw new moodle_exception('invalidlogin', 'core');
             }
 
             if (isloggedin()) {
@@ -134,13 +135,11 @@ class auth_plugin_lti extends \auth_plugin_base {
                 }
                 // If the linked user is already logged in, skip the call to complete_user_login() because this affects deep linking
                 // workflows on sites publishing and consuming resources on the same site, due to the regenerated sesskey.
+                return;
             } else {
                 complete_user_login($user);
-
+                return;
             }
-            // Always sync the PII, regardless of whether we're already authenticated as this user or not.
-            $this->update_user_account($user, $launchdata, $launchdata['iss']);
-            return;
         }
 
         // The platform user is not bound to a user account, check provisioning mode now.
@@ -151,9 +150,7 @@ class auth_plugin_lti extends \auth_plugin_base {
         switch ($provisioningmode) {
             case self::PROVISIONING_MODE_AUTO_ONLY:
                 // Automatic provisioning - this will create/migrate a user account and log the user in.
-                $user = $this->find_or_create_user_from_launch($launchdata, $legacyconsumersecrets);
-                complete_user_login($user);
-                $this->update_user_account($user, $launchdata, $launchdata['iss']);
+                complete_user_login($this->find_or_create_user_from_launch($launchdata, true, $legacyconsumersecrets));
                 break;
             case self::PROVISIONING_MODE_PROMPT_NEW_EXISTING:
             case self::PROVISIONING_MODE_PROMPT_EXISTING_ONLY:
@@ -198,7 +195,7 @@ class auth_plugin_lti extends \auth_plugin_base {
         unset($member['picture']);
 
         if ($binduser = $this->get_user_binding($iss, $member['user_id'])) {
-            $user = \core_user::get_user($binduser);
+            $user = \core_user::get_user((int) $binduser);
             $this->update_user_account($user, $member, $iss);
             return \core_user::get_user($user->id);
         } else {
@@ -228,13 +225,21 @@ class auth_plugin_lti extends \auth_plugin_base {
      * itself and pass relevant data in - as auth_plugin_lti::complete_login() does.
      *
      * @param array $launchdata all data in the decoded JWT including iss and sub.
+     * @param bool $syncpicture whether to sync the user's picture with the picture sent in the launch.
      * @param array $legacyconsumersecrets all secrets found for the legacy consumer, facilitating user migration.
      * @return stdClass the Moodle user who is mapped to the platform user identified in the JWT data.
      */
-    public function find_or_create_user_from_launch(array $launchdata, array $legacyconsumersecrets = []): stdClass {
+    public function find_or_create_user_from_launch(array $launchdata, bool $syncpicture = false,
+            array $legacyconsumersecrets = []): stdClass {
+
+        if (!$syncpicture) {
+            unset($launchdata['picture']);
+        }
 
         if ($binduser = $this->get_user_binding($launchdata['iss'], $launchdata['sub'])) {
-            return \core_user::get_user($binduser);
+            $user = \core_user::get_user((int) $binduser);
+            $this->update_user_account($user, $launchdata, $launchdata['iss']);
+            return \core_user::get_user($user->id);
         } else {
             // Is the intent to migrate a user account used in legacy launches?
             if (!empty($legacyconsumersecrets)) {
@@ -243,10 +248,11 @@ class auth_plugin_lti extends \auth_plugin_base {
                     $usermigrationclaim = new user_migration_claim($launchdata, $legacyconsumersecrets);
                     $username = 'enrol_lti' .
                         sha1($usermigrationclaim->get_consumer_key() . '::' .
-                            $usermigrationclaim->get_consumer_key() . ':' . $usermigrationclaim->get_user_id());
-                    if ($user = core_user::get_user_by_username($username)) {
+                        $usermigrationclaim->get_consumer_key() .':' .$usermigrationclaim->get_user_id());
+                    if ($user = \core_user::get_user_by_username($username)) {
                         $this->create_user_binding($launchdata['iss'], $launchdata['sub'], $user->id);
-                        return core_user::get_user($user->id);
+                        $this->update_user_account($user, $launchdata, $launchdata['iss']);
+                        return \core_user::get_user($user->id);
                     }
                 } catch (Exception $e) {
                     // There was an issue validating the user migration claim. We don't want to fail auth entirely though.
@@ -255,12 +261,9 @@ class auth_plugin_lti extends \auth_plugin_base {
                         "'{$launchdata['iss']}'. The migration claim could not be validated. A new account will be created.");
                 }
             }
-            // At the point of the creation, to ensure the user_created event correctly reflects the creating user of '0' (the user
-            // performing the action), ensure any active session is terminated and an empty session initialised.
-            $this->empty_session();
-
             $user = $this->create_new_account($launchdata, $launchdata['iss']);
-            return core_user::get_user($user->id);
+            $this->update_user_account($user, $launchdata, $launchdata['iss']);
+            return \core_user::get_user($user->id);
         }
     }
 
@@ -310,17 +313,6 @@ class auth_plugin_lti extends \auth_plugin_base {
             $binduser = null;
         }
         return $binduser;
-    }
-
-    /**
-     * If there's an existing session, inits an empty session.
-     *
-     * @return void
-     */
-    protected function empty_session(): void {
-        if (isloggedin()) {
-            \core\session\manager::init_empty_session();
-        }
     }
 
     /**
@@ -383,7 +375,7 @@ class auth_plugin_lti extends \auth_plugin_base {
      * @param array $userdata the user data coming from either a launch or membership service call.
      * @param string $iss the issuer to which the user belongs.
      */
-    public function update_user_account(stdClass $user, array $userdata, string $iss): void {
+    protected function update_user_account(stdClass $user, array $userdata, string $iss): void {
         global $CFG;
         require_once($CFG->dirroot.'/user/lib.php');
         if ($user->auth !== 'lti') {

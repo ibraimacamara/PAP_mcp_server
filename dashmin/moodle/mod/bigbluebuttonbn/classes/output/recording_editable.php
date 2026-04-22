@@ -20,7 +20,6 @@ use mod_bigbluebuttonbn\local\bigbluebutton;
 use moodle_exception;
 use core\output\inplace_editable;
 use mod_bigbluebuttonbn\instance;
-use mod_bigbluebuttonbn\local\bigbluebutton\recordings\recording_action;
 use mod_bigbluebuttonbn\local\proxy\bigbluebutton_proxy;
 use mod_bigbluebuttonbn\local\proxy\recording_proxy;
 use mod_bigbluebuttonbn\recording;
@@ -120,7 +119,7 @@ abstract class recording_editable extends \core\output\inplace_editable {
         require_capability('mod/bigbluebuttonbn:managerecordings', $instance->get_context());
 
         $recording->set(static::get_type(), $value);
-        recording_action::edit($recording);
+        $recording->update();
 
         return new static($recording, $instance);
     }

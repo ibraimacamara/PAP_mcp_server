@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 date_default_timezone_set('Europe/Lisbon');
@@ -18,134 +17,282 @@ function logErro(string $mensagem): void
     error_log("[$data] $mensagem\n", 3, LOG_FILE);
 }
 
-function erroUtilizador(string $mensagem): void
+function redirecionarComErroUtilizador(string $mensagem): void
 {
-    $_SESSION['alerta'] = ['tipo' => 'warning', 'msg' => $mensagem];
+    $_SESSION['alerta_funcionario'] = [
+        'tipo' => 'warning',
+        'msg' => $mensagem
+    ];
 
-    // guarda os dados do formulário
-    $_SESSION['old'] = $_POST;
+    $_SESSION['old_funcionario'] = $_POST;
+
+    if (!empty($_FILES['foto']['name'])) {
+        $_SESSION['tinha_foto_funcionario'] = true;
+    }
 
     header('Location: form_funcionario.php');
     exit;
 }
 
-function old($campo)
-{
-    return htmlspecialchars($_SESSION['old'][$campo] ?? '', ENT_QUOTES, 'UTF-8');
-}
-
-function erroTecnico(string $logMsg, int $httpCode = 500): void
+function redirecionarComErroTecnico(string $logMsg, int $httpCode = 500): void
 {
     logErro($logMsg);
     http_response_code($httpCode);
-    $_SESSION['alerta'] = ['tipo' => 'danger', 'msg' => 'Ocorreu um erro interno.'];
+
+    $_SESSION['alerta_funcionario'] = [
+        'tipo' => 'danger',
+        'msg' => 'Ocorreu um erro interno.'
+    ];
+
+    $_SESSION['old_funcionario'] = $_POST;
+
+    if (!empty($_FILES['foto']['name'])) {
+        $_SESSION['tinha_foto_funcionario'] = true;
+    }
+
     header('Location: form_funcionario.php');
     exit;
 }
 
+function obterUserIdPorEmail(PDO $pdo, string $email): ?int
+{
+    $stmt = $pdo->prepare('SELECT id FROM users WHERE username = :email LIMIT 1');
+    $stmt->execute([':email' => $email]);
+    $id = $stmt->fetchColumn();
 
-//SEGURANÇA no request
+    return $id === false ? null : (int)$id;
+}
 
+function userEstaVinculadoAFuncionario(PDO $pdo, int $userId): bool
+{
+    $stmt = $pdo->prepare('SELECT 1 FROM funcionario WHERE user_id = :user_id LIMIT 1');
+    $stmt->execute([':user_id' => $userId]);
+
+    return (bool)$stmt->fetchColumn();
+}
+
+function limparUserOrfaoPorEmail(PDO $pdo, string $email): void
+{
+    $stmt = $pdo->prepare("
+        DELETE FROM users
+        WHERE username = :email
+          AND NOT EXISTS (
+              SELECT 1
+              FROM funcionario
+              WHERE funcionario.user_id = users.id
+          )
+    ");
+    $stmt->execute([':email' => $email]);
+}
+
+function limparFotoSeExistir(?string $fotoPath): void
+{
+    if (empty($fotoPath)) {
+        return;
+    }
+
+    $caminhoCompleto = __DIR__ . '/../uploads/' . $fotoPath;
+
+    if (is_file($caminhoCompleto)) {
+        unlink($caminhoCompleto);
+    }
+}
+
+function validarMimeRealImagem(string $tmpName): ?string
+{
+    $tiposPermitidos = [
+        'image/jpeg' => 'jpg',
+        'image/jpg'  => 'jpg',
+        'image/png'  => 'png',
+        'image/gif'  => 'gif'
+    ];
+
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    if ($finfo === false) {
+        return null;
+    }
+
+    $mime = finfo_file($finfo, $tmpName);
+    finfo_close($finfo);
+
+    if ($mime === false || !isset($tiposPermitidos[$mime])) {
+        return null;
+    }
+
+    return $tiposPermitidos[$mime];
+}
+
+/* =====================================================
+   SEGURANÇA DO REQUEST
+===================================================== */
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    erroTecnico('Método HTTP inválido');
+    redirecionarComErroTecnico('Método HTTP inválido em salvar_funcionario.php', 405);
 }
-
-if (empty($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
-    erroUtilizador('Sessão expirada.');
-}
-
-
-//RECEBENDO DADOS
-
-$nome = trim($_POST['nome'] ?? '');
-$dataNasc = $_POST['data_nascimento'] ?? '';
-$contato = trim($_POST['contato'] ?? '');
-$bi = trim($_POST['bi'] ?? '');
-$email = trim($_POST['email'] ?? '');
-$morada = trim($_POST['morada'] ?? '');
-$nacionalidade = trim($_POST['nacionalidade'] ?? '');
-$nif = trim($_POST['nif'] ?? '');
-$genero = $_POST['genero'] ?? '';
-$distrito = trim($_POST['distrito'] ?? '');
-$freguesia = trim($_POST['freguesia'] ?? '');
-$cargo = trim($_POST['cargo'] ?? '');
-
-$categoria = trim($_POST['categoria'] ?? '');
-$t_contrato = $_POST['t_contrato'] ?? '';
-$h_profissional = trim($_POST['h_profissional'] ?? '');
-$h_academica = trim($_POST['h_academica'] ?? '');
-
-
-//VALIDAÇÃO
 
 if (
-    !$nome || !$dataNasc || !$contato || !$bi || !$email || !$nacionalidade || !$nif
-    || !$t_contrato || !$h_profissional || !$h_academica || !$cargo || !$categoria
+    empty($_POST['csrf_token_funcionario']) ||
+    empty($_SESSION['csrf_token_funcionario']) ||
+    !hash_equals($_SESSION['csrf_token_funcionario'], $_POST['csrf_token_funcionario'])
 ) {
-
-    erroUtilizador('Preencha todos os campos obrigatórios.');
+    redirecionarComErroUtilizador('Sessão expirada. Atualize a página e tente novamente.');
 }
 
+/* =====================================================
+   RECEBER DADOS
+===================================================== */
+$nome = trim((string)($_POST['nome'] ?? ''));
+$dataNasc = trim((string)($_POST['data_nascimento'] ?? ''));
+$contato = trim((string)($_POST['contato'] ?? ''));
+$bi = trim((string)($_POST['bi'] ?? ''));
+$email = trim((string)($_POST['email'] ?? ''));
+$morada = trim((string)($_POST['morada'] ?? ''));
+$nacionalidade = trim((string)($_POST['nacionalidade'] ?? ''));
+$nif = trim((string)($_POST['nif'] ?? ''));
+$genero = trim((string)($_POST['genero'] ?? ''));
+$distrito = trim((string)($_POST['distrito'] ?? ''));
+$freguesia = trim((string)($_POST['freguesia'] ?? ''));
+$cargo = trim((string)($_POST['cargo'] ?? ''));
+$categoria = trim((string)($_POST['categoria'] ?? ''));
+$t_contrato = trim((string)($_POST['t_contrato'] ?? ''));
+$h_profissional = trim((string)($_POST['h_profissional'] ?? ''));
+$h_academica = trim((string)($_POST['h_academica'] ?? ''));
 
+/* =====================================================
+   VALIDAÇÃO
+===================================================== */
+if (
+    $nome === '' ||
+    $dataNasc === '' ||
+    $contato === '' ||
+    $bi === '' ||
+    $email === '' ||
+    $morada === '' ||
+    $nacionalidade === '' ||
+    $nif === '' ||
+    $genero === '' ||
+    $distrito === '' ||
+    $freguesia === '' ||
+    $cargo === '' ||
+    $categoria === '' ||
+    $t_contrato === '' ||
+    $h_profissional === '' ||
+    $h_academica === ''
+) {
+    redirecionarComErroUtilizador('Preencha todos os campos obrigatórios.');
+}
 
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    erroUtilizador('Email inválido.');
+    redirecionarComErroUtilizador('Email inválido.');
 }
 
+$generosPermitidos = ['Masculino', 'Feminino'];
+if (!in_array($genero, $generosPermitidos, true)) {
+    redirecionarComErroUtilizador('Género inválido.');
+}
 
-//UPLOAD DE FOTO
+$categoriasPermitidas = ['admin', 'funcionario'];
+if (!in_array($categoria, $categoriasPermitidas, true)) {
+    redirecionarComErroUtilizador('Categoria inválida.');
+}
 
+$tiposContratoPermitidos = [
+    'Contrato com termo',
+    'Contrato sem termo',
+    'Prestação de serviços'
+];
+if (!in_array($t_contrato, $tiposContratoPermitidos, true)) {
+    redirecionarComErroUtilizador('Tipo de contrato inválido.');
+}
 
+$dataObj = DateTime::createFromFormat('Y-m-d', $dataNasc);
+if (!$dataObj || $dataObj->format('Y-m-d') !== $dataNasc) {
+    redirecionarComErroUtilizador('Data de nascimento inválida.');
+}
+
+$hoje = new DateTime('today');
+if ($dataObj > $hoje) {
+    redirecionarComErroUtilizador('A data de nascimento não pode ser no futuro.');
+}
+
+/* =====================================================
+   VALIDAR EMAIL JÁ EXISTENTE / ESTADO INCONSISTENTE
+===================================================== */
+try {
+    $userIdExistente = obterUserIdPorEmail($pdo, $email);
+
+    if ($userIdExistente !== null) {
+        if (userEstaVinculadoAFuncionario($pdo, $userIdExistente)) {
+            redirecionarComErroUtilizador('O email já está registado. Tente outro.');
+        }
+
+        limparUserOrfaoPorEmail($pdo, $email);
+    }
+} catch (PDOException $e) {
+    redirecionarComErroTecnico('Erro ao validar email existente em salvar_funcionario.php: ' . $e->getMessage());
+}
+
+/* =====================================================
+   UPLOAD DE FOTO
+===================================================== */
 $fotoPath = null;
 
 if (!empty($_FILES['foto']['name'])) {
     $foto = $_FILES['foto'];
 
+    if (!isset($foto['error'], $foto['tmp_name'], $foto['size'])) {
+        redirecionarComErroUtilizador('Upload de foto inválido.');
+    }
+
     if ($foto['error'] !== UPLOAD_ERR_OK) {
-        erroUtilizador('Erro no upload da foto.');
+        redirecionarComErroUtilizador('Erro no upload da foto.');
     }
 
-    $tiposPermitidos = [
-        'image/jpeg' => 'jpg',
-        'image/png' => 'png',
-        'image/gif' => 'gif'
-    ];
-
-    if (!array_key_exists($foto['type'], $tiposPermitidos)) {
-        erroUtilizador('Apenas imagens JPEG, PNG ou GIF são permitidas.');
+    if ($foto['size'] > 2 * 1024 * 1024) {
+        redirecionarComErroUtilizador('A foto não pode ter mais de 2MB.');
     }
 
-    $uploadDir = '../uploads/';
+    if (!is_uploaded_file($foto['tmp_name'])) {
+        redirecionarComErroUtilizador('Ficheiro de foto inválido.');
+    }
+
+    $extensao = validarMimeRealImagem($foto['tmp_name']);
+    if ($extensao === null) {
+        redirecionarComErroUtilizador('Apenas imagens JPEG, PNG ou GIF são permitidas.');
+    }
+
+    $uploadDir = __DIR__ . '/../uploads/';
     if (!is_dir($uploadDir)) {
-        erroUtilizador('A pasta de uploads não existe.');
+        redirecionarComErroUtilizador('A pasta de uploads não existe.');
     }
 
-    $extensao = $tiposPermitidos[$foto['type']];
-    $novoNome = 'funcionario_' . $bi . '.' . $extensao;
+    if (!is_writable($uploadDir)) {
+        redirecionarComErroUtilizador('A pasta de uploads não tem permissões de escrita.');
+    }
+
+    $novoNome = 'funcionario_' . bin2hex(random_bytes(16)) . '.' . $extensao;
     $destino = $uploadDir . $novoNome;
 
-
     if (!move_uploaded_file($foto['tmp_name'], $destino)) {
-        erroUtilizador('Falha ao guardar a foto.');
+        redirecionarComErroUtilizador('Falha ao guardar a foto.');
     }
 
     $fotoPath = $novoNome;
 }
 
-
-
+/* =====================================================
+   GRAVAR NA BASE DE DADOS
+===================================================== */
 try {
     $pdo->beginTransaction();
 
-
-    // users
-
+    // Password temporária inicial.
+    // Se quiseres segurança a sério, deves obrigar mudança no primeiro login.
     $senhaOriginal = $bi;
-
     $senhaHash = password_hash($senhaOriginal, PASSWORD_DEFAULT);
+
     $stmt = $pdo->prepare("
-    INSERT INTO users (username, senha, categoria, foto)
-    VALUES (:username, :senha, :categoria, :foto)
+        INSERT INTO users (username, senha, categoria, foto)
+        VALUES (:username, :senha, :categoria, :foto)
     ");
     $stmt->execute([
         ':username' => $email,
@@ -154,13 +301,47 @@ try {
         ':foto' => $fotoPath
     ]);
 
-    $userId = (int) $pdo->lastInsertId();
+    $userId = (int)$pdo->lastInsertId();
 
-    // Inserir funcionario
     $stmt = $pdo->prepare("
         INSERT INTO funcionario
-        (user_id, nome, data_nascimento, contato, bi, morada,nacionalidade, nif, genero, distrito, freguesia, cargo, tipo_c, h_profissional, h_academica )
-        VALUES (:user_id,:nome, :data, :contato, :bi, :morada,:nacionalidade, :nif, :genero, :distrito, :freguesia, :cargo, :tipo_contrato, :h_profissional, :h_academica)
+        (
+            user_id,
+            nome,
+            data_nascimento,
+            contato,
+            bi,
+            email,
+            morada,
+            nacionalidade,
+            nif,
+            genero,
+            distrito,
+            freguesia,
+            cargo,
+            tipo_c,
+            h_profissional,
+            h_academica
+        )
+        VALUES
+        (
+            :user_id,
+            :nome,
+            :data,
+            :contato,
+            :bi,
+            :email,
+            :morada,
+            :nacionalidade,
+            :nif,
+            :genero,
+            :distrito,
+            :freguesia,
+            :cargo,
+            :tipo_contrato,
+            :h_profissional,
+            :h_academica
+        )
     ");
     $stmt->execute([
         ':user_id' => $userId,
@@ -168,7 +349,7 @@ try {
         ':data' => $dataNasc,
         ':contato' => $contato,
         ':bi' => $bi,
-
+        ':email' => $email,
         ':morada' => $morada,
         ':nacionalidade' => $nacionalidade,
         ':nif' => $nif,
@@ -179,30 +360,55 @@ try {
         ':tipo_contrato' => $t_contrato,
         ':h_profissional' => $h_profissional,
         ':h_academica' => $h_academica
-
     ]);
-
 
     $pdo->commit();
 
-    $_SESSION['alerta'] = ['tipo' => 'success', 'msg' => 'funcionario registado com sucesso.'];
+    $_SESSION['alerta_funcionario'] = [
+        'tipo' => 'success',
+        'msg' => 'Funcionário registado com sucesso.'
+    ];
 
+    unset($_SESSION['csrf_token_funcionario']);
+    unset($_SESSION['old_funcionario']);
+    unset($_SESSION['tinha_foto_funcionario']);
+
+    header('Location: form_funcionario.php');
+    exit;
 } catch (PDOException $e) {
-    $pdo->rollBack();
-
-    // Remove foto se já tiver sido movida
-    if ($fotoPath && file_exists('/' . $fotoPath)) {
-        unlink('/' . $fotoPath);
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
     }
+
+    limparFotoSeExistir($fotoPath);
 
     if ($e->getCode() === '23000') {
-        erroUtilizador('funcionario já registado.');
+        $mensagemErro = strtolower($e->getMessage());
+
+        if (str_contains($mensagemErro, 'username') || str_contains($mensagemErro, 'email')) {
+            try {
+                limparUserOrfaoPorEmail($pdo, $email);
+            } catch (Throwable $cleanupError) {
+                logErro('Falha ao limpar user órfão: ' . $cleanupError->getMessage());
+            }
+
+            redirecionarComErroUtilizador('O email já está registado. Tente outro.');
+        }
+
+        if (str_contains($mensagemErro, 'bi')) {
+            redirecionarComErroUtilizador('O BI já está registado. Tente outro.');
+        }
+
+        if (str_contains($mensagemErro, 'nif')) {
+            redirecionarComErroUtilizador('O NIF já está registado. Tente outro.');
+        }
+
+        if (str_contains($mensagemErro, 'contato') || str_contains($mensagemErro, 'contacto')) {
+            redirecionarComErroUtilizador('O contacto já está registado. Tente outro.');
+        }
+
+        redirecionarComErroUtilizador('Funcionário já registado.');
     }
 
-    erroTecnico('Erro BD: ' . $e->getMessage());
+    redirecionarComErroTecnico('Erro BD em salvar_funcionario.php: ' . $e->getMessage());
 }
-
-unset($_SESSION['csrf_token']);
-unset($_SESSION['old']);
-header('Location: form_funcionario.php');
-exit;

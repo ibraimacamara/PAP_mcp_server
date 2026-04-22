@@ -17,7 +17,7 @@
 namespace core_grades\external;
 
 use core_grades\external\create_gradecategories;
-use core_external\external_api;
+use external_api;
 
 defined('MOODLE_INTERNAL') || die;
 
@@ -41,7 +41,7 @@ final class create_gradecategories_test extends \externallib_advanced_testcase {
      *
      * @return void
      */
-    public function test_create_gradecategories(): void {
+    public function test_create_gradecategories() {
         global $DB;
         $this->resetAfterTest(true);
         $course = $this->getDataGenerator()->create_course();

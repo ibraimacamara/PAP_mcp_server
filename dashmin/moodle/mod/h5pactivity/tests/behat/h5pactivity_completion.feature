@@ -28,7 +28,7 @@ Feature: View activity completion information in the h5p activity
   Scenario: A student can manually mark the h5p activity as done but a teacher cannot
     Given I am on the "Music history" "h5pactivity activity editing" page logged in as teacher1
     And I expand all fieldsets
-    And I set the field "Students must manually mark the activity as done" to "1"
+    And I set the field "Completion tracking" to "Students can manually mark the activity as completed"
     And I press "Save and display"
     # Teacher view.
     And I am on the "Music history" "h5pactivity activity" page

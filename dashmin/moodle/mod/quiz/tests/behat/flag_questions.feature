@@ -46,10 +46,12 @@ Feature: Flag quiz questions
   Scenario: Flag a quiz during and after quiz attempt
     Given I am on the "Quiz 1" "quiz activity" page logged in as student1
     And I press "Attempt quiz"
-    When I click on "Flag question" "button" in the "First question" "question"
-    Then I should see "Remove flag" in the "First question" "question"
+    # flag question 1
+    When I press "Flag question"
     # Confirm question 1 is flagged in navigation
-    And "Question 1 This page Flagged" "link" should exist
+    Then "Question 1 This page Flagged" "link" should exist
+    # Confirm that link in question 1 is changed to Remove flag
+    And I should see "Remove flag" in the "First question" "question"
     # Answer questions
     And I click on "True" "radio" in the "First question" "question"
     And I press "Next page"
@@ -62,14 +64,9 @@ Feature: Flag quiz questions
     # Confirm only flagged question is flagged
     And I should see "Remove flag" in the "First question" "question"
     And I should see "Flag question" in the "Second question" "question"
-    And I click on "Flagged" "button" in the "Second question" "question"
-    And I should see "Remove flag" in the "Second question" "question"
     And I should see "Flag question" in the "Third question" "question"
+    And I click on "Flagged" "button" in the "Second question" "question"
     And I am on the "Quiz 1" "mod_quiz > Grades report" page logged in as teacher1
     And "Flagged" "icon" should exist in the "Student 1" "table_row"
     And I am on the "Quiz 1" "mod_quiz > Responses report" page
     And "Flagged" "icon" should exist in the "Student 1" "table_row"
-    And I am on the "Quiz 1 > student1 > Attempt 1" "mod_quiz > Attempt review" page
-    And I should see "Remove flag" in the "First question" "question"
-    And I should see "Remove flag" in the "Second question" "question"
-    And I should see "Flag question" in the "Third question" "question"

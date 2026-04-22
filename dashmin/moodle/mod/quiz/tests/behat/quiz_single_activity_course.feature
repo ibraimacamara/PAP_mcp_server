@@ -57,5 +57,6 @@ Feature: Teacher can build quiz in a single activity format course
     And I should see "Answer saved"
     And I press "Submit all and finish"
     And I click on "Submit all and finish" "button" in the "Submit all your answers and finish?" "dialogue"
+    And I click on "Finish review" "link"
     # Confirm that quiz is finished successfully.
-    Then I should see "Finished" in the "Status" "table_row"
+    Then "Finished" "text" should exist

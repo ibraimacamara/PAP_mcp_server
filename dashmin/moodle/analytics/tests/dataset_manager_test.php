@@ -25,16 +25,12 @@ namespace core_analytics;
  */
 final class dataset_manager_test extends \advanced_testcase {
 
-    /** @var array Store dataset top rows. */
-    protected array $sharedtoprows = [];
-
     /**
      * setUp
      *
      * @return null
      */
     public function setUp(): void {
-        parent::setUp();
         $this->resetAfterTest(true);
 
         $this->sharedtoprows = array(
@@ -49,7 +45,7 @@ final class dataset_manager_test extends \advanced_testcase {
      *
      * @return null
      */
-    public function test_create_dataset(): void {
+    public function test_create_dataset() {
 
         $dataset1 = new \core_analytics\dataset_manager(1, 1, 'whatever', \core_analytics\dataset_manager::LABELLED_FILEAREA, false);
         $dataset1data = array_merge($this->sharedtoprows, array(array('yeah', 'yeah', 'yeah')));
@@ -67,7 +63,7 @@ final class dataset_manager_test extends \advanced_testcase {
      *
      * @return null
      */
-    public function test_merge_datasets(): void {
+    public function test_merge_datasets() {
 
         $dataset1 = new \core_analytics\dataset_manager(1, 1, 'whatever', \core_analytics\dataset_manager::LABELLED_FILEAREA, false);
         $dataset1data = array_merge($this->sharedtoprows, array(array('yeah', 'yeah', 'yeah')));
@@ -94,7 +90,7 @@ final class dataset_manager_test extends \advanced_testcase {
      *
      * @return null
      */
-    public function test_get_pending_files(): void {
+    public function test_get_pending_files() {
         global $DB;
 
         $this->resetAfterTest();

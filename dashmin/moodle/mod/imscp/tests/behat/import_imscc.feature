@@ -18,9 +18,8 @@ Feature: IMS Common Cartridge package import
   @javascript @_file_upload
   Scenario: Teacher can import an IMS Common Cartridge to a course
     Given I am on the "Course 1" course page logged in as teacher1
-    And I navigate to "Course reuse" in current page administration
-    And I follow "Restore"
-    When I upload "mod/imscp/tests/packages/py4e_export.imscc" file to "Backup file" filemanager
+    And I am on the "Course 1" "restore" page
+    When I upload "mod/imscp/tests/packages/py4e_export.imscc" file to "Files" filemanager
     And I press "Restore"
     # Confirm that IMS Common Cartridge package can be restored.
     Then I should see "The selected file is not a standard Moodle backup file. The restore process will try to convert the backup file into the standard format and then restore it."

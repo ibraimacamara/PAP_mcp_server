@@ -8,7 +8,7 @@ require_once ($CFG->dirroot.'/course/moodleform_mod.php');
 class mod_choice_mod_form extends moodleform_mod {
 
     function definition() {
-        global $CFG, $DB;
+        global $CFG, $CHOICE_SHOWRESULTS, $CHOICE_PUBLISH, $CHOICE_DISPLAY, $DB;
 
         $mform    =& $this->_form;
 
@@ -26,10 +26,7 @@ class mod_choice_mod_form extends moodleform_mod {
 
         $this->standard_intro_elements(get_string('description', 'choice'));
 
-        $mform->addElement('select', 'display', get_string("displaymode", "choice"), [
-            CHOICE_DISPLAY_HORIZONTAL   => get_string('displayhorizontal', 'choice'),
-            CHOICE_DISPLAY_VERTICAL     => get_string('displayvertical', 'choice'),
-        ]);
+        $mform->addElement('select', 'display', get_string("displaymode","choice"), $CHOICE_DISPLAY);
 
         //-------------------------------------------------------------------------------
         $mform->addElement('header', 'optionhdr', get_string('options', 'choice'));
@@ -97,18 +94,9 @@ class mod_choice_mod_form extends moodleform_mod {
 //-------------------------------------------------------------------------------
         $mform->addElement('header', 'resultshdr', get_string('results', 'choice'));
 
-        $mform->addElement('select', 'showresults', get_string("publish", "choice"), [
-            CHOICE_SHOWRESULTS_NOT          => get_string('publishnot', 'choice'),
-            CHOICE_SHOWRESULTS_AFTER_ANSWER => get_string('publishafteranswer', 'choice'),
-            CHOICE_SHOWRESULTS_AFTER_CLOSE  => get_string('publishafterclose', 'choice'),
-            CHOICE_SHOWRESULTS_ALWAYS       => get_string('publishalways', 'choice'),
-        ]);
+        $mform->addElement('select', 'showresults', get_string("publish", "choice"), $CHOICE_SHOWRESULTS);
 
-        $mform->addElement('select', 'publish', get_string("privacy", "choice"), [
-            CHOICE_PUBLISH_ANONYMOUS  => get_string('publishanonymous', 'choice'),
-            CHOICE_PUBLISH_NAMES      => get_string('publishnames', 'choice'),
-        ]);
-
+        $mform->addElement('select', 'publish', get_string("privacy", "choice"), $CHOICE_PUBLISH);
         $mform->hideIf('publish', 'showresults', 'eq', 0);
 
         $mform->addElement('selectyesno', 'showunanswered', get_string("showunanswered", "choice"));
@@ -150,11 +138,10 @@ class mod_choice_mod_form extends moodleform_mod {
      */
     public function data_postprocessing($data) {
         parent::data_postprocessing($data);
-        // Set up completion section even if checkbox is not ticked.
+        // Set up completion section even if checkbox is not ticked
         if (!empty($data->completionunlocked)) {
-            $suffix = $this->get_suffix();
-            if (empty($data->{'completionsubmit' . $suffix})) {
-                $data->{'completionsubmit' . $suffix} = 0;
+            if (empty($data->completionsubmit)) {
+                $data->completionsubmit = 0;
             }
         }
     }
@@ -178,19 +165,17 @@ class mod_choice_mod_form extends moodleform_mod {
         return $errors;
     }
 
-    public function add_completion_rules() {
+    function add_completion_rules() {
         $mform =& $this->_form;
 
-        $suffix = $this->get_suffix();
-        $completionsubmitel = 'completionsubmit' . $suffix;
-        $mform->addElement('checkbox', $completionsubmitel, '', get_string('completionsubmit', 'choice'));
+        $mform->addElement('checkbox', 'completionsubmit', '', get_string('completionsubmit', 'choice'));
         // Enable this completion rule by default.
-        $mform->setDefault($completionsubmitel, 1);
-        return [$completionsubmitel];
+        $mform->setDefault('completionsubmit', 1);
+        return array('completionsubmit');
     }
 
-    public function completion_rule_enabled($data) {
-        $suffix = $this->get_suffix();
-        return !empty($data['completionsubmit' . $suffix]);
+    function completion_rule_enabled($data) {
+        return !empty($data['completionsubmit']);
     }
 }
+

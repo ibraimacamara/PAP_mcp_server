@@ -176,10 +176,7 @@ class api {
         $user = get_complete_user_data('id', $userid);
 
         $data = new stdClass();
-        $placeholders = \core_user::get_name_placeholders($user);
-        foreach ($placeholders as $field => $value) {
-            $data->{$field} = $value;
-        }
+        $data->fullname = fullname($user);
         $data->sitename  = format_string($site->fullname);
         $data->admin     = generate_email_signoff();
         $data->issuername = format_string($issuer->get('name'));
@@ -197,7 +194,9 @@ class api {
 
         $data->link = $confirmationurl->out(false);
         $message = get_string('confirmlinkedloginemail', 'auth_oauth2', $data);
-        $messagehtml = text_to_html(get_string('confirmlinkedloginemail', 'auth_oauth2', $data), false, false);
+
+        $data->link = $confirmationurl->out();
+        $messagehtml = text_to_html(get_string('confirmlinkedloginemail', 'auth_oauth2', $data), false, false, true);
 
         $user->mailformat = 1;  // Always send HTML version as well.
 
@@ -320,10 +319,7 @@ class api {
         $user = get_complete_user_data('id', $user->id);
 
         $data = new stdClass();
-        $placeholders = \core_user::get_name_placeholders($user);
-        foreach ($placeholders as $field => $value) {
-            $data->{$field} = $value;
-        }
+        $data->fullname = fullname($user);
         $data->sitename  = format_string($site->fullname);
         $data->admin     = generate_email_signoff();
 
@@ -337,7 +333,9 @@ class api {
 
         $data->link = $confirmationurl->out(false);
         $message = get_string('confirmaccountemail', 'auth_oauth2', $data);
-        $messagehtml = text_to_html(get_string('confirmaccountemail', 'auth_oauth2', $data), false, false);
+
+        $data->link = $confirmationurl->out();
+        $messagehtml = text_to_html(get_string('confirmaccountemail', 'auth_oauth2', $data), false, false, true);
 
         $user->mailformat = 1;  // Always send HTML version as well.
 

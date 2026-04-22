@@ -28,11 +28,9 @@
 require_once(__DIR__ . '/../../../../lib/behat/behat_base.php');
 require_once(__DIR__ . '/../../../../question/tests/behat/behat_question_base.php');
 
-use Behat\Gherkin\Node\TableNode;
-use Behat\Mink\Exception\DriverException;
-use Behat\Mink\Exception\ExpectationException;
-use mod_quiz\quiz_attempt;
-use mod_quiz\quiz_settings;
+use Behat\Gherkin\Node\TableNode as TableNode;
+
+use Behat\Mink\Exception\ExpectationException as ExpectationException;
 
 /**
  * Steps definitions related to mod_quiz.
@@ -90,10 +88,6 @@ class behat_mod_quiz extends behat_question_base {
 
             case 'edit':
                 return new moodle_url('/mod/quiz/edit.php',
-                        ['cmid' => $this->get_cm_by_quiz_name($identifier)->id]);
-
-            case 'multiple grades setup':
-                return new moodle_url('/mod/quiz/editgrading.php',
                         ['cmid' => $this->get_cm_by_quiz_name($identifier)->id]);
 
             case 'group overrides':
@@ -170,7 +164,7 @@ class behat_mod_quiz extends behat_question_base {
      */
     protected function get_quiz_by_name(string $name): stdClass {
         global $DB;
-        return $DB->get_record('quiz', ['name' => $name], '*', MUST_EXIST);
+        return $DB->get_record('quiz', array('name' => $name), '*', MUST_EXIST);
     }
 
     /**
@@ -217,9 +211,9 @@ class behat_mod_quiz extends behat_question_base {
         $firstrow = $data->getRow(0);
         if (!in_array('question', $firstrow) && !in_array('page', $firstrow)) {
             if (count($firstrow) == 2) {
-                $headings = ['question', 'page'];
+                $headings = array('question', 'page');
             } else if (count($firstrow) == 3) {
-                $headings = ['question', 'page', 'maxmark'];
+                $headings = array('question', 'page', 'maxmark');
             } else {
                 throw new ExpectationException('When adding questions to a quiz, you should give 2 or three 3 things: ' .
                         ' the question name, the page number, and optionally the maximum mark. ' .
@@ -283,65 +277,27 @@ class behat_mod_quiz extends behat_question_base {
                 } else {
                     $includingsubcategories = clean_param($questiondata['includingsubcategories'], PARAM_BOOL);
                 }
-
-                $filter = [
-                    'category' => [
-                        'jointype' => \qbank_managecategories\category_condition::JOINTYPE_DEFAULT,
-                        'values' => [$question->category],
-                        'filteroptions' => ['includesubcategories' => $includingsubcategories],
-                    ],
-                ];
-                $filtercondition['filter'] = $filter;
-                $settings = quiz_settings::create($quiz->id);
-                $structure = \mod_quiz\structure::create_for_quiz($settings);
-                $structure->add_random_questions($page, 1, $filtercondition);
+                quiz_add_random_questions($quiz, $page, $question->category, 1, $includingsubcategories);
             } else {
                 // Add the question.
                 quiz_add_quiz_question($question->id, $quiz, $page, $maxmark);
             }
 
-            // Look for additional properties we might want to set on the new slot.
-            $extraslotproperties = [];
-
-            // Display number (allowing editable customised question number).
-            if (array_key_exists('displaynumber', $questiondata)) {
-                if (!is_number($questiondata['displaynumber']) && !is_string($questiondata['displaynumber'])) {
-                    throw new ExpectationException('Displayed question number for "' . $questiondata['question'] .
-                            '" should either be \'i\', automatically numbered (eg. 1, 2, 3),
-                            or customised (eg. A.1, A.2, 1.1, 1.2)', $this->getSession());
-                }
-                $extraslotproperties['displaynumber'] = $questiondata['displaynumber'];
-            }
-
             // Require previous.
             if (array_key_exists('requireprevious', $questiondata)) {
                 if ($questiondata['requireprevious'] === '1') {
-                    $extraslotproperties['requireprevious'] = 1;
+                    $slot = $DB->get_field('quiz_slots', 'MAX(slot)', array('quizid' => $quiz->id));
+                    $DB->set_field('quiz_slots', 'requireprevious', 1,
+                            array('quizid' => $quiz->id, 'slot' => $slot));
                 } else if ($questiondata['requireprevious'] !== '' && $questiondata['requireprevious'] !== '0') {
                     throw new ExpectationException('Require previous for question "' .
-                        $questiondata['question'] . '" should be 0, 1 or blank.',
-                        $this->getSession());
+                            $questiondata['question'] . '" should be 0, 1 or blank.',
+                            $this->getSession());
                 }
-            }
-
-            // Grade item.
-            if (array_key_exists('grade item', $questiondata) && trim($questiondata['grade item']) !== '') {
-                $extraslotproperties['quizgradeitemid'] =
-                    $DB->get_field('quiz_grade_items', 'id',
-                        ['quizid' => $quiz->id, 'name' => $questiondata['grade item']], MUST_EXIST);
-            }
-
-            // If there were any extra properties, save them.
-            if ($extraslotproperties) {
-                // We assume that the slot was just created for this row of data is the highest numbered one.
-                $extraslotproperties['id'] = $DB->get_field('quiz_slots', 'MAX(id)', ['quizid' => $quiz->id]);
-
-                $DB->update_record('quiz_slots', $extraslotproperties);
             }
         }
 
-        $quizobj = quiz_settings::create($quiz->id);
-        $quizobj->get_grade_calculator()->recompute_quiz_sumgrades();
+        quiz_update_sumgrades($quiz);
     }
 
     /**
@@ -364,7 +320,7 @@ class behat_mod_quiz extends behat_question_base {
     public function quiz_contains_the_following_sections($quizname, TableNode $data) {
         global $DB;
 
-        $quiz = $DB->get_record('quiz', ['name' => $quizname], '*', MUST_EXIST);
+        $quiz = $DB->get_record('quiz', array('name' => $quizname), '*', MUST_EXIST);
 
         // Add the sections.
         $previousfirstslot = 0;
@@ -383,7 +339,7 @@ class behat_mod_quiz extends behat_question_base {
             }
 
             if ($rownumber == 0) {
-                $section = $DB->get_record('quiz_sections', ['quizid' => $quiz->id], '*', MUST_EXIST);
+                $section = $DB->get_record('quiz_sections', array('quizid' => $quiz->id), '*', MUST_EXIST);
             } else {
                 $section = new stdClass();
                 $section->quizid = $quiz->id;
@@ -420,7 +376,7 @@ class behat_mod_quiz extends behat_question_base {
             }
         }
 
-        if ($section->firstslot > $DB->count_records('quiz_slots', ['quizid' => $quiz->id])) {
+        if ($section->firstslot > $DB->count_records('quiz_slots', array('quizid' => $quiz->id))) {
             throw new ExpectationException('The section firstslot must be less than the total number of slots in the quiz.',
                     $this->getSession());
         }
@@ -446,8 +402,8 @@ class behat_mod_quiz extends behat_question_base {
         ]);
 
         if ($this->running_javascript()) {
-            $this->execute("behat_action_menu::i_open_the_action_menu_in", ['.slots', "css_element"]);
-            $this->execute("behat_action_menu::i_choose_in_the_open_action_menu", [$addaquestion]);
+            $this->execute("behat_action_menu::i_open_the_action_menu_in", array('.slots', "css_element"));
+            $this->execute("behat_action_menu::i_choose_in_the_open_action_menu", array($addaquestion));
         } else {
             $this->execute('behat_general::click_link', $addaquestion);
         }
@@ -465,7 +421,7 @@ class behat_mod_quiz extends behat_question_base {
     public function i_set_the_max_mark_for_quiz_question($questionname, $newmark) {
         $this->execute('behat_general::click_link', $this->escape(get_string('editmaxmark', 'quiz')));
 
-        $this->execute('behat_general::wait_until_exists', ["li input[name=maxmark]", "css_element"]);
+        $this->execute('behat_general::wait_until_exists', array("li input[name=maxmark]", "css_element"));
 
         $this->execute('behat_general::assert_page_contains_text', $this->escape(get_string('edittitleinstructions')));
 
@@ -506,7 +462,7 @@ class behat_mod_quiz extends behat_question_base {
             "')][./preceding-sibling::li[contains(@class, 'pagenumber')][1][contains(., 'Page " .
             $pagenumber . "')]]";
 
-        $this->execute('behat_general::should_exist', [$xpath, 'xpath_element']);
+        $this->execute('behat_general::should_exist', array($xpath, 'xpath_element'));
     }
 
     /**
@@ -520,7 +476,7 @@ class behat_mod_quiz extends behat_question_base {
                 "')][./preceding-sibling::li[contains(@class, 'pagenumber')][1][contains(., 'Page " .
                 $pagenumber . "')]]";
 
-        $this->execute('behat_general::should_not_exist', [$xpath, 'xpath_element']);
+        $this->execute('behat_general::should_not_exist', array($xpath, 'xpath_element'));
     }
 
     /**
@@ -535,7 +491,7 @@ class behat_mod_quiz extends behat_question_base {
                 "')]/following-sibling::li" .
                 "[contains(., '" . $this->escape($secondquestionname) . "')]";
 
-        $this->execute('behat_general::should_exist', [$xpath, 'xpath_element']);
+        $this->execute('behat_general::should_exist', array($xpath, 'xpath_element'));
     }
 
     /**
@@ -545,13 +501,10 @@ class behat_mod_quiz extends behat_question_base {
      * @param number $number the number (or 'i') that should be displayed beside that question.
      */
     public function should_have_number_on_the_edit_quiz_page($questionname, $number) {
-        if ($number !== get_string('infoshort', 'quiz')) {
-            // Logic here copied from edit_renderer, which is not ideal, but necessary.
-            $number = get_string('question') . ' ' . $number;
-        }
         $xpath = "//li[contains(@class, 'slot') and contains(., '" . $this->escape($questionname) .
-                "')]//span[contains(@class, 'slotnumber') and normalize-space(.) = '" . $this->escape($number) . "']";
-        $this->execute('behat_general::should_exist', [$xpath, 'xpath_element']);
+                "')]//span[contains(@class, 'slotnumber') and normalize-space(text()) = '" . $this->escape($number) . "']";
+
+        $this->execute('behat_general::should_exist', array($xpath, 'xpath_element'));
     }
 
     /**
@@ -562,7 +515,7 @@ class behat_mod_quiz extends behat_question_base {
      */
     protected function get_xpath_page_break_icon_after_question($addorremoves, $questionname) {
         return "//li[contains(@class, 'slot') and contains(., '" . $this->escape($questionname) .
-                "')]//a[contains(@class, 'page_split_join') and contains(@aria-label, '$addorremoves page break')]";
+                "')]//a[contains(@class, 'page_split_join') and @title = '" . $addorremoves . " page break']";
     }
 
     /**
@@ -574,7 +527,7 @@ class behat_mod_quiz extends behat_question_base {
     public function i_click_on_the_page_break_icon_after_question($addorremoves, $questionname) {
         $xpath = $this->get_xpath_page_break_icon_after_question($addorremoves, $questionname);
 
-        $this->execute("behat_general::i_click_on", [$xpath, "xpath_element"]);
+        $this->execute("behat_general::i_click_on", array($xpath, "xpath_element"));
     }
 
     /**
@@ -587,7 +540,7 @@ class behat_mod_quiz extends behat_question_base {
     public function the_page_break_icon_after_question_should_exist($addorremoves, $questionname) {
         $xpath = $this->get_xpath_page_break_icon_after_question($addorremoves, $questionname);
 
-        $this->execute('behat_general::should_exist', [$xpath, 'xpath_element']);
+        $this->execute('behat_general::should_exist', array($xpath, 'xpath_element'));
     }
 
     /**
@@ -600,7 +553,7 @@ class behat_mod_quiz extends behat_question_base {
     public function the_page_break_icon_after_question_should_not_exist($addorremoves, $questionname) {
         $xpath = $this->get_xpath_page_break_icon_after_question($addorremoves, $questionname);
 
-        $this->execute('behat_general::should_not_exist', [$xpath, 'xpath_element']);
+        $this->execute('behat_general::should_not_exist', array($xpath, 'xpath_element'));
     }
 
     /**
@@ -616,7 +569,7 @@ class behat_mod_quiz extends behat_question_base {
     public function the_page_break_link_after_question_should_contain($addorremoves, $questionname, $paramdata) {
         $xpath = $this->get_xpath_page_break_icon_after_question($addorremoves, $questionname);
 
-        $this->execute("behat_general::i_click_on", [$xpath, "xpath_element"]);
+        $this->execute("behat_general::i_click_on", array($xpath, "xpath_element"));
     }
 
     /**
@@ -679,8 +632,8 @@ class behat_mod_quiz extends behat_question_base {
         $iconxpath = "//li[contains(@class, ' slot ') and contains(., '" . $this->escape($questionname) .
                 "')]//span[contains(@class, 'editing_move')]";
 
-        $this->execute("behat_general::i_click_on", [$iconxpath, "xpath_element"]);
-        $this->execute("behat_general::i_click_on", [$this->escape($target), "button"]);
+        $this->execute("behat_general::i_click_on", array($iconxpath, "xpath_element"));
+        $this->execute("behat_general::i_click_on", array($this->escape($target), "text"));
     }
 
     /**
@@ -696,7 +649,7 @@ class behat_mod_quiz extends behat_question_base {
                 "[contains(., '" . $this->escape($target) . "')]";
 
         $this->execute('behat_general::i_drag_and_i_drop_it_in',
-            [$iconxpath, 'xpath_element', $destinationxpath, 'xpath_element']
+            array($iconxpath, 'xpath_element', $destinationxpath, 'xpath_element')
         );
     }
 
@@ -712,10 +665,10 @@ class behat_mod_quiz extends behat_question_base {
                 "')]";
         $deletexpath = "//a[contains(@class, 'editing_delete')]";
 
-        $this->execute("behat_general::i_click_on", [$slotxpath . $deletexpath, "xpath_element"]);
+        $this->execute("behat_general::i_click_on", array($slotxpath . $deletexpath, "xpath_element"));
 
         $this->execute('behat_general::i_click_on_in_the',
-            ['Yes', "button", "Confirm", "dialogue"]
+            array('Yes', "button", "Confirm", "dialogue")
         );
     }
 
@@ -744,14 +697,14 @@ class behat_mod_quiz extends behat_question_base {
      * Check that a given question comes after a given section heading in the
      * quiz navigation block.
      *
-     * @Then /^I should see question "(?P<questionnumber>(?:[^"]|\\")*)" in section "(?P<section_heading_string>(?:[^"]|\\")*)" in the quiz navigation$/
-     * @param string $questionnumber the number of the question to check.
+     * @Then /^I should see question "(?P<questionnumber>\d+)" in section "(?P<section_heading_string>(?:[^"]|\\")*)" in the quiz navigation$/
+     * @param int $questionnumber the number of the question to check.
      * @param string $sectionheading which section heading it should appear after.
      */
     public function i_should_see_question_in_section_in_the_quiz_navigation($questionnumber, $sectionheading) {
 
         // Using xpath literal to avoid quotes problems.
-        $questionnumberliteral = behat_context_helper::escape($questionnumber);
+        $questionnumberliteral = behat_context_helper::escape('Question ' . $questionnumber);
         $headingliteral = behat_context_helper::escape($sectionheading);
 
         // Split in two checkings to give more feedback in case of exception.
@@ -759,7 +712,7 @@ class behat_mod_quiz extends behat_question_base {
                 $sectionheading . '" in the quiz navigation.', $this->getSession());
         $xpath = "//*[@id = 'mod_quiz_navblock']//*[contains(concat(' ', normalize-space(@class), ' '), ' qnbutton ') and " .
                 "contains(., {$questionnumberliteral}) and contains(preceding-sibling::h3[1], {$headingliteral})]";
-        $this->find('xpath', $xpath, $exception);
+        $this->find('xpath', $xpath);
     }
 
     /**
@@ -847,29 +800,15 @@ class behat_mod_quiz extends behat_question_base {
      * @param string $username the username of the user that will attempt.
      * @param string $quizname the name of the quiz the user will attempt.
      * @param TableNode $attemptinfo information about the questions to add, as above.
-     * @param string|null $timefinish if specified, the attempt will be submitted with this
      * @Given /^user "([^"]*)" has attempted "([^"]*)" with responses:$/
-     * @Given /^user "([^"]*)" has attempted "([^"]*)" with responses submitting "([^"]*)":$/
      */
-    public function user_has_attempted_with_responses($username, $quizname, TableNode $attemptinfo, $timefinish = null) {
+    public function user_has_attempted_with_responses($username, $quizname, TableNode $attemptinfo) {
         global $DB;
 
         /** @var mod_quiz_generator $quizgenerator */
         $quizgenerator = behat_util::get_data_generator()->get_plugin_generator('mod_quiz');
 
-        $quiz = $DB->get_record('quiz', ['name' => $quizname], 'id, timeclose', MUST_EXIST);
-        $quizid = $quiz->id;
-        $timeclose = $quiz->timeclose;
-
-        // If timefinish is provided, check against timeclose.
-        if ($timefinish !== null) {
-            if ($timeclose && $timefinish > $timeclose) {
-                throw new ExpectationException(
-                    "Attempt submission cannot be after the time the quiz closed.",
-                    $this->getSession()
-                );
-            }
-        }
+        $quizid = $DB->get_field('quiz', 'id', ['name' => $quizname], MUST_EXIST);
         $user = $DB->get_record('user', ['username' => $username], '*', MUST_EXIST);
 
         list($forcedrandomquestions, $forcedvariants) =
@@ -881,13 +820,17 @@ class behat_mod_quiz extends behat_question_base {
         $attempt = $quizgenerator->create_attempt($quizid, $user->id,
                 $forcedrandomquestions, $forcedvariants);
 
-        $quizgenerator->submit_responses($attempt->id, $responses, false, true, $timefinish);
+        $quizgenerator->submit_responses($attempt->id, $responses, false, true);
 
         $this->set_user();
     }
 
     /**
      * Start a quiz attempt without answers.
+     *
+     * Then there should be a number of rows of data, one for each question you want to add.
+     * There is no need to supply answers to all questions. If so, other qusetions will be
+     * left unanswered.
      *
      * @param string $username the username of the user that will attempt.
      * @param string $quizname the name of the quiz the user will attempt.
@@ -1027,31 +970,6 @@ class behat_mod_quiz extends behat_question_base {
         $attempts = quiz_get_user_attempts($quizid, $user->id, 'unfinished', true);
         $attemptobj = quiz_attempt::create(key($attempts));
         $attemptobj->process_finish(time(), true);
-
-        $this->set_user();
-    }
-
-    /**
-     * Finish an existing quiz attempt.
-     *
-     * @param string $quizname the name of the quiz the user will attempt.
-     * @param string $username the username of the user that will attempt.
-     * @Given the attempt at :quizname by :username was never submitted
-     */
-    public function attempt_was_abandoned($quizname, $username) {
-        global $DB;
-
-        $quizid = $DB->get_field('quiz', 'id', ['name' => $quizname], MUST_EXIST);
-        $user = $DB->get_record('user', ['username' => $username], '*', MUST_EXIST);
-
-        $this->set_user($user);
-
-        $attempt = quiz_get_user_attempt_unfinished($quizid, $user->id);
-        if (!$attempt) {
-            throw new coding_exception("No in-progress attempt found for $username and quiz $quizname.");
-        }
-        $attemptobj = quiz_attempt::create($attempt->id);
-        $attemptobj->process_abandon(time(), false);
 
         $this->set_user();
     }

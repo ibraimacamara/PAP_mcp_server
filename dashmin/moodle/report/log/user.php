@@ -38,18 +38,12 @@ if ($mode !== 'today' and $mode !== 'all') {
 }
 
 $user = $DB->get_record('user', array('id' => $userid, 'deleted' => 0), '*', MUST_EXIST);
-$course = $DB->get_record('course', ['id' => $courseid], '*');
-$sitecoursefilter = 0;
-if (!$course) {
-    // Missing courses may have be deleted, so display them in site context.
-    $course = $SITE;
-    $sitecoursefilter = $courseid;
-}
+$course = $DB->get_record('course', array('id' => $courseid), '*', MUST_EXIST);
 
 $coursecontext   = context_course::instance($course->id);
 $personalcontext = context_user::instance($user->id);
 
-if ($course->id == SITEID) {
+if ($courseid == SITEID) {
     $PAGE->set_context($personalcontext);
 }
 
@@ -81,14 +75,15 @@ if ($mode === 'today') {
 $stractivityreport = get_string('activityreport');
 
 $PAGE->set_pagelayout('report');
-$PAGE->set_url('/report/log/user.php', ['id' => $user->id, 'course' => $courseid, 'mode' => $mode]);
+$PAGE->set_url('/report/log/user.php', array('id' => $user->id, 'course' => $course->id, 'mode' => $mode));
 $PAGE->navigation->extend_for_user($user);
 $PAGE->navigation->set_userid_for_parent_checks($user->id); // see MDL-25805 for reasons and for full commit reference for reversal when fixed.
 $PAGE->set_title("$course->shortname: $stractivityreport");
+$PAGE->navbar->add(get_string('alllogs'));
 
 // Create the appropriate breadcrumb.
 $navigationnode = array(
-        'url' => new moodle_url('/report/log/user.php', ['id' => $user->id, 'course' => $courseid, 'mode' => $mode]),
+        'url' => new moodle_url('/report/log/user.php', array('id' => $user->id, 'course' => $course->id, 'mode' => $mode))
     );
 if ($mode === 'today') {
     $navigationnode['name'] = get_string('todaylogs');
@@ -97,7 +92,7 @@ if ($mode === 'today') {
 }
 $PAGE->add_report_nodes($user->id, $navigationnode);
 
-if ($course->id == SITEID) {
+if ($courseid == SITEID) {
     $PAGE->set_heading(fullname($user, has_capability('moodle/site:viewfullnames', $PAGE->context)));
 } else {
     $PAGE->set_heading($course->fullname);
@@ -109,7 +104,7 @@ $event = \report_log\event\user_report_viewed::create(array('context' => $course
 $event->trigger();
 
 echo $OUTPUT->header();
-if ($course->id != SITEID) {
+if ($courseid != SITEID) {
     $userheading = array(
             'heading' => fullname($user, has_capability('moodle/site:viewfullnames', $PAGE->context)),
             'user' => $user,
@@ -132,7 +127,7 @@ if ($mode === 'today') {
 
 $output = $PAGE->get_renderer('report_log');
 $reportlog = new report_log_renderable($logreader, $course, $user->id, 0, '', -1, -1, false, false, true, false, $PAGE->url,
-        $timefrom, '', $page, $perpage, 'timecreated DESC', '' , $sitecoursefilter);
+        $timefrom, '', $page, $perpage, 'timecreated DESC');
 
 // Setup table if log reader is enabled.
 if (!empty($reportlog->selectedlogreader)) {
@@ -142,9 +137,13 @@ if (!empty($reportlog->selectedlogreader)) {
 
 echo $output->reader_selector($reportlog);
 
+if ($mode === 'all') {
+    $reportlog->selecteddate = 0;
+}
+
 // Print the graphic chart accordingly to the mode (all, today).
 echo '<div class="graph">';
-report_log_print_graph($course, $user, $mode, 0, $logreader, $sitecoursefilter);
+report_log_print_graph($course, $user, $mode, 0, $logreader);
 echo '</div>';
 
 echo $output->render($reportlog);

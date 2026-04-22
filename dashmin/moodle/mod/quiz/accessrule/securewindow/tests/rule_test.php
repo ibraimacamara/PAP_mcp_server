@@ -16,7 +16,7 @@
 
 namespace quizaccess_securewindow;
 
-use mod_quiz\quiz_settings;
+use quiz;
 use quizaccess_securewindow;
 
 defined('MOODLE_INTERNAL') || die();
@@ -32,17 +32,17 @@ require_once($CFG->dirroot . '/mod/quiz/accessrule/securewindow/rule.php');
  * @copyright  2008 The Open University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  *
- * @covers \mod_quiz\local\access_rule_base
+ * @covers \quiz_access_rule_base
  * @covers \quizaccess_securewindow
  */
 final class rule_test extends \basic_testcase {
     // Nothing very testable in this class, just test that it obeys the general access rule contact.
-    public function test_securewindow_access_rule(): void {
+    public function test_securewindow_access_rule() {
         $quiz = new \stdClass();
         $quiz->browsersecurity = 'securewindow';
         $cm = new \stdClass();
         $cm->id = 0;
-        $quizobj = new quiz_settings($quiz, $cm, null);
+        $quizobj = new quiz($quiz, $cm, null);
         $rule = new quizaccess_securewindow($quizobj, 0);
         $attempt = new \stdClass();
 

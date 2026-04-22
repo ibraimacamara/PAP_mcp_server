@@ -57,13 +57,9 @@ $PAGE->set_url($url);
 // If the typ is pagebreak so the item will be saved directly.
 if (!$item->id && $typ === 'pagebreak') {
     require_sesskey();
-
-    $redirectmessage = '';
-    if (!feedback_create_pagebreak($feedback->id)) {
-        $redirectmessage = get_string('cannotcreatepagebreak', 'mod_feedback');
-    }
-
-    redirect($editurl, $redirectmessage, null, \core\output\notification::NOTIFY_WARNING);
+    feedback_create_pagebreak($feedback->id);
+    redirect($editurl->out(false));
+    exit;
 }
 
 //get the existing item or create it
@@ -98,20 +94,16 @@ if ($item->id) {
     $PAGE->navbar->add(get_string('add_item', 'feedback'));
 }
 $PAGE->set_heading($course->fullname);
-
-$renderer = $PAGE->get_renderer('mod_feedback');
-$pagetitle = ($itemid) ? get_string('edit_item', 'feedback') : get_string('add_item', 'feedback');
-$renderer->set_title(
-    [format_string($feedback->name), format_string($course->fullname)],
-    $pagetitle
-);
-
+$PAGE->set_title($feedback->name);
 $PAGE->activityheader->set_attrs([
     "hidecompletion" => true,
     "description" => ''
 ]);
-$PAGE->add_body_class('limitedwidth');
 echo $OUTPUT->header();
+
+/// print the tabs
+$current_tab = 'edit';
+$id = $cm->id;
 
 //print errormsg
 if (isset($error)) {

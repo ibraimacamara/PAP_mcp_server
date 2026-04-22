@@ -134,7 +134,8 @@ function report_log_extend_navigation_module($navigation, $cm) {
         && report_helper::has_valid_group(context_module::instance($cm->id))
     ) {
         $url = new moodle_url('/report/log/index.php', array('chooselog'=>'1','id'=>$cm->course,'modid'=>$cm->id));
-        $navigation->add(get_string('logs'), $url, navigation_node::TYPE_SETTING, null, 'logreport', new pix_icon('i/report', ''));
+        $navigation->add(get_string('logs'), $url, navigation_node::TYPE_SETTING, null, 'logreport', new pix_icon('i/report', ''))
+            ->set_show_in_secondary_navigation(false);
     }
 }
 

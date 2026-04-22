@@ -32,7 +32,7 @@ global $CFG;
 require_once($CFG->dirroot . '/webservice/tests/helpers.php');
 
 use dml_missing_record_exception;
-use core_external\external_api;
+use external_api;
 use externallib_advanced_testcase;
 
 /**
@@ -52,7 +52,7 @@ final class get_h5pactivity_access_information_test extends externallib_advanced
      * @param int $enabletracking if tracking is enabled
      * @param array $enabledcaps capabilities enabled
      */
-    public function test_get_h5pactivity_access_information(string $role, int $enabletracking, array $enabledcaps): void {
+    public function test_get_h5pactivity_access_information(string $role, int $enabletracking, array $enabledcaps) {
         $this->resetAfterTest();
         $this->setAdminUser();
 
@@ -124,7 +124,7 @@ final class get_h5pactivity_access_information_test extends externallib_advanced
     /**
      * Test dml_missing_record_exception in get_h5pactivity_access_information.
      */
-    public function test_dml_missing_record_exception(): void {
+    public function test_dml_missing_record_exception() {
         $this->resetAfterTest();
         $this->setAdminUser();
 

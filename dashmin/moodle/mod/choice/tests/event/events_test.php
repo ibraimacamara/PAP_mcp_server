@@ -54,7 +54,6 @@ final class events_test extends \advanced_testcase {
      */
     protected function setUp(): void {
         global $DB;
-        parent::setUp();
 
         $this->resetAfterTest();
 
@@ -67,7 +66,7 @@ final class events_test extends \advanced_testcase {
     /**
      * Test to ensure that event data is being stored correctly.
      */
-    public function test_answer_created(): void {
+    public function test_answer_created() {
         global $DB;
         // Generate user data.
         $user = $this->getDataGenerator()->create_user();
@@ -96,7 +95,7 @@ final class events_test extends \advanced_testcase {
     /**
      * Test to ensure that event data is being stored correctly.
      */
-    public function test_answer_submitted_by_another_user(): void {
+    public function test_answer_submitted_by_another_user() {
         global $DB, $USER;
         // Generate user data.
         $user = $this->getDataGenerator()->create_user();
@@ -124,7 +123,7 @@ final class events_test extends \advanced_testcase {
     /**
      * Test to ensure that multiple choice data is being stored correctly.
      */
-    public function test_answer_created_multiple(): void {
+    public function test_answer_created_multiple() {
         global $DB;
 
         // Generate user data.
@@ -172,7 +171,7 @@ final class events_test extends \advanced_testcase {
     /**
      * Test custom validations.
      */
-    public function test_answer_created_other_exception(): void {
+    public function test_answer_created_other_exception() {
         // Generate user data.
         $user = $this->getDataGenerator()->create_user();
 
@@ -193,7 +192,7 @@ final class events_test extends \advanced_testcase {
     /**
      * Test to ensure that event data is being stored correctly.
      */
-    public function test_answer_updated(): void {
+    public function test_answer_updated() {
         global $DB;
         // Generate user data.
         $user = $this->getDataGenerator()->create_user();
@@ -237,7 +236,7 @@ final class events_test extends \advanced_testcase {
     /**
      * Test to ensure that event data is being stored correctly.
      */
-    public function test_answer_deleted(): void {
+    public function test_answer_deleted() {
         global $DB, $USER;
         // Generate user data.
         $user = $this->getDataGenerator()->create_user();
@@ -273,7 +272,7 @@ final class events_test extends \advanced_testcase {
     /**
      * Test to ensure that event data is being stored correctly.
      */
-    public function test_report_viewed(): void {
+    public function test_report_viewed() {
         global $USER;
 
         $this->resetAfterTest();
@@ -300,13 +299,17 @@ final class events_test extends \advanced_testcase {
         $this->assertInstanceOf('\mod_choice\event\report_viewed', $event[0]);
         $this->assertEquals($USER->id, $event[0]->userid);
         $this->assertEquals(\context_module::instance($this->choice->cmid), $event[0]->get_context());
+        $expected = array($this->course->id, "choice", "report", 'report.php?id=' . $this->context->instanceid,
+            $this->choice->id, $this->context->instanceid);
+        $this->assertEventLegacyLogData($expected, $event[0]);
+        $this->assertEventContextNotUsed($event[0]);
         $sink->close();
     }
 
     /**
      * Test to ensure that event data is being stored correctly.
      */
-    public function test_report_downloaded(): void {
+    public function test_report_downloaded() {
         global $USER;
 
         $this->resetAfterTest();
@@ -343,7 +346,7 @@ final class events_test extends \advanced_testcase {
     /**
      * Test to ensure that event data is being stored correctly.
      */
-    public function test_course_module_viewed(): void {
+    public function test_course_module_viewed() {
         global $USER;
 
         // Generate user data.
@@ -368,13 +371,17 @@ final class events_test extends \advanced_testcase {
         $this->assertInstanceOf('\mod_choice\event\course_module_viewed', $event[0]);
         $this->assertEquals($USER->id, $event[0]->userid);
         $this->assertEquals(\context_module::instance($this->choice->cmid), $event[0]->get_context());
+        $expected = array($this->course->id, "choice", "view", 'view.php?id=' . $this->context->instanceid,
+            $this->choice->id, $this->context->instanceid);
+        $this->assertEventLegacyLogData($expected, $event[0]);
+        $this->assertEventContextNotUsed($event[0]);
         $sink->close();
     }
 
     /**
      * Test to ensure that event data is being stored correctly.
      */
-    public function test_course_module_instance_list_viewed_viewed(): void {
+    public function test_course_module_instance_list_viewed_viewed() {
         global $USER;
 
         // Not much can be tested here as the event is only triggered on a page load,
@@ -390,5 +397,8 @@ final class events_test extends \advanced_testcase {
         $this->assertInstanceOf('\mod_choice\event\course_module_instance_list_viewed', $event);
         $this->assertEquals($USER->id, $event->userid);
         $this->assertEquals(\context_course::instance($this->course->id), $event->get_context());
+        $expected = array($this->course->id, 'choice', 'view all', 'index.php?id=' . $this->course->id, '');
+        $this->assertEventLegacyLogData($expected, $event);
+        $this->assertEventContextNotUsed($event);
     }
 }

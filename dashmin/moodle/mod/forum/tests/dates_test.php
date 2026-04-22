@@ -72,7 +72,7 @@ final class dates_test extends advanced_testcase {
      * @param int|null $duedate Forum's due date.
      * @param array $expected The expected value of calling get_dates_for_module()
      */
-    public function test_get_dates_for_module(?int $duedate, array $expected): void {
+    public function test_get_dates_for_module(?int $duedate, array $expected) {
         $this->resetAfterTest();
 
         $course = $this->getDataGenerator()->create_course();

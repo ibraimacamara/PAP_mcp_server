@@ -36,16 +36,8 @@ class config {
     /** @var string Default bigbluebutton server shared secret */
     public const DEFAULT_SHARED_SECRET = '0b21fcaf34673a8c3ec8ed877d76ae34';
 
-
-    /** @var string the default bigbluebutton checksum algorithm */
-    public const DEFAULT_CHECKSUM_ALGORITHM = 'SHA256';
-
-    /** @var array list of supported bigbluebutton checksum algorithm */
-    const CHECKSUM_ALGORITHMS = [
-        self::DEFAULT_CHECKSUM_ALGORITHM,
-        'SHA1',
-        'SHA512'
-    ];
+    /** @var string Default bigbluebutton data processing agreement url */
+    public const DEFAULT_DPA_URL = 'https://blindsidenetworks.com/dpa-moodle-free-tier';
 
     /**
      * Returns moodle version.
@@ -65,8 +57,8 @@ class config {
      */
     protected static function defaultvalues(): array {
         return [
-            'server_url' => '',
-            'shared_secret' => '',
+            'server_url' => self::DEFAULT_SERVER_URL,
+            'shared_secret' => self::DEFAULT_SHARED_SECRET,
             'voicebridge_editable' => false,
             'importrecordings_enabled' => false,
             'importrecordings_from_deleted_enabled' => false,
@@ -81,7 +73,6 @@ class config {
             'recordingstatus_enabled' => false,
             'meetingevents_enabled' => false,
             'participant_moderator_default' => '0',
-            'profile_picture_enabled' => false,
             'scheduled_pre_opening' => '10',
             'recordings_enabled' => true,
             'recordings_deleted_default' => false,
@@ -122,9 +113,6 @@ class config {
             'welcome_editable' => true,
             'default_dpa_accepted' => false,
             'poll_interval' => bigbluebutton_proxy::DEFAULT_POLL_INTERVAL,
-            'checksum_algorithm' => self::DEFAULT_CHECKSUM_ALGORITHM,
-            'showpresentation_default' => true,
-            'showpresentation_editable' => false,
         ];
     }
 
@@ -175,27 +163,6 @@ class config {
      */
     public static function importrecordings_enabled(): bool {
         return (boolean) self::get('importrecordings_enabled');
-    }
-
-    /**
-     * Check if bbb server credentials are invalid.
-     *
-     * @return bool
-     */
-    public static function server_credentials_invalid(): bool {
-        // Test server credentials across all versions of the plugin are flagged.
-        $parsedurl = parse_url(self::get('server_url'));
-        $defaultserverurl = parse_url(self::DEFAULT_SERVER_URL);
-        if (!isset($parsedurl['host'])) {
-            return false;
-        }
-        if (strpos($parsedurl['host'], $defaultserverurl['host']) === 0) {
-            return true;
-        }
-        if (strpos($parsedurl['host'], 'test-install.blindsidenetworks.com') === 0) {
-            return true;
-        }
-        return false;
     }
 
     /**
@@ -253,8 +220,6 @@ class config {
             'welcome_editable' => self::get('welcome_editable'),
             'poll_interval' => self::get('poll_interval'),
             'guestaccess_enabled' => self::get('guestaccess_enabled'),
-            'showpresentation_editable' => self::get('showpresentation_editable'),
-            'showpresentation_default' => self::get('showpresentation_default'),
         ];
     }
 

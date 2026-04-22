@@ -27,7 +27,7 @@ final class userroleseditable_test extends \advanced_testcase {
     /**
      * Test user roles editable.
      */
-    public function test_update(): void {
+    public function test_update() {
         global $DB;
 
         $this->resetAfterTest();

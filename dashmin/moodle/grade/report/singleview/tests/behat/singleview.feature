@@ -55,12 +55,13 @@ Feature: We can use Single view
     And the following config values are set as admin:
       | fullnamedisplay | firstnamephonetic,lastnamephonetic |
       | alternativefullnameformat | middlename, alternatename, firstname, lastname |
+    And I change window size to "large"
     And I am on the "Course 1" "grades > Grader report > View" page logged in as "teacher1"
 
   Scenario: I can update grades, add feedback and exclude grades.
     Given I navigate to "View > Single view" in the course gradebook
     And I click on "Users" "link" in the ".page-toggler" "css_element"
-    And I click on "Student" in the "Search users" search combo box
+    And I click on "Student" in the "user" search widget
     And I turn editing mode on
     And I set the field "Override for Test assignment one" to "1"
     When I set the following fields to these values:
@@ -88,7 +89,7 @@ Feature: We can use Single view
     Then I should see "Grades were set for 2 items"
     And the field "Grade for Ann, Jill, Grainne, Beauchamp" matches value "12.05"
     And the field "Exclude for Jane, Nina, Niamh, Cholmondely" matches value "1"
-    And I click on "new grade item 1" in the "Search items" search combo box
+    And I click on "new grade item 1" in the "grade" search widget
     And I set the field "Grade for Ann, Jill, Grainne, Beauchamp" to "Very good"
     And I press "Save"
     Then I should see "Grades were set for 1 items"
@@ -97,23 +98,20 @@ Feature: We can use Single view
         | Ann, Jill, Grainne, Beauchamp | Very good |
     And I am on the "Course 1" "grades > Single view > View" page logged in as "teacher2"
     And I click on "Users" "link" in the ".page-toggler" "css_element"
-    And I click on "Student" in the "Search users" search combo box
+    And I click on "Student" in the "user" search widget
     And I turn editing mode on
     And the "Exclude for Test assignment one" "checkbox" should be disabled
     And the "Override for Test assignment one" "checkbox" should be enabled
 
   Scenario: Single view links work on grade report.
-    Given I click on grade item menu "Test assignment one" of type "gradeitem" on "grader" page
-    And I choose "Single view for this item" in the open action menu
-    And I should see "Test assignment one"
-    When I navigate to "View > Grader report" in the course gradebook
-    And I click on user menu "Grainne Beauchamp"
-    And I choose "Single view for this user" in the open action menu
+    Given I follow "Single view for Test assignment one"
+    Then I should see "Test assignment one"
+    Then I navigate to "View > Grader report" in the course gradebook
+    And I follow "Single view for Ann, Jill, Grainne, Beauchamp"
     Then I should see "Gronya,Beecham"
 
   Scenario: I can bulk update grades.
-    Given I click on user menu "Grainne Beauchamp"
-    And I choose "Single view for this user" in the open action menu
+    Given I follow "Single view for Ann, Jill, Grainne, Beauchamp"
     And I should see "Gronya,Beecham"
     When I turn editing mode on
     And I click on "Actions" "link"
@@ -128,8 +126,7 @@ Feature: We can use Single view
     Given the following "language customisations" exist:
       | component       | stringid | value |
       | core_langconfig | decsep   | #     |
-    And I click on user menu "Grainne Beauchamp"
-    And I choose "Single view for this user" in the open action menu
+    And I follow "Single view for Ann, Jill, Grainne, Beauchamp"
     And I should see "Gronya,Beecham"
     When I turn editing mode on
     And I click on "Actions" "link"
@@ -147,58 +144,56 @@ Feature: We can use Single view
     And the field "Grade for Test grade item" matches value "1#00"
 
   Scenario: Navigation works in the Single view.
-    Given I click on user menu "Grainne Beauchamp"
-    And I choose "Single view for this user" in the open action menu
+    Given I follow "Single view for Ann, Jill, Grainne, Beauchamp"
     Then I should see "Gronya,Beecham"
-    And I click on "Nee,Chumlee" "link" in the ".stickyfooter" "css_element"
+    And I follow "Nee,Chumlee"
     Then I should see "Nee,Chumlee"
-    And I click on "Gronya,Beecham" "link" in the ".stickyfooter" "css_element"
+    And I follow "Gronya,Beecham"
     Then I should see "Gronya,Beecham"
     And I open the action menu in "Test assignment four" "table_row"
     And I choose "Show all grades" in the open action menu
     Then I should see "Test assignment four"
-    And I click on "Test assignment three" in the "Search items" search combo box
+    And I follow "Test assignment three"
     Then I should see "Test assignment three"
-    And I click on "Test assignment four" in the "Search items" search combo box
+    And I follow "Test assignment four"
     Then I should see "Test assignment four"
 
   Scenario: Activities are clickable only when it has a valid activity page.
-    Given I click on user menu "Grainne Beauchamp"
-    And I choose "Single view for this user" in the open action menu
+    Given I follow "Single view for Ann, Jill, Grainne, Beauchamp"
     And "new grade item 1" "link" should not exist in the "//tbody//tr[position()=1]//td[position()=2]" "xpath_element"
     Then "Category total" "link" should not exist in the "//tbody//tr[position()=2]//td[position()=2]" "xpath_element"
     And "Course total" "link" should not exist in the "//tbody//tr[position()=last()]//td[position()=2]" "xpath_element"
 
   Scenario: Teacher sees his last viewed singleview report type when navigating back to the gradebook singleview report.
     Given I navigate to "View > Single view" in the course gradebook
-    And I should see "Search for a user to view all their grades" in the "region-main" "region"
+    And I should see "Select a user above to view all their grades" in the "region-main" "region"
     And I click on "Grade items" "link"
     And I should see "Select a grade item above" in the "region-main" "region"
     When I am on the "Course 1" "grades > Single view > View" page
     Then I should see "Select a grade item above" in the "region-main" "region"
     And I am on the "Course 1" "grades > Single view > View" page logged in as "teacher3"
-    And I should see "Search for a user to view all their grades" in the "region-main" "region"
+    And I should see "Select a user above to view all their grades" in the "region-main" "region"
 
   Scenario: Teacher sees his last viewed user report when navigating back to the gradebook singleview report.
     Given I navigate to "View > Single view" in the course gradebook
-    And I click on "Gronya,Beecham" in the "Search users" search combo box
+    And I click on "Gronya,Beecham" in the "user" search widget
     And I should see "Gronya,Beecham" in the "region-main" "region"
     When I am on the "Course 1" "grades > Single view > View" page
-    Then I should not see "Search for a user to view all their grades" in the "region-main" "region"
+    Then I should not see "Select a user above to view all their grades" in the "region-main" "region"
     And I should see "Gronya,Beecham" in the "region-main" "region"
     And I am on the "Course 1" "grades > Single view > View" page logged in as "teacher3"
-    And I should see "Search for a user to view all their grades" in the "region-main" "region"
+    And I should see "Select a user above to view all their grades" in the "region-main" "region"
 
   Scenario: Teacher sees his last viewed grade item report when navigating back to the gradebook singleview report.
     Given I navigate to "View > Single view" in the course gradebook
     And I click on "Grade items" "link"
-    And I click on "Test assignment one" in the "Search items" search combo box
+    And I click on "Test assignment one" in the "grade" search widget
     And I should see "Test assignment one" in the "region-main" "region"
     When I am on the "Course 1" "grades > Single view > View" page
     Then I should not see "Select a grade item above" in the "region-main" "region"
     And I should see "Test assignment one" in the "region-main" "region"
     And I am on the "Course 1" "grades > Single view > View" page logged in as "teacher3"
-    And I should see "Search for a user to view all their grades" in the "region-main" "region"
+    And I should see "Select a user above to view all their grades" in the "region-main" "region"
 
   Scenario: Teacher sees his last viewed user report if the user is a part of the the current group.
     Given the following "groups" exist:
@@ -212,12 +207,12 @@ Feature: We can use Single view
     And I set the field "Group mode" to "Visible groups"
     And I press "Save and display"
     And I navigate to "View > Single view" in the course gradebook
-    And I click on "Nee,Chumlee" in the "Search users" search combo box
+    And I click on "Nee,Chumlee" in the "user" search widget
     And I navigate to "View > Grader report" in the course gradebook
-    And I click on "Group 1" in the "Search groups" search combo box
+    And I select "Group 1" from the "group" singleselect
     When I navigate to "View > Single view" in the course gradebook
     Then I should see "Nee,Chumlee" in the "region-main" "region"
-    And I should not see "Search for a user to view all their grades" in the "region-main" "region"
+    And I should not see "Select a user above to view all their grades" in the "region-main" "region"
 
   Scenario: Teacher does not see his last viewed user report if the user is not a part of the the current group.
     Given the following "groups" exist:
@@ -231,39 +226,30 @@ Feature: We can use Single view
     And I set the field "Group mode" to "Visible groups"
     And I press "Save and display"
     And I navigate to "View > Single view" in the course gradebook
-    And I click on "Gronya,Beecham" in the "Search users" search combo box
+    And I click on "Gronya,Beecham" in the "user" search widget
     And I navigate to "View > Grader report" in the course gradebook
-    And I click on "Group 1" in the "Search groups" search combo box
+    And I select "Group 1" from the "group" singleselect
     When I navigate to "View > Single view" in the course gradebook
-    Then I should see "Search for a user to view all their grades" in the "region-main" "region"
+    Then I should see "Select a user above to view all their grades" in the "region-main" "region"
     And I should not see "Gronya,Beecham" in the "region-main" "region"
-    # edge case coverage: to ensure session variable not causing error upon second visit
-    And I reload the page
-    And I should see "Search for a user to view all their grades" in the "region-main" "region"
 
   Scenario: Teacher does not see his last viewed user report if that user is no longer enrolled in the course.
     Given I navigate to "View > Single view" in the course gradebook
-    And I click on "Gronya,Beecham" in the "Search users" search combo box
+    And I click on "Gronya,Beecham" in the "user" search widget
     And I navigate to course participants
     And I click on "Unenrol" "icon" in the "Gronya,Beecham" "table_row"
     And I click on "Unenrol" "button" in the "Unenrol" "dialogue"
     When I am on the "Course 1" "grades > Single view > View" page
-    Then I should see "Search for a user to view all their grades" in the "region-main" "region"
+    Then I should see "Select a user above to view all their grades" in the "region-main" "region"
     And I should not see "Gronya,Beecham" in the "region-main" "region"
-    # edge case coverage: to ensure session variable not causing error upon second visit
-    And I reload the page
-    And I should see "Search for a user to view all their grades" in the "region-main" "region"
 
   Scenario: Teacher does not see his last viewed grade item report if the item no longer exists in the course.
     Given I navigate to "View > Single view" in the course gradebook
     And I click on "Grade items" "link"
-    And I click on "Test assignment four" in the "Search items" search combo box
+    And I click on "Test assignment four" in the "grade" search widget
     And I am on "Course 1" course homepage with editing mode on
     And I delete "Test assignment four" activity
     And I run all adhoc tasks
     When I navigate to "View > Single view" in the course gradebook
     Then I should see "Select a grade item above" in the "region-main" "region"
     And I should not see "Test grade item" in the "region-main" "region"
-    # edge case coverage: to ensure session variable not causing error upon second visit
-    And I reload the page
-    And I should see "Select a grade item above" in the "region-main" "region"

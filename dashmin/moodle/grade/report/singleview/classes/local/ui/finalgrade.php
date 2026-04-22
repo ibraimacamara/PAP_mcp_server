@@ -114,8 +114,6 @@ class finalgrade extends grade_attribute_format implements unique_value, be_disa
      * @return element
      */
     public function determine_format(): element {
-        global $CFG;
-
         if (($this->grade->is_hidden() || $this->grade->grade_item->is_hidden()) &&
             !has_capability('moodle/grade:viewhidden', context_course::instance($this->grade->grade_item->courseid))) {
             return new empty_element();
@@ -139,34 +137,13 @@ class finalgrade extends grade_attribute_format implements unique_value, be_disa
                 $this->is_readonly()
             );
         } else {
-            $textattribute = new text_attribute(
+            return new text_attribute(
                 $this->get_name(),
                 $this->get_value(),
                 $this->get_label(),
                 $this->is_disabled(),
                 $this->is_readonly()
             );
-
-            // Set min/max attributes, if applicable.
-            $textattribute->set_type('number');
-            $gradeitem = $this->grade->grade_item;
-            $decimals = $gradeitem->get_decimals();
-
-            // Min attribute.
-            $minvalue = null;
-            if (isset($gradeitem->grademin)) {
-                $minvalue = format_float($gradeitem->grademin, $decimals);
-            }
-            $textattribute->set_min($minvalue);
-
-            // Max attribute.
-            $maxvalue = null;
-            if (isset($gradeitem->grademax) && empty($CFG->unlimitedgrades)) {
-                $maxvalue = format_float($gradeitem->grademax, $decimals);
-            }
-            $textattribute->set_max($maxvalue);
-
-            return $textattribute;
         }
     }
 

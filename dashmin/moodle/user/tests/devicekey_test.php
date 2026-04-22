@@ -23,6 +23,7 @@ use stdClass;
  *
  * @package core_user
  * @covers \core_user\devicekey
+ * @requires extension sodium
  */
 final class devicekey_test extends \advanced_testcase {
     /**

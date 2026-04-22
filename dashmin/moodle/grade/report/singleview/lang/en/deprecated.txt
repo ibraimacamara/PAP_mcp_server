@@ -1,1 +1,1 @@
-viewsingleuserorgradeitem,gradereport_singleview
+filtergrades,gradereport_singleview

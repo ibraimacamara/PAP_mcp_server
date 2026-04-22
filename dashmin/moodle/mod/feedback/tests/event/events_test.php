@@ -58,7 +58,6 @@ final class events_test extends \advanced_testcase {
 
     public function setUp(): void {
         global $DB;
-        parent::setUp();
 
         $this->setAdminUser();
         $gen = $this->getDataGenerator();
@@ -105,7 +104,7 @@ final class events_test extends \advanced_testcase {
     /**
      * Tests for event response_deleted.
      */
-    public function test_response_deleted_event(): void {
+    public function test_response_deleted_event() {
         global $USER, $DB;
         $this->resetAfterTest();
 
@@ -126,6 +125,12 @@ final class events_test extends \advanced_testcase {
         $this->assertEquals($this->eventfeedbackcompleted, $event->get_record_snapshot('feedback_completed', $event->objectid));
         $this->assertEquals($this->eventcourse, $event->get_record_snapshot('course', $event->courseid));
         $this->assertEquals($this->eventfeedback, $event->get_record_snapshot('feedback', $event->other['instanceid']));
+
+        // Test legacy data.
+        $arr = array($this->eventcourse->id, 'feedback', 'delete', 'view.php?id=' . $this->eventcm->id, $this->eventfeedback->id,
+                $this->eventfeedback->id);
+        $this->assertEventLegacyLogData($arr, $event);
+        $this->assertEventContextNotUsed($event);
 
         // Test can_view() .
         $this->setUser($this->eventuser);
@@ -169,7 +174,7 @@ final class events_test extends \advanced_testcase {
     /**
      * Tests for event validations related to feedback response deletion.
      */
-    public function test_response_deleted_event_exceptions(): void {
+    public function test_response_deleted_event_exceptions() {
 
         $this->resetAfterTest();
 
@@ -192,7 +197,7 @@ final class events_test extends \advanced_testcase {
     /**
      * Tests for event response_submitted.
      */
-    public function test_response_submitted_event(): void {
+    public function test_response_submitted_event() {
         global $USER, $DB;
         $this->resetAfterTest();
         $this->setUser($this->eventuser);
@@ -213,7 +218,7 @@ final class events_test extends \advanced_testcase {
 
         // Save the feedback.
         $sink = $this->redirectEvents();
-        $id = feedback_save_tmp_values($completed);
+        $id = feedback_save_tmp_values($completed, false);
         $events = $sink->get_events();
         $event = array_pop($events); // Response submitted feedback event.
         $sink->close();
@@ -233,6 +238,9 @@ final class events_test extends \advanced_testcase {
         $this->assertTrue($event->can_view());
         $this->assertDebuggingCalled();
 
+        // Test legacy data.
+        $this->assertEventLegacyLogData(null, $event);
+
         // Create a temporary response, with anonymous set to no.
         $response = new \stdClass();
         $response->feedback = $this->eventcm->instance;
@@ -249,10 +257,15 @@ final class events_test extends \advanced_testcase {
 
         // Save the feedback.
         $sink = $this->redirectEvents();
-        feedback_save_tmp_values($completed);
+        feedback_save_tmp_values($completed, false);
         $events = $sink->get_events();
         $event = array_pop($events); // Response submitted feedback event.
         $sink->close();
+
+        // Test legacy data.
+        $arr = array($this->eventcourse->id, 'feedback', 'submit', 'view.php?id=' . $this->eventcm->id, $this->eventfeedback->id,
+                     $this->eventcm->id, $this->eventuser->id);
+        $this->assertEventLegacyLogData($arr, $event);
 
         // Test can_view().
         $this->assertTrue($event->can_view());
@@ -266,7 +279,7 @@ final class events_test extends \advanced_testcase {
     /**
      * Tests for event validations related to feedback response submission.
      */
-    public function test_response_submitted_event_exceptions(): void {
+    public function test_response_submitted_event_exceptions() {
 
         $this->resetAfterTest();
 
@@ -320,7 +333,7 @@ final class events_test extends \advanced_testcase {
     /**
      * Test that event observer is executed on course deletion and the templates are removed.
      */
-    public function test_delete_course(): void {
+    public function test_delete_course() {
         global $DB;
         $this->resetAfterTest();
         feedback_save_as_template($this->eventfeedback, 'my template', 0);

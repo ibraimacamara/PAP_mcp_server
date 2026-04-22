@@ -104,7 +104,7 @@ final class custom_completion_test extends advanced_testcase {
      * @param string|null $exception Expected exception.
      */
     public function test_get_state(string $rule, int $rulecount, int $available, ?int $discussions, ?int $replies,
-                                   ?int $posts, ?int $status, ?string $exception): void {
+                                   ?int $posts, ?int $status, ?string $exception) {
 
         if (!is_null($exception)) {
             $this->expectException($exception);
@@ -160,7 +160,7 @@ final class custom_completion_test extends advanced_testcase {
     /**
      * Test for get_defined_custom_rules().
      */
-    public function test_get_defined_custom_rules(): void {
+    public function test_get_defined_custom_rules() {
         $rules = custom_completion::get_defined_custom_rules();
         $this->assertCount(3, $rules);
         $this->assertEquals('completiondiscussions', reset($rules));
@@ -169,7 +169,7 @@ final class custom_completion_test extends advanced_testcase {
     /**
      * Test for get_defined_custom_rule_descriptions().
      */
-    public function test_get_custom_rule_descriptions(): void {
+    public function test_get_custom_rule_descriptions() {
         // Get defined custom rules.
         $rules = custom_completion::get_defined_custom_rules();
 
@@ -194,7 +194,7 @@ final class custom_completion_test extends advanced_testcase {
     /**
      * Test for is_defined().
      */
-    public function test_is_defined(): void {
+    public function test_is_defined() {
         // Build a mock cm_info instance.
         $mockcminfo = $this->getMockBuilder(cm_info::class)
             ->disableOriginalConstructor()
@@ -244,7 +244,7 @@ final class custom_completion_test extends advanced_testcase {
      * @param int $status
      * @param array $expected
      */
-    public function test_get_available_custom_rules(int $status, array $expected): void {
+    public function test_get_available_custom_rules(int $status, array $expected) {
         $customdataval = [
             'customcompletionrules' => []
         ];

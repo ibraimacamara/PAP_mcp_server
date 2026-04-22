@@ -59,11 +59,6 @@
       <exclude>lib/tests/fixtures</exclude>
       <!-- <directory suffix="_test.php">lib/ajax/tests</directory> -->
     </testsuite>
-    <testsuite name="core_external_testsuite">
-      <directory suffix="_test.php">lib/external/tests</directory>
-      <exclude>lib/external/tests/classes</exclude>
-      <exclude>lib/external/tests/fixtures</exclude>
-    </testsuite>
     <testsuite name="core_favourites_testsuite">
       <directory suffix="_test.php">favourites/tests</directory>
       <exclude>favourites/tests/classes</exclude>
@@ -185,6 +180,9 @@
       <directory suffix="_test.php">group/tests</directory>
       <exclude>group/tests/classes</exclude>
       <exclude>group/tests/fixtures</exclude>
+    </testsuite>
+    <testsuite name="core_external_testsuite">
+      <directory suffix="_test.php">lib/external/tests</directory>
     </testsuite>
     <testsuite name="core_message_testsuite">
       <directory suffix="_test.php">message/tests</directory>
@@ -330,21 +328,6 @@
       <directory suffix="_test.php">admin/tests</directory>
       <exclude>admin/tests/classes</exclude>
       <exclude>admin/tests/fixtures</exclude>
-    </testsuite>
-    <testsuite name="core_communication_testsuite">
-      <directory suffix="_test.php">communication/tests</directory>
-      <exclude>communication/tests/classes</exclude>
-      <exclude>communication/tests/fixtures</exclude>
-    </testsuite>
-    <testsuite name="core_ai_testsuite">
-      <directory suffix="_test.php">ai/tests</directory>
-      <exclude>ai/tests/classes</exclude>
-      <exclude>ai/tests/fixtures</exclude>
-    </testsuite>
-    <testsuite name="core_sms_testsuite">
-      <directory suffix="_test.php">sms/tests</directory>
-      <exclude>sms/tests/classes</exclude>
-      <exclude>sms/tests/fixtures</exclude>
     </testsuite>
 
     <!--Plugin suites: use admin/tool/phpunit/cli/util.php to build phpunit.xml from

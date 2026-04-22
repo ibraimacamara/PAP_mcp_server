@@ -48,7 +48,7 @@ Feature: In a timed assignment, students should confirm before starting the time
     And "#mod_assign_timelimit_block" "css_element" should not exist
     # Now start the timer.
     And I click on "Begin assignment" "link"
-    And I click on "Begin assignment" "button" in the ".modal-footer" "css_element"
+    And I click on "Begin assignment" "button" in the ".confirmation-buttons" "css_element"
     And "#mod_assign_timelimit_block" "css_element" should exist
 
   @javascript
@@ -75,7 +75,7 @@ Feature: In a timed assignment, students should confirm before starting the time
     And "#mod_assign_timelimit_block" "css_element" should not exist
     # Now start the timer.
     And I click on "Begin assignment" "link"
-    And I click on "Begin assignment" "button" in the ".modal-footer" "css_element"
+    And I click on "Begin assignment" "button" in the ".confirmation-buttons" "css_element"
     And "#mod_assign_timelimit_block" "css_element" should exist
     And I log out
     # Now check the submission has started for the other group member too.

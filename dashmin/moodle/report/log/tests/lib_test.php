@@ -52,7 +52,6 @@ final class lib_test extends \advanced_testcase {
     private $tree;
 
     public function setUp(): void {
-        parent::setUp();
         $this->user = $this->getDataGenerator()->create_user();
         $this->course = $this->getDataGenerator()->create_course();
         $this->tree = new \core_user\output\myprofile\tree();
@@ -62,12 +61,13 @@ final class lib_test extends \advanced_testcase {
     /**
      * Test report_log_supports_logstore.
      */
-    public function test_report_log_supports_logstore(): void {
+    public function test_report_log_supports_logstore() {
         $logmanager = get_log_manager();
         $allstores = \core_component::get_plugin_list_with_class('logstore', 'log\store');
 
         $supportedstores = array(
             'logstore_database' => '\logstore_database\log\store',
+            'logstore_legacy' => '\logstore_legacy\log\store',
             'logstore_standard' => '\logstore_standard\log\store'
         );
 
@@ -83,7 +83,7 @@ final class lib_test extends \advanced_testcase {
     /**
      * Tests the report_log_myprofile_navigation() function as an admin viewing the logs for a user.
      */
-    public function test_report_log_myprofile_navigation(): void {
+    public function test_report_log_myprofile_navigation() {
         // Set as the admin.
         $this->setAdminUser();
         $iscurrentuser = false;
@@ -92,6 +92,7 @@ final class lib_test extends \advanced_testcase {
         report_log_myprofile_navigation($this->tree, $this->user, $iscurrentuser, $this->course);
         $reflector = new \ReflectionObject($this->tree);
         $nodes = $reflector->getProperty('nodes');
+        $nodes->setAccessible(true);
         $this->assertArrayHasKey('alllogs', $nodes->getValue($this->tree));
         $this->assertArrayHasKey('todayslogs', $nodes->getValue($this->tree));
     }
@@ -99,7 +100,7 @@ final class lib_test extends \advanced_testcase {
     /**
      * Tests the report_log_myprofile_navigation() function as a user without permission.
      */
-    public function test_report_log_myprofile_navigation_without_permission(): void {
+    public function test_report_log_myprofile_navigation_without_permission() {
         // Set to the other user.
         $this->setUser($this->user);
         $iscurrentuser = true;
@@ -108,6 +109,7 @@ final class lib_test extends \advanced_testcase {
         report_log_myprofile_navigation($this->tree, $this->user, $iscurrentuser, $this->course);
         $reflector = new \ReflectionObject($this->tree);
         $nodes = $reflector->getProperty('nodes');
+        $nodes->setAccessible(true);
         $this->assertArrayNotHasKey('alllogs', $nodes->getValue($this->tree));
         $this->assertArrayNotHasKey('todayslogs', $nodes->getValue($this->tree));
     }

@@ -53,8 +53,6 @@ $context = context_module::instance($cm->id);
 require_capability('mod/glossary:view', $context);
 $hassecondary = $PAGE->has_secondary_navigation();
 
-$headinglevel = $PAGE->activityheader->get_heading_level();
-
 // Prepare format_string/text options
 $fmtoptions = array(
     'context' => $context);
@@ -297,6 +295,7 @@ if (!empty($CFG->enablerssfeeds) && !empty($CFG->glossary_enablerssfeeds)
 }
 if ($tab == GLOSSARY_APPROVAL_VIEW) {
     require_capability('mod/glossary:approve', $context);
+    $PAGE->navbar->add($strwaitingapproval);
 }
 
 $hassecondary = $PAGE->has_secondary_navigation();
@@ -434,20 +433,24 @@ if ($allentries) {
             if ($currentpivot != $upperpivot) {
                 $currentpivot = $upperpivot;
 
-                // Print the group break if applicable.
-                $categoryheader = '';
+                // print the group break if apply
+
+                echo '<div>';
+                echo '<table cellspacing="0" class="glossarycategoryheader">';
+
+                echo '<tr>';
                 if ($userispivot) {
-                    // Printing the user icon if defined (only when browsing authors).
+                // printing the user icon if defined (only when browsing authors)
+                    echo '<th align="left">';
                     $user = mod_glossary_entry_query_builder::get_user_from_record($entry);
-                    $userpictureoptions = [
-                        'courseid' => $course->id,
-                    ];
-                    $categoryheader .= $OUTPUT->user_picture($user, $userpictureoptions);
-                    $coursecontext = context_course::instance($course->id);
-                    $pivottoshow = fullname($user, has_capability('moodle/site:viewfullnames', $coursecontext));
+                    echo $OUTPUT->user_picture($user, array('courseid'=>$course->id));
+                    $pivottoshow = fullname($user, has_capability('moodle/site:viewfullnames', context_course::instance($course->id)));
+                } else {
+                    echo '<th >';
                 }
-                $categoryheader .= $OUTPUT->heading($pivottoshow, $headinglevel);
-                echo html_writer::div($categoryheader, 'glossarycategoryheader text-center');
+
+                echo $OUTPUT->heading($pivottoshow, 3);
+                echo "</th></tr></table></div>\n";
             }
         }
 
@@ -471,24 +474,8 @@ if ($allentries) {
             $entry->highlight = $strippedsearch;
         }
 
-        // Determine heading level for the concept.
-        $conceptheadinglevel = $headinglevel;
-        if (!empty($categoryheader)) {
-            // If we're displaying the glossary category header, increase the concept heading level.
-            $conceptheadinglevel++;
-        }
-        // And finally print the entry.
-        glossary_print_entry(
-            $course,
-            $cm,
-            $glossary,
-            $entry,
-            $mode,
-            $hook,
-            1,
-            $displayformat,
-            conceptheadinglevel: $conceptheadinglevel,
-        );
+        /// and finally print the entry.
+        glossary_print_entry($course, $cm, $glossary, $entry, $mode, $hook,1,$displayformat);
         $entriesshown++;
     }
     // The all entries value may be a recordset or an array.

@@ -34,7 +34,7 @@ final class numeric_helper_test extends \advanced_testcase {
      * @param $decsep
      * @param $tests
      */
-    public function test_lesson_unformat_numeric_value($decsep, $tests): void {
+    public function test_lesson_unformat_numeric_value($decsep, $tests) {
         $this->define_local_decimal_separator($decsep);
 
         foreach ($tests as $test) {
@@ -49,7 +49,7 @@ final class numeric_helper_test extends \advanced_testcase {
      * @param $decsep
      * @param $tests
      */
-    public function test_lesson_format_numeric_value($decsep, $tests): void {
+    public function test_lesson_format_numeric_value($decsep, $tests) {
         $this->define_local_decimal_separator($decsep);
 
         foreach ($tests as $test) {

@@ -32,7 +32,7 @@ function logErro(string $mensagem): void
 
 function erroUtilizador(string $mensagem): void
 {
-    $_SESSION['alerta'] = [
+    $_SESSION['alerta_encarregado'] = [
         'tipo' => 'warning',
         'msg' => $mensagem
     ];
@@ -47,7 +47,7 @@ function erroTecnico(string $logMsg, int $httpCode = 500): void
     logErro($logMsg);
     http_response_code($httpCode);
 
-    $_SESSION['alerta'] = [
+    $_SESSION['alerta_encarregado'] = [
         'tipo' => 'danger',
         'msg' => 'Ocorreu um erro interno. Tente novamente mais tarde.'
     ];
@@ -63,9 +63,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 if (
-    empty($_POST['csrf_token']) ||
-    empty($_SESSION['csrf_token']) ||
-    !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])
+    empty($_POST['csrf_token_encarregado']) ||
+    empty($_SESSION['csrf_token_encarregado']) ||
+    !hash_equals($_SESSION['csrf_token_encarregado'], $_POST['csrf_token_encarregado'])
 ) {
     erroUtilizador('Sessão expirada. Recarregue o formulário.');
 }
@@ -95,8 +95,6 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     erroUtilizador('Email inválido.');
 }
 
-
-          
 try {
     
     // Senha final
@@ -104,6 +102,7 @@ try {
 
     $senhaHash = password_hash($senhaOriginal, PASSWORD_DEFAULT);
     $categoria = "encarregado";
+    $fotoPath = null;
     $stmt = $pdo->prepare("
     INSERT INTO users (username, senha, categoria, foto)
     VALUES (:username, :senha, :categoria, :foto)
@@ -137,8 +136,7 @@ try {
         ':freguesia' => $freguesia
     ]);
 
-
-    $_SESSION['alerta'] = [
+    $_SESSION['alerta_encarregado'] = [
         'tipo' => 'success',
         'msg' => 'Encarregado registado com sucesso.'
     ];
@@ -154,6 +152,6 @@ try {
 
 
 
-unset($_SESSION['csrf_token']);
+unset($_SESSION['csrf_token_encarregado']);
 header('Location: form_encarregado.php');
 exit;

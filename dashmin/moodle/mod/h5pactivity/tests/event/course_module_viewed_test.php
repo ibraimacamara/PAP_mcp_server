@@ -40,7 +40,7 @@ final class course_module_viewed_test extends advanced_testcase {
     /**
      * Test course_module_viewed event.
      */
-    public function test_course_module_viewed(): void {
+    public function test_course_module_viewed() {
         // There is no proper API to call to trigger this event, so what we are
         // doing here is simply making sure that the events returns the right information.
 
@@ -68,6 +68,8 @@ final class course_module_viewed_test extends advanced_testcase {
         $this->assertInstanceOf('\mod_h5pactivity\event\course_module_viewed', $event);
         $this->assertEquals(context_module::instance($activity->cmid), $event->get_context());
         $this->assertEquals($activity->id, $event->objectid);
+        $expected = [$course->id, 'h5pactivity', 'view', 'view.php?id=' . $activity->cmid, $activity->id, $activity->cmid];
+        $this->assertEventLegacyLogData($expected, $event);
         $this->assertEventContextNotUsed($event);
     }
 }

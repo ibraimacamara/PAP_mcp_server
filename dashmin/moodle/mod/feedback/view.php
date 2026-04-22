@@ -27,6 +27,8 @@ require_once($CFG->dirroot . '/mod/feedback/lib.php');
 $id = required_param('id', PARAM_INT);
 $courseid = optional_param('courseid', false, PARAM_INT);
 
+$current_tab = 'view';
+
 list($course, $cm) = get_course_and_cm_from_cmid($id, 'feedback');
 require_course_login($course, true, $cm);
 $feedback = $PAGE->activityrecord;
@@ -39,15 +41,14 @@ if ($course->id == SITEID) {
     $PAGE->set_pagelayout('incourse');
 }
 $PAGE->set_url('/mod/feedback/view.php', array('id' => $cm->id));
-
-/** @var \mod_feedback\output\renderer $renderer */
-$renderer = $PAGE->get_renderer('mod_feedback');
-$renderer->set_title(
-    [format_string($feedback->name), format_string($course->fullname)]
-);
-
+$PAGE->set_title($feedback->name);
 $PAGE->set_heading($course->fullname);
 $PAGE->add_body_class('limitedwidth');
+
+// Check access to the given courseid.
+if ($courseid AND $courseid != SITEID) {
+    require_course_login(get_course($courseid)); // This overwrites the object $COURSE .
+}
 
 // Check whether the feedback is mapped to the given courseid.
 if (!has_capability('mod/feedback:edititems', $context) &&
@@ -65,6 +66,9 @@ $actionbar = new \mod_feedback\output\standard_action_bar(
     $feedbackcompletion->get_resume_page(),
     $courseid
 );
+
+/** @var \mod_feedback\output\renderer $renderer */
+$renderer = $PAGE->get_renderer('mod_feedback');
 
 // Trigger module viewed event.
 $feedbackcompletion->trigger_module_viewed();

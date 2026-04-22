@@ -1463,9 +1463,6 @@ class page_wiki_map extends page_wiki {
      */
     private $view;
 
-    /** @var renderer_base */
-    protected $output;
-
     function print_header() {
         parent::print_header();
         $this->print_pagetitle();
@@ -1967,7 +1964,7 @@ class page_wiki_restoreversion extends page_wiki {
         echo $OUTPUT->container_start('mt-2', 'wiki_restoreform');
         $yesbutton = new single_button($restoreurl, get_string('yes'), 'post');
         $nobutton = new single_button($return, get_string('no'), 'post');
-        $nobutton->class .= ' ms-2';
+        $nobutton->class .= ' ml-2';
         echo $OUTPUT->render($yesbutton);
         echo $OUTPUT->render($nobutton);
         echo $OUTPUT->container_end();
@@ -1996,7 +1993,9 @@ class page_wiki_deletecomment extends page_wiki {
     }
 
     public function set_action($action, $commentid, $content) {
+        $this->action = $action;
         $this->commentid = $commentid;
+        $this->content = $content;
     }
 
     protected function create_navbar() {
@@ -2216,7 +2215,7 @@ class page_wiki_viewversion extends page_wiki {
             $pageversion->content = file_rewrite_pluginfile_urls($pageversion->content, 'pluginfile.php', $this->modcontext->id, 'mod_wiki', 'attachments', $this->subwiki->id);
 
             $parseroutput = wiki_parse_content($pageversion->contentformat, $pageversion->content, $options);
-            $content = $OUTPUT->container(format_text($parseroutput['parsed_text'], FORMAT_HTML, ['overflowdiv' => true]));
+            $content = $OUTPUT->container(format_text($parseroutput['parsed_text'], FORMAT_HTML, array('overflowdiv'=>true)), false, '', '', true);
             echo $OUTPUT->box($content, 'generalbox wiki_contentbox');
 
         } else {

@@ -114,8 +114,9 @@ try {
 
         $tiposPermitidos = [
             'image/jpeg' => 'jpg',
+            'image/jpg'  => 'jpg',
             'image/png'  => 'png',
-            'image/webp' => 'webp'
+            'image/gif' => 'gif'
         ];
 
         if (!array_key_exists($foto['type'], $tiposPermitidos)) {

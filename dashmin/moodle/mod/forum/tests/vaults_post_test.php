@@ -41,7 +41,6 @@ final class vaults_post_test extends \advanced_testcase {
      * Set up function for tests.
      */
     public function setUp(): void {
-        parent::setUp();
         $vaultfactory = \mod_forum\local\container::get_vault_factory();
         $this->vault = $vaultfactory->get_post_vault();
     }
@@ -51,13 +50,12 @@ final class vaults_post_test extends \advanced_testcase {
      */
     public function tearDown(): void {
         unset($this->vault);
-        parent::tearDown();
     }
 
     /**
      * Test get_from_id.
      */
-    public function test_get_from_id(): void {
+    public function test_get_from_id() {
         $this->resetAfterTest();
 
         $datagenerator = $this->getDataGenerator();
@@ -76,7 +74,7 @@ final class vaults_post_test extends \advanced_testcase {
      *
      * @covers ::get_from_discussion_id
      */
-    public function test_get_from_discussion_id(): void {
+    public function test_get_from_discussion_id() {
         $this->resetAfterTest();
 
         $datagenerator = $this->getDataGenerator();
@@ -105,7 +103,7 @@ final class vaults_post_test extends \advanced_testcase {
      *
      * @covers ::get_from_discussion_id
      */
-    public function test_get_from_discussion_id_private_replies(): void {
+    public function test_get_from_discussion_id_private_replies() {
         $this->resetAfterTest();
 
         $course = $this->getDataGenerator()->create_course();
@@ -149,7 +147,7 @@ final class vaults_post_test extends \advanced_testcase {
      *
      * @covers ::get_from_discussion_ids
      */
-    public function test_get_from_discussion_ids_empty(): void {
+    public function test_get_from_discussion_ids_empty() {
         $this->resetAfterTest();
 
         $datagenerator = $this->getDataGenerator();
@@ -165,7 +163,7 @@ final class vaults_post_test extends \advanced_testcase {
      *
      * @covers ::get_from_discussion_ids
      */
-    public function test_get_from_discussion_ids(): void {
+    public function test_get_from_discussion_ids() {
         $this->resetAfterTest();
 
         $datagenerator = $this->getDataGenerator();
@@ -211,7 +209,7 @@ final class vaults_post_test extends \advanced_testcase {
      *
      * @covers ::get_from_discussion_ids
      */
-    public function test_get_from_discussion_ids_private_replies(): void {
+    public function test_get_from_discussion_ids_private_replies() {
         $this->resetAfterTest();
 
         $course = $this->getDataGenerator()->create_course();
@@ -307,7 +305,7 @@ final class vaults_post_test extends \advanced_testcase {
      *
      * @covers ::get_replies_to_post
      */
-    public function test_get_replies_to_post(): void {
+    public function test_get_replies_to_post() {
         $this->resetAfterTest();
 
         $datagenerator = $this->getDataGenerator();
@@ -355,7 +353,7 @@ final class vaults_post_test extends \advanced_testcase {
      *
      * @covers ::get_replies_to_post
      */
-    public function test_get_replies_to_post_private_replies(): void {
+    public function test_get_replies_to_post_private_replies() {
         $this->resetAfterTest();
 
         $course = $this->getDataGenerator()->create_course();
@@ -515,7 +513,7 @@ final class vaults_post_test extends \advanced_testcase {
      *
      * @covers ::get_reply_count_for_discussion_ids
      */
-    public function test_get_reply_count_for_discussion_ids_empty(): void {
+    public function test_get_reply_count_for_discussion_ids_empty() {
         $this->resetAfterTest();
 
         $datagenerator = $this->getDataGenerator();
@@ -531,7 +529,7 @@ final class vaults_post_test extends \advanced_testcase {
      *
      * @covers ::get_reply_count_for_discussion_ids
      */
-    public function test_get_reply_count_for_discussion_ids(): void {
+    public function test_get_reply_count_for_discussion_ids() {
         $this->resetAfterTest();
 
         $datagenerator = $this->getDataGenerator();
@@ -580,7 +578,7 @@ final class vaults_post_test extends \advanced_testcase {
      *
      * @covers ::get_reply_count_for_discussion_ids
      */
-    public function test_get_reply_count_for_discussion_ids_private_replies(): void {
+    public function test_get_reply_count_for_discussion_ids_private_replies() {
         $this->resetAfterTest();
 
         $course = $this->getDataGenerator()->create_course();
@@ -630,7 +628,7 @@ final class vaults_post_test extends \advanced_testcase {
      *
      * @covers ::get_reply_count_for_post_id_in_discussion_id
      */
-    public function test_get_reply_count_for_post_id_in_discussion_id(): void {
+    public function test_get_reply_count_for_post_id_in_discussion_id() {
         $this->resetAfterTest();
 
         $datagenerator = $this->getDataGenerator();
@@ -660,7 +658,7 @@ final class vaults_post_test extends \advanced_testcase {
      *
      * @covers ::get_reply_count_for_post_id_in_discussion_id
      */
-    public function test_get_reply_count_for_post_id_in_discussion_id_private_replies(): void {
+    public function test_get_reply_count_for_post_id_in_discussion_id_private_replies() {
         $this->resetAfterTest();
 
         $course = $this->getDataGenerator()->create_course();
@@ -710,7 +708,7 @@ final class vaults_post_test extends \advanced_testcase {
      *
      * @covers ::get_unread_count_for_discussion_ids
      */
-    public function test_get_unread_count_for_discussion_ids(): void {
+    public function test_get_unread_count_for_discussion_ids() {
         global $CFG;
         $this->resetAfterTest();
 
@@ -770,7 +768,7 @@ final class vaults_post_test extends \advanced_testcase {
      *
      * @covers ::get_unread_count_for_discussion_ids
      */
-    public function test_get_unread_count_for_discussion_ids_empty(): void {
+    public function test_get_unread_count_for_discussion_ids_empty() {
         $this->resetAfterTest();
 
         $datagenerator = $this->getDataGenerator();
@@ -786,25 +784,22 @@ final class vaults_post_test extends \advanced_testcase {
      *
      * @covers ::get_latest_posts_for_discussion_ids
      */
-    public function test_get_latest_posts_for_discussion_ids(): void {
+    public function test_get_latest_posts_for_discussion_ids() {
         $this->resetAfterTest();
 
         $datagenerator = $this->getDataGenerator();
         $course = $datagenerator->create_course();
         [$teacher, $otherteacher] = $this->helper_create_users($course, 2, 'teacher');
         [$user, $user2] = $this->helper_create_users($course, 2, 'student');
-        $now = time();
         $forum = $datagenerator->create_module('forum', ['course' => $course->id]);
         [$discussion1, $post1] = $this->helper_post_to_forum($forum, $user);
-        $post2 = $this->helper_reply_to_post($post1, $user, ['created' => $now + 100]);
-        $post3 = $this->helper_reply_to_post($post1, $user, ['created' => $now + 101]);
-        $post4 = $this->helper_reply_to_post($post2, $user, ['created' => $now + 102]);
+        $post2 = $this->helper_reply_to_post($post1, $user);
+        $post3 = $this->helper_reply_to_post($post1, $user);
+        $post4 = $this->helper_reply_to_post($post2, $user);
         [$discussion2, $post5] = $this->helper_post_to_forum($forum, $user);
         $post6 = $this->helper_reply_to_post($post5, $user);
-        $post7 = $this->helper_reply_to_post($post5, $user);
-        $post8 = $this->helper_reply_to_post($post6, $user);
-        [$discussion3, $post9] = $this->helper_post_to_forum($forum, $user);
-        $post10 = $this->helper_post_to_discussion($forum, $discussion3, $teacher, [
+        [$discussion3, $post7] = $this->helper_post_to_forum($forum, $user);
+        $post8 = $this->helper_post_to_discussion($forum, $discussion3, $teacher, [
             'privatereplyto' => $user->id,
         ]);
 
@@ -816,22 +811,22 @@ final class vaults_post_test extends \advanced_testcase {
             [$discussion1->id, $discussion2->id], false);
         $this->assertCount(2, $ids);
         $this->assertEquals($post4->id, $ids[$discussion1->id]->get_id());
-        $this->assertEquals($post8->id, $ids[$discussion2->id]->get_id());
+        $this->assertEquals($post6->id, $ids[$discussion2->id]->get_id());
 
         $ids = $this->vault->get_latest_posts_for_discussion_ids($user,
             [$discussion1->id, $discussion2->id, $discussion3->id], false);
         $this->assertCount(3, $ids);
         $this->assertEquals($post4->id, $ids[$discussion1->id]->get_id());
-        $this->assertEquals($post8->id, $ids[$discussion2->id]->get_id());
-        $this->assertEquals($post10->id, $ids[$discussion3->id]->get_id());
+        $this->assertEquals($post6->id, $ids[$discussion2->id]->get_id());
+        $this->assertEquals($post8->id, $ids[$discussion3->id]->get_id());
 
         // Checks the user who doesn't have access to the private reply.
         $ids = $this->vault->get_latest_posts_for_discussion_ids($user2,
             [$discussion1->id, $discussion2->id, $discussion3->id], false);
         $this->assertCount(3, $ids);
         $this->assertEquals($post4->id, $ids[$discussion1->id]->get_id());
-        $this->assertEquals($post8->id, $ids[$discussion2->id]->get_id());
-        $this->assertEquals($post9->id, $ids[$discussion3->id]->get_id());
+        $this->assertEquals($post6->id, $ids[$discussion2->id]->get_id());
+        $this->assertEquals($post7->id, $ids[$discussion3->id]->get_id());
 
         // Checks the user with the private reply to.
         $ids = $this->vault->get_latest_posts_for_discussion_ids($user, [
@@ -842,8 +837,8 @@ final class vaults_post_test extends \advanced_testcase {
         ], false);
         $this->assertCount(3, $ids);
         $this->assertEquals($post4->id, $ids[$discussion1->id]->get_id());
-        $this->assertEquals($post8->id, $ids[$discussion2->id]->get_id());
-        $this->assertEquals($post10->id, $ids[$discussion3->id]->get_id());
+        $this->assertEquals($post6->id, $ids[$discussion2->id]->get_id());
+        $this->assertEquals($post8->id, $ids[$discussion3->id]->get_id());
     }
 
     /**
@@ -851,7 +846,7 @@ final class vaults_post_test extends \advanced_testcase {
      *
      * @covers ::get_latest_posts_for_discussion_ids
      */
-    public function test_get_latest_posts_for_discussion_ids_empty(): void {
+    public function test_get_latest_posts_for_discussion_ids_empty() {
         $this->resetAfterTest();
 
         $datagenerator = $this->getDataGenerator();
@@ -867,23 +862,20 @@ final class vaults_post_test extends \advanced_testcase {
      *
      * @covers ::get_first_post_for_discussion_ids
      */
-    public function test_get_first_post_for_discussion_ids(): void {
+    public function test_get_first_post_for_discussion_ids() {
         $this->resetAfterTest();
 
         $datagenerator = $this->getDataGenerator();
         $user = $datagenerator->create_user();
         $course = $datagenerator->create_course();
         $forum = $datagenerator->create_module('forum', ['course' => $course->id]);
-        $now = time();
         [$discussion1, $post1] = $this->helper_post_to_forum($forum, $user);
-        $post2 = $this->helper_reply_to_post($post1, $user, ['created' => $now + 100]);
-        $post3 = $this->helper_reply_to_post($post1, $user, ['created' => $now + 101]);
-        $post4 = $this->helper_reply_to_post($post2, $user, ['created' => $now + 102]);
+        $post2 = $this->helper_reply_to_post($post1, $user);
+        $post3 = $this->helper_reply_to_post($post1, $user);
+        $post4 = $this->helper_reply_to_post($post2, $user);
         [$discussion2, $post5] = $this->helper_post_to_forum($forum, $user);
         $post6 = $this->helper_reply_to_post($post5, $user);
-        $post7 = $this->helper_reply_to_post($post5, $user);
-        $post8 = $this->helper_reply_to_post($post6, $user);
-        [$discussion3, $post9] = $this->helper_post_to_forum($forum, $user);
+        [$discussion3, $post7] = $this->helper_post_to_forum($forum, $user);
 
         $firstposts = $this->vault->get_first_post_for_discussion_ids([$discussion1->id]);
         $this->assertCount(1, $firstposts);
@@ -898,7 +890,7 @@ final class vaults_post_test extends \advanced_testcase {
         $this->assertCount(3, $firstposts);
         $this->assertEquals($post1->id, $firstposts[$post1->id]->get_id());
         $this->assertEquals($post5->id, $firstposts[$post5->id]->get_id());
-        $this->assertEquals($post9->id, $firstposts[$post9->id]->get_id());
+        $this->assertEquals($post7->id, $firstposts[$post7->id]->get_id());
 
         $firstposts = $this->vault->get_first_post_for_discussion_ids([
             $discussion1->id,
@@ -909,7 +901,7 @@ final class vaults_post_test extends \advanced_testcase {
         $this->assertCount(3, $firstposts);
         $this->assertEquals($post1->id, $firstposts[$post1->id]->get_id());
         $this->assertEquals($post5->id, $firstposts[$post5->id]->get_id());
-        $this->assertEquals($post9->id, $firstposts[$post9->id]->get_id());
+        $this->assertEquals($post7->id, $firstposts[$post7->id]->get_id());
     }
 
     /**
@@ -917,7 +909,7 @@ final class vaults_post_test extends \advanced_testcase {
      *
      * @covers ::get_first_post_for_discussion_ids
      */
-    public function test_get_first_post_for_discussion_ids_empty(): void {
+    public function test_get_first_post_for_discussion_ids_empty() {
         $this->resetAfterTest();
 
         $datagenerator = $this->getDataGenerator();
@@ -933,7 +925,7 @@ final class vaults_post_test extends \advanced_testcase {
      *
      * @covers ::get_from_filters
      */
-    public function test_get_from_filters(): void {
+    public function test_get_from_filters() {
         $this->resetAfterTest();
 
         $datagenerator = $this->getDataGenerator();
@@ -994,7 +986,7 @@ final class vaults_post_test extends \advanced_testcase {
         $this->assertEquals($post4->id, array_values($entities)[3]->get_id());
     }
 
-    public function test_get_from_filters_from_to_dates(): void {
+    public function test_get_from_filters_from_to_dates() {
         $this->resetAfterTest();
 
         $datagenerator = $this->getDataGenerator();
@@ -1029,7 +1021,7 @@ final class vaults_post_test extends \advanced_testcase {
      *
      * @covers ::get_from_filters
      */
-    public function test_get_from_filters_empty(): void {
+    public function test_get_from_filters_empty() {
         $this->resetAfterTest();
 
         $datagenerator = $this->getDataGenerator();
@@ -1046,7 +1038,7 @@ final class vaults_post_test extends \advanced_testcase {
      *
      * @covers ::get_from_filters
      */
-    public function test_get_from_filters_private_replies(): void {
+    public function test_get_from_filters_private_replies() {
         $this->resetAfterTest();
 
         $course = $this->getDataGenerator()->create_course();

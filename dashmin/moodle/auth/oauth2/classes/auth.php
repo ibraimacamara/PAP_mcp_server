@@ -63,6 +63,7 @@ class auth extends \auth_plugin_base {
     public function __construct() {
         $this->authtype = 'oauth2';
         $this->config = get_config('auth_oauth2');
+        $this->customfields = $this->get_custom_user_profile_fields();
     }
 
     /**
@@ -309,7 +310,7 @@ class auth extends \auth_plugin_base {
             return $userdata;
         }
 
-        $allfields = array_merge($this->userfields, $this->get_custom_user_profile_fields());
+        $allfields = array_merge($this->userfields, $this->customfields);
 
         // Go through each field from the external data.
         foreach ($externaldata as $fieldname => $value) {
@@ -630,7 +631,7 @@ class auth extends \auth_plugin_base {
      * @param stdClass $user A user object
      * @return string[] An array of strings with keys subject and message
      */
-    public function get_password_change_info(stdClass $user): array {
+    public function get_password_change_info(stdClass $user) : array {
         $site = get_site();
 
         $data = new stdClass();

@@ -18,6 +18,7 @@ define('NO_MOODLE_COOKIES', true); // Because it interferes with caching
     require_once($CFG->dirroot.'/filter/tex/latex.php');
 
     $cmd    = '';               // Initialise these variables
+    $status = '';
 
     $relativepath = get_file_argument();
 
@@ -57,16 +58,13 @@ define('NO_MOODLE_COOKIES', true); // Because it interferes with caching
                 $texexp = preg_replace('!\r\n?!', ' ', $texexp);
                 $texexp = '\Large '.$texexp;
                 $cmd = filter_tex_get_cmd($pathname, $texexp);
-                filter_tex_exec($cmd, $status);
+                system($cmd, $status);
             }
         }
     }
 
     if (file_exists($pathname)) {
-        send_file($pathname, $image, YEARSECS, 0, false, false, '', false, [
-            'cacheability' => 'public',
-            'immutable' => true,
-        ]);
+        send_file($pathname, $image);
     } else {
         if (debugging()) {
             echo "The shell command<br />$cmd<br />returned status = $status<br />\n";

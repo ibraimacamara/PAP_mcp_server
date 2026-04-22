@@ -48,7 +48,6 @@ final class events_test extends \advanced_testcase {
      */
     public function setUp(): void {
         global $DB;
-        parent::setUp();
 
         $this->resetAfterTest();
         // Create course and wiki.
@@ -69,7 +68,7 @@ final class events_test extends \advanced_testcase {
     /**
      * Test comment_created event.
      */
-    public function test_comment_created(): void {
+    public function test_comment_created() {
         $this->setUp();
 
         $page = $this->wikigenerator->create_first_page($this->wiki);
@@ -92,7 +91,7 @@ final class events_test extends \advanced_testcase {
     /**
      * Test comment_deleted event.
      */
-    public function test_comment_deleted(): void {
+    public function test_comment_deleted() {
         $this->setUp();
 
         $page = $this->wikigenerator->create_first_page($this->wiki);
@@ -121,7 +120,7 @@ final class events_test extends \advanced_testcase {
     /**
      * Test comment_viewed event.
      */
-    public function test_comment_viewed(): void {
+    public function test_comment_viewed() {
         // There is no proper API to call or trigger this event, so simulating event
         // to check if event returns the right information.
 
@@ -145,12 +144,15 @@ final class events_test extends \advanced_testcase {
         // Checking that the event contains the expected values.
         $this->assertInstanceOf('\mod_wiki\event\comments_viewed', $event);
         $this->assertEquals($context, $event->get_context());
+        $expected = array($this->course->id, 'wiki', 'comments', 'comments.php?pageid=' . $page->id, $page->id, $this->wiki->cmid);
+        $this->assertEventLegacyLogData($expected, $event);
+        $this->assertEventContextNotUsed($event);
     }
 
     /**
      * Test instances_list_viewed event.
      */
-    public function test_course_module_instance_list_viewed(): void {
+    public function test_course_module_instance_list_viewed() {
         // There is no proper API to call or trigger this event, so simulating event
         // to check if event returns the right information.
 
@@ -170,12 +172,15 @@ final class events_test extends \advanced_testcase {
         // Checking that the event contains the expected values.
         $this->assertInstanceOf('\mod_wiki\event\course_module_instance_list_viewed', $event);
         $this->assertEquals($context, $event->get_context());
+        $expected = array($this->course->id, 'wiki', 'view all', 'index.php?id=' . $this->course->id, '');
+        $this->assertEventLegacyLogData($expected, $event);
+        $this->assertEventContextNotUsed($event);
     }
 
     /**
      * Test course_module_viewed event.
      */
-    public function test_course_module_viewed(): void {
+    public function test_course_module_viewed() {
         // There is no proper API to call or trigger this event, so simulating event
         // to check if event returns the right information.
 
@@ -199,12 +204,16 @@ final class events_test extends \advanced_testcase {
         $this->assertInstanceOf('\mod_wiki\event\course_module_viewed', $event);
         $this->assertEquals($context, $event->get_context());
         $this->assertEquals($this->wiki->id, $event->objectid);
+        $expected = array($this->course->id, 'wiki', 'view', 'view.php?id=' . $this->wiki->cmid,
+            $this->wiki->id, $this->wiki->cmid);
+        $this->assertEventLegacyLogData($expected, $event);
+        $this->assertEventContextNotUsed($event);
     }
 
     /**
      * Test page_viewed event.
      */
-    public function test_page_viewed(): void {
+    public function test_page_viewed() {
         // There is no proper API to call or trigger this event, so simulating event
         // to check if event returns the right information.
 
@@ -230,12 +239,15 @@ final class events_test extends \advanced_testcase {
         $this->assertInstanceOf('\mod_wiki\event\page_viewed', $event);
         $this->assertEquals($context, $event->get_context());
         $this->assertEquals($page->id, $event->objectid);
+        $expected = array($this->course->id, 'wiki', 'view', 'view.php?pageid=' . $page->id, $page->id, $this->wiki->cmid);
+        $this->assertEventLegacyLogData($expected, $event);
+        $this->assertEventContextNotUsed($event);
     }
 
     /**
      * Test page_viewed event for prettypage view.
      */
-    public function test_pretty_page_viewed(): void {
+    public function test_pretty_page_viewed() {
         // There is no proper API to call or trigger this event, so simulating event
         // to check if event returns the right information.
 
@@ -262,12 +274,15 @@ final class events_test extends \advanced_testcase {
         $this->assertInstanceOf('\mod_wiki\event\page_viewed', $event);
         $this->assertEquals($context, $event->get_context());
         $this->assertEquals($page->id, $event->objectid);
+        $expected = array($this->course->id, 'wiki', 'view', 'prettyview.php?pageid=' . $page->id, $page->id, $this->wiki->cmid);
+        $this->assertEventLegacyLogData($expected, $event);
+        $this->assertEventContextNotUsed($event);
     }
 
     /**
      * Test page_created event.
      */
-    public function test_page_created(): void {
+    public function test_page_created() {
         global $USER;
 
         $this->setUp();
@@ -285,12 +300,16 @@ final class events_test extends \advanced_testcase {
         $this->assertInstanceOf('\mod_wiki\event\page_created', $event);
         $this->assertEquals($context, $event->get_context());
         $this->assertEquals($page->id, $event->objectid);
+        $expected = array($this->course->id, 'wiki', 'add page',
+            'view.php?pageid=' . $page->id, $page->id, $this->wiki->cmid);
+        $this->assertEventLegacyLogData($expected, $event);
+        $this->assertEventContextNotUsed($event);
     }
 
     /**
      * Test page_deleted and page_version_deleted and page_locks_deleted event.
      */
-    public function test_page_deleted(): void {
+    public function test_page_deleted() {
         global $DB;
 
         $this->setUp();
@@ -312,18 +331,24 @@ final class events_test extends \advanced_testcase {
         $this->assertEquals($context, $event->get_context());
         $this->assertEquals($page->id, $event->other['pageid']);
         $this->assertEquals($oldversion->id, $event->objectid);
+        $expected = array($this->course->id, 'wiki', 'admin', 'admin.php?pageid=' .  $page->id,  $page->id, $this->wiki->cmid);
+        $this->assertEventLegacyLogData($expected, $event);
 
         // Checking that the event contains the page_deleted event.
         $event = array_pop($events);
         $this->assertInstanceOf('\mod_wiki\event\page_deleted', $event);
         $this->assertEquals($context, $event->get_context());
         $this->assertEquals($page->id, $event->objectid);
+        $expected = array($this->course->id, 'wiki', 'admin', 'admin.php?pageid=' . $page->id, $page->id, $this->wiki->cmid);
+        $this->assertEventLegacyLogData($expected, $event);
 
         // Checking that the event contains the expected values.
         $event = array_pop($events);
         $this->assertInstanceOf('\mod_wiki\event\page_locks_deleted', $event);
         $this->assertEquals($context, $event->get_context());
         $this->assertEquals($page->id, $event->objectid);
+        $expected = array($this->course->id, 'wiki', 'overridelocks', 'view.php?pageid=' . $page->id, $page->id, $this->wiki->cmid);
+        $this->assertEventLegacyLogData($expected, $event);
 
         // Delete all pages.
         $page1 = $this->wikigenerator->create_first_page($this->wiki);
@@ -341,12 +366,15 @@ final class events_test extends \advanced_testcase {
         $this->assertInstanceOf('\mod_wiki\event\page_deleted', $event);
         $this->assertEquals($context, $event->get_context());
         $this->assertEquals($page2->id, $event->objectid);
+        $expected = array($this->course->id, 'wiki', 'admin', 'admin.php?pageid=' . $page2->id, $page2->id, $this->wiki->cmid);
+        $this->assertEventLegacyLogData($expected, $event);
+        $this->assertEventContextNotUsed($event);
     }
 
     /**
      * Test page_updated event.
      */
-    public function test_page_updated(): void {
+    public function test_page_updated() {
         global $USER;
 
         $this->setUp();
@@ -365,12 +393,16 @@ final class events_test extends \advanced_testcase {
         $this->assertInstanceOf('\mod_wiki\event\page_updated', $event);
         $this->assertEquals($context, $event->get_context());
         $this->assertEquals($page->id, $event->objectid);
+        $expected = array($this->course->id, 'wiki', 'edit',
+            'view.php?pageid=' . $page->id, $page->id, $this->wiki->cmid);
+        $this->assertEventLegacyLogData($expected, $event);
+        $this->assertEventContextNotUsed($event);
     }
 
     /**
      * Test page_diff_viewed event.
      */
-    public function test_page_diff_viewed(): void {
+    public function test_page_diff_viewed() {
         // There is no proper API to call or trigger this event, so simulating event
         // to check if event returns the right information.
 
@@ -400,12 +432,16 @@ final class events_test extends \advanced_testcase {
         $this->assertInstanceOf('\mod_wiki\event\page_diff_viewed', $event);
         $this->assertEquals($context, $event->get_context());
         $this->assertEquals($page->id, $event->objectid);
+        $expected = array($this->course->id, 'wiki', 'diff', 'diff.php?pageid=' . $page->id . '&comparewith=' .
+            1 . '&compare=' .  2, $page->id, $this->wiki->cmid);
+        $this->assertEventLegacyLogData($expected, $event);
+        $this->assertEventContextNotUsed($event);
     }
 
     /**
      * Test page_history_viewed event.
      */
-    public function test_page_history_viewed(): void {
+    public function test_page_history_viewed() {
         // There is no proper API to call or trigger this event, so simulating event
         // to check if event returns the right information.
 
@@ -431,12 +467,15 @@ final class events_test extends \advanced_testcase {
         $this->assertInstanceOf('\mod_wiki\event\page_history_viewed', $event);
         $this->assertEquals($context, $event->get_context());
         $this->assertEquals($page->id, $event->objectid);
+        $expected = array($this->course->id, 'wiki', 'history', 'history.php?pageid=' . $page->id, $page->id, $this->wiki->cmid);
+        $this->assertEventLegacyLogData($expected, $event);
+        $this->assertEventContextNotUsed($event);
     }
 
     /**
      * Test page_map_viewed event.
      */
-    public function test_page_map_viewed(): void {
+    public function test_page_map_viewed() {
         // There is no proper API to call or trigger this event, so simulating event
         // to check if event returns the right information.
 
@@ -466,12 +505,15 @@ final class events_test extends \advanced_testcase {
         $this->assertEquals($context, $event->get_context());
         $this->assertEquals($page->id, $event->objectid);
         $this->assertEquals(0, $event->other['option']);
+        $expected = array($this->course->id, 'wiki', 'map', 'map.php?pageid=' . $page->id, $page->id, $this->wiki->cmid);
+        $this->assertEventLegacyLogData($expected, $event);
+        $this->assertEventContextNotUsed($event);
     }
 
     /**
      * Test page_version_viewed event.
      */
-    public function test_page_version_viewed(): void {
+    public function test_page_version_viewed() {
         // There is no proper API to call or trigger this event, so simulating event
         // to check if event returns the right information.
 
@@ -501,12 +543,16 @@ final class events_test extends \advanced_testcase {
         $this->assertEquals($context, $event->get_context());
         $this->assertEquals($page->id, $event->objectid);
         $this->assertEquals(1, $event->other['versionid']);
+        $expected = array($this->course->id, 'wiki', 'history', 'viewversion.php?pageid=' . $page->id . '&versionid=1',
+            $page->id, $this->wiki->cmid);
+        $this->assertEventLegacyLogData($expected, $event);
+        $this->assertEventContextNotUsed($event);
     }
 
     /**
      * Test page_version_restored event.
      */
-    public function test_page_version_restored(): void {
+    public function test_page_version_restored() {
         $this->setUp();
 
         $page = $this->wikigenerator->create_first_page($this->wiki);
@@ -525,5 +571,8 @@ final class events_test extends \advanced_testcase {
         $this->assertEquals($context, $event->get_context());
         $this->assertEquals($version->id, $event->objectid);
         $this->assertEquals($page->id, $event->other['pageid']);
+        $expected = array($this->course->id, 'wiki', 'restore', 'view.php?pageid=' . $page->id, $page->id, $this->wiki->cmid);
+        $this->assertEventLegacyLogData($expected, $event);
+        $this->assertEventContextNotUsed($event);
     }
 }

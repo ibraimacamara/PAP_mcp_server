@@ -65,7 +65,7 @@ final class provider_test extends \mod_assign\tests\provider_testcase {
     /**
      * Quick test to make sure that get_metadata returns something.
      */
-    public function test_get_metadata(): void {
+    public function test_get_metadata() {
         $collection = new \core_privacy\local\metadata\collection('assignsubmission_comments');
         $collection = \assignsubmission_comments\privacy\provider::get_metadata($collection);
         $this->assertNotEmpty($collection);
@@ -74,7 +74,7 @@ final class provider_test extends \mod_assign\tests\provider_testcase {
     /**
      * Test returning the context for a user who has made a comment in an assignment.
      */
-    public function test_get_context_for_userid_within_submission(): void {
+    public function test_get_context_for_userid_within_submission() {
         $this->resetAfterTest();
         // Create course, assignment, submission, and then a feedback comment.
         $course = $this->getDataGenerator()->create_course();
@@ -102,7 +102,7 @@ final class provider_test extends \mod_assign\tests\provider_testcase {
     /**
      * Test returning student ids given a user ID.
      */
-    public function test_get_student_user_ids(): void {
+    public function test_get_student_user_ids() {
         $this->resetAfterTest();
         // Create course, assignment, submission, and then a feedback comment.
         $course = $this->getDataGenerator()->create_course();
@@ -130,7 +130,7 @@ final class provider_test extends \mod_assign\tests\provider_testcase {
     /**
      * Test returning users related to a given context.
      */
-    public function test_get_userids_from_context(): void {
+    public function test_get_userids_from_context() {
         // Get a bunch of users making comments.
         // Some in one context some in another.
         $this->resetAfterTest();
@@ -177,7 +177,7 @@ final class provider_test extends \mod_assign\tests\provider_testcase {
     /**
      * Test that comments are exported for a user.
      */
-    public function test_export_submission_user_data(): void {
+    public function test_export_submission_user_data() {
         $this->resetAfterTest();
         // Create course, assignment, submission, and then a feedback comment.
         $course = $this->getDataGenerator()->create_course();
@@ -221,7 +221,7 @@ final class provider_test extends \mod_assign\tests\provider_testcase {
     /**
      * Test that all comments are deleted for this context.
      */
-    public function test_delete_submission_for_context(): void {
+    public function test_delete_submission_for_context() {
         global $DB;
         $this->resetAfterTest();
 
@@ -260,7 +260,7 @@ final class provider_test extends \mod_assign\tests\provider_testcase {
     /**
      * Test that the comments for a user are deleted.
      */
-    public function test_delete_submission_for_userid(): void {
+    public function test_delete_submission_for_userid() {
         global $DB;
         $this->resetAfterTest();
         // Create course, assignment, submission, and then a feedback comment.
@@ -303,7 +303,7 @@ final class provider_test extends \mod_assign\tests\provider_testcase {
     /**
      * Test deletion of all submissions for a context works.
      */
-    public function test_delete_submissions(): void {
+    public function test_delete_submissions() {
         global $DB;
         // Get a bunch of users making comments.
         // Some in one context some in another.

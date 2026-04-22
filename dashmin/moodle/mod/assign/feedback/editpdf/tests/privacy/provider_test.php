@@ -50,9 +50,9 @@ final class provider_test extends \mod_assign\tests\provider_testcase {
     /**
      * Convenience function for creating feedback data.
      *
-     * @param  object    $assign         assign object
-     * @param  \stdClass $student        user object
-     * @param  \stdClass $teacher        user object
+     * @param  object   $assign         assign object
+     * @param  stdClass $student        user object
+     * @param  stdClass $teacher        user object
      * @return array   Feedback plugin object and the grade object.
      */
     protected function create_feedback($assign, $student, $teacher) {
@@ -118,7 +118,7 @@ final class provider_test extends \mod_assign\tests\provider_testcase {
     /**
      * Quick test to make sure that get_metadata returns something.
      */
-    public function test_get_metadata(): void {
+    public function test_get_metadata() {
         $collection = new \core_privacy\local\metadata\collection('assignfeedback_editpdf');
         $collection = \assignfeedback_editpdf\privacy\provider::get_metadata($collection);
         $this->assertNotEmpty($collection);
@@ -127,7 +127,7 @@ final class provider_test extends \mod_assign\tests\provider_testcase {
     /**
      * Test that feedback comments are exported for a user.
      */
-    public function test_export_feedback_user_data(): void {
+    public function test_export_feedback_user_data() {
         $this->resetAfterTest();
         // Create course, assignment, submission, and then a feedback comment.
         $course = $this->getDataGenerator()->create_course();
@@ -166,7 +166,7 @@ final class provider_test extends \mod_assign\tests\provider_testcase {
     /**
      * Test that all feedback is deleted for a context.
      */
-    public function test_delete_feedback_for_context(): void {
+    public function test_delete_feedback_for_context() {
         $this->resetAfterTest();
         // Create course, assignment, submission, and then a feedback comment.
         $course = $this->getDataGenerator()->create_course();
@@ -204,7 +204,7 @@ final class provider_test extends \mod_assign\tests\provider_testcase {
     /**
      * Test that a grade item is deleted for a user.
      */
-    public function test_delete_feedback_for_grade(): void {
+    public function test_delete_feedback_for_grade() {
         $this->resetAfterTest();
         // Create course, assignment, submission, and then a feedback comment.
         $course = $this->getDataGenerator()->create_course();
@@ -243,7 +243,7 @@ final class provider_test extends \mod_assign\tests\provider_testcase {
     /**
      * Test that a grade item is deleted for a user.
      */
-    public function test_delete_feedback_for_grades(): void {
+    public function test_delete_feedback_for_grades() {
         global $DB;
 
         $this->resetAfterTest();

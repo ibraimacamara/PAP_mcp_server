@@ -22,15 +22,15 @@ Feature: View activity completion in the SCORM activity
       | name                     | Music history                                                 |
       | completion               | 2                                                             |
       | completionstatusallscos  | 0                                                             |
-      # Add requirements
+      # Show activity as complete when conditions are met
       | packagefilepath          | mod/scorm/tests/packages/RuntimeMinimumCalls_SCORM12-mini.zip |
       | completionstatusrequired | 6                                                             |
       | completionscorerequired  | 3                                                             |
       | completionstatusrequired | 6                                                             |
-      | completionstatusallscos  | 1                                                             |
+      | completionstatusallscos | 1 |
       | maxattempt               | 1                                                             |
       | completionview           | 1                                                             |
-      | completionusegrade       | 1                                                             |
+      | completionusegrade           | 1                                                             |
 
   @javascript
   Scenario: A teacher can view a SCORM activity automatic completion conditions
@@ -43,15 +43,6 @@ Feature: View activity completion in the SCORM activity
 
   @javascript
   Scenario: Any grade and Passing grade options are hidden
-    Given I am on the "Music history" "scorm activity" page logged in as teacher1
-    When I navigate to "Settings" in current page administration
-    And I expand all fieldsets
-    And the field "completionusegrade" matches value "1"
-    Then I should not see "Any grade"
-    And I should not see "Passing grade"
-
-  @javascript
-  Scenario: A student can complete a SCORM activity by achieving a passing grade
     Given I am on the "Music history" "scorm activity" page logged in as student1
     # We need a little taller window because Firefox is, apparently, unable to auto-scroll within
     # an iframe, so we need to ensure that the "Save changes" button is visible in the viewport.
@@ -110,9 +101,8 @@ Feature: View activity completion in the SCORM activity
     And I switch to the main frame
     When I am on the "Music history" "scorm activity" page
     Then the "View" completion condition of "Music history" is displayed as "done"
-    # Conditions that are not possible to achieve (eg score below requirement but all attempts used) are still marked as todo.
-    # this is because the SCORM does not return a score and also that the completion is not possible anymore (as all attempts are used).
-    And the "Receive a score of 3 or more" completion condition of "Music history" is displayed as "todo"
+    # Conditions that are not possible to achieve (eg score below requirement but all attempts used) are marked as failed.
+    And the "Receive a score of 3 or more" completion condition of "Music history" is displayed as "failed"
     And the "Do all parts of this activity" completion condition of "Music history" is displayed as "done"
     And the "Receive a grade" completion condition of "Music history" is displayed as "done"
     And the "Complete or pass the activity" completion condition of "Music history" is displayed as "done"
@@ -122,7 +112,7 @@ Feature: View activity completion in the SCORM activity
     Given I am on the "Music history" "scorm activity" page logged in as teacher1
     And I navigate to "Settings" in current page administration
     And I expand all fieldsets
-    And I set the field "Students must manually mark the activity as done" to "1"
+    And I set the field "Completion tracking" to "Students can manually mark the activity as completed"
     And I press "Save and display"
     # Teacher view.
     And the manual completion button for "Music history" should be disabled
@@ -132,21 +122,3 @@ Feature: View activity completion in the SCORM activity
     Then the manual completion button of "Music history" is displayed as "Mark as done"
     And I toggle the manual completion state of "Music history"
     And the manual completion button of "Music history" is displayed as "Done"
-
-  @javascript
-  Scenario: Required minimum score should be greater than zero
-    Given I am on the "Music history" "scorm activity" page logged in as teacher1
-    And I navigate to "Settings" in current page administration
-    And I expand all fieldsets
-    When I set the field "completionscorerequired" to "0"
-    And I click on "Save and display" "button"
-    Then I should see "Minimum score must be greater than 0."
-    And "Enter" "button" should not exist
-    And I set the field "completionscorerequired" to "-1"
-    And I click on "Save and display" "button"
-    And I should see "Minimum score must be greater than 0."
-    And "Enter" "button" should not exist
-    And I set the field "completionscorerequired" to "5"
-    And I click on "Save and display" "button"
-    And I should not see "Minimum score must be greater than 0."
-    And "Enter" "button" should exist

@@ -16,10 +16,9 @@
 
 namespace core_files;
 
-use core_external\external_api;
+use core_files_external;
 use core_files\external\delete\draft;
 use core_files\external\get\unused_draft;
-use core_files_external;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -43,7 +42,7 @@ final class externallib_test extends \advanced_testcase {
      * Test core_files_external::upload().
      */
 
-    public function test_upload(): void {
+    public function test_upload() {
         global $USER;
 
         $this->resetAfterTest();
@@ -67,7 +66,7 @@ final class externallib_test extends \advanced_testcase {
         // Call the api to create a file.
         $fileinfo = core_files_external::upload($contextid, $component, $filearea, $itemid, $filepath,
                 $filename, $filecontent, $contextlevel, $instanceid);
-        $fileinfo = external_api::clean_returnvalue(core_files_external::upload_returns(), $fileinfo);
+        $fileinfo = \external_api::clean_returnvalue(core_files_external::upload_returns(), $fileinfo);
         // Get the created draft item id.
         $itemid = $fileinfo['itemid'];
 
@@ -83,7 +82,7 @@ final class externallib_test extends \advanced_testcase {
         // Call the api to create a file.
         $fileinfo = core_files_external::upload($contextid, $component, $filearea, $itemid,
                 $filepath, $filename, $filecontent, $contextlevel, $instanceid);
-        $fileinfo = external_api::clean_returnvalue(core_files_external::upload_returns(), $fileinfo);
+        $fileinfo = \external_api::clean_returnvalue(core_files_external::upload_returns(), $fileinfo);
         $file = $browser->get_file_info($context, $component, $filearea, $itemid, $filepath, $filename);
         $this->assertNotEmpty($file);
 
@@ -96,7 +95,7 @@ final class externallib_test extends \advanced_testcase {
         $this->assertEmpty($file);
         $fileinfo = core_files_external::upload($contextid, $component, $filearea, $itemid, $filepath,
                 $filename, $filecontent, $contextlevel, $instanceid);
-        $fileinfo = external_api::clean_returnvalue(core_files_external::upload_returns(), $fileinfo);
+        $fileinfo = \external_api::clean_returnvalue(core_files_external::upload_returns(), $fileinfo);
         $file = $browser->get_file_info($context, $component, $filearea, $itemid, $filepath, $filename);
         $this->assertNotEmpty($file);
 
@@ -109,7 +108,7 @@ final class externallib_test extends \advanced_testcase {
     /*
      * Make sure only user component is allowed in  core_files_external::upload().
      */
-    public function test_upload_param_component(): void {
+    public function test_upload_param_component() {
         global $USER;
 
         $this->resetAfterTest();
@@ -134,7 +133,7 @@ final class externallib_test extends \advanced_testcase {
     /*
      * Make sure only draft areas are allowed in  core_files_external::upload().
      */
-    public function test_upload_param_area(): void {
+    public function test_upload_param_area() {
         global $USER;
 
         $this->resetAfterTest();
@@ -153,7 +152,7 @@ final class externallib_test extends \advanced_testcase {
         // Make sure the file is created.
         $fileinfo = core_files_external::upload($contextid, $component, $filearea, $itemid, $filepath, $filename, $filecontent,
             'user', $USER->id);
-        $fileinfo = external_api::clean_returnvalue(core_files_external::upload_returns(), $fileinfo);
+        $fileinfo = \external_api::clean_returnvalue(core_files_external::upload_returns(), $fileinfo);
         $browser = get_file_browser();
         $file = $browser->get_file_info($context, $component, $filearea, $itemid, $filepath, $filename);
         $this->assertNotEmpty($file);
@@ -162,7 +161,7 @@ final class externallib_test extends \advanced_testcase {
     /**
      * Test getting a list of files with and without a context ID.
      */
-    public function test_get_files(): void {
+    public function test_get_files() {
         global $USER, $DB;
 
         $this->resetAfterTest();
@@ -234,7 +233,7 @@ final class externallib_test extends \advanced_testcase {
         // The first time is with a valid context ID.
         $filename = '';
         $testfilelisting = core_files_external::get_files($context->id, $component, $filearea, $itemid, '/', $filename);
-        $testfilelisting = external_api::clean_returnvalue(core_files_external::get_files_returns(), $testfilelisting);
+        $testfilelisting = \external_api::clean_returnvalue(core_files_external::get_files_returns(), $testfilelisting);
 
         // With the information that we have provided we should get an object exactly like the one below.
         $coursecontext = \context_course::instance($course->id);
@@ -295,7 +294,7 @@ final class externallib_test extends \advanced_testcase {
         $contextlevel = 'module';
         $instanceid = $module->cmid;
         $testfilelisting = core_files_external::get_files($nocontext, $component, $filearea, $itemid, '/', $filename, $modified, $contextlevel, $instanceid);
-        $testfilelisting = external_api::clean_returnvalue(core_files_external::get_files_returns(), $testfilelisting);
+        $testfilelisting = \external_api::clean_returnvalue(core_files_external::get_files_returns(), $testfilelisting);
 
         $this->assertEquals($testfilelisting, $testdata);
     }
@@ -303,7 +302,7 @@ final class externallib_test extends \advanced_testcase {
     /**
      * Test delete draft files
      */
-    public function test_delete_draft_files(): void {
+    public function test_delete_draft_files() {
         global $USER;
 
         $this->resetAfterTest();
@@ -331,12 +330,12 @@ final class externallib_test extends \advanced_testcase {
 
         // Check two files were created (one file and one directory).
         $files = core_files_external::get_files($context->id, 'user', 'draft', $draftitemid, '/', '');
-        $files = external_api::clean_returnvalue(core_files_external::get_files_returns(), $files);
+        $files = \external_api::clean_returnvalue(core_files_external::get_files_returns(), $files);
         $this->assertCount(2, $files['files']);
 
         // Check the folder has one file.
         $files = core_files_external::get_files($context->id, 'user', 'draft', $draftitemid, '/fakefolder/', '');
-        $files = external_api::clean_returnvalue(core_files_external::get_files_returns(), $files);
+        $files = \external_api::clean_returnvalue(core_files_external::get_files_returns(), $files);
         $this->assertCount(1, $files['files']);
 
         // Delete a file and a folder.
@@ -345,18 +344,18 @@ final class externallib_test extends \advanced_testcase {
             ['filepath' => '/fakefolder/', 'filename' => ''],
         ];
         $paths = draft::execute($draftitemid, $filestodelete);
-        $paths = external_api::clean_returnvalue(draft::execute_returns(), $paths);
+        $paths = \external_api::clean_returnvalue(draft::execute_returns(), $paths);
 
         // Check everything was deleted.
         $files = core_files_external::get_files($context->id, 'user', 'draft', $draftitemid, '/', '');
-        $files = external_api::clean_returnvalue(core_files_external::get_files_returns(), $files);
+        $files = \external_api::clean_returnvalue(core_files_external::get_files_returns(), $files);
         $this->assertCount(0, $files['files']);
     }
 
     /**
      * Test get_unused_draft_itemid.
      */
-    public function test_get_unused_draft_itemid(): void {
+    public function test_get_unused_draft_itemid() {
         global $USER;
 
         $this->resetAfterTest();
@@ -364,7 +363,7 @@ final class externallib_test extends \advanced_testcase {
 
         // Add files to user draft area.
         $result = unused_draft::execute();
-        $result = external_api::clean_returnvalue(unused_draft::execute_returns(), $result);
+        $result = \external_api::clean_returnvalue(unused_draft::execute_returns(), $result);
 
         $filerecordinline = [
             'contextid' => $result['contextid'],
@@ -386,7 +385,7 @@ final class externallib_test extends \advanced_testcase {
         $context = \context_user::instance($USER->id);
         // Check two files were created (one file and one directory).
         $files = core_files_external::get_files($context->id, 'user', 'draft', $result['itemid'], '/', '');
-        $files = external_api::clean_returnvalue(core_files_external::get_files_returns(), $files);
+        $files = \external_api::clean_returnvalue(core_files_external::get_files_returns(), $files);
         $this->assertCount(2, $files['files']);
     }
 }

@@ -107,7 +107,6 @@ Feature: Workshop submission and assessment with pass grade activity completion
     And I press "Re-calculate grades"
     And I change phase in workshop "TestWorkshop" to "Closed"
 
-  @javascript
   Scenario: As teacher, I can see the completion status of students in the workshop activity
     And I am on the "Course1" course page logged in as student1
     And the "Receive a grade" completion condition of "TestWorkshop" is displayed as "done"

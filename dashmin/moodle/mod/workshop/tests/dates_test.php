@@ -115,7 +115,7 @@ final class dates_test extends advanced_testcase {
      */
     public function test_get_dates_for_module(?int $submissionstart, ?int $submissionend,
             ?int $assessmentstart, ?int $assessmentend,
-            array $expected): void {
+            array $expected) {
 
         $this->resetAfterTest();
 

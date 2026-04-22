@@ -24,15 +24,11 @@
 
 namespace mod_assign\output;
 
-use assign_files;
-use html_writer;
-use mod_assign\output\grading_app;
-use portfolio_add_button;
-use stored_file;
-
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/mod/assign/locallib.php');
+
+use \mod_assign\output\grading_app;
 
 /**
  * A custom renderer class that extends the plugin_renderer_base and is used by the assign module.
@@ -43,9 +39,6 @@ require_once($CFG->dirroot . '/mod/assign/locallib.php');
  */
 class renderer extends \plugin_renderer_base {
 
-    /** @var string a unique ID. */
-    public $htmlid;
-
     /**
      * Rendering assignment files
      *
@@ -53,8 +46,8 @@ class renderer extends \plugin_renderer_base {
      * @param int $userid
      * @param string $filearea
      * @param string $component
-     * @param \stdClass $course
-     * @param \stdClass $coursemodule
+     * @param stdClass $course
+     * @param stdClass $coursemodule
      * @return string
      */
     public function assign_files(\context $context, $userid, $filearea, $component, $course = null, $coursemodule = null) {
@@ -304,8 +297,6 @@ class renderer extends \plugin_renderer_base {
         $o .= $this->output->box_start('boxaligncenter gradingsummarytable');
         $t = new \html_table();
         $t->attributes['class'] = 'generaltable table-bordered';
-        $t->caption = get_string('gradingsummary', 'assign');
-        $t->captionhide = true; // Hidden because it matches the title above.
 
         // Visibility Status.
         $cell1content = get_string('hiddenfromstudents');
@@ -412,8 +403,6 @@ class renderer extends \plugin_renderer_base {
         $o .= $this->output->heading(get_string('feedback', 'assign'), 3);
         $o .= $this->output->box_start('boxaligncenter feedbacktable');
         $t = new \html_table();
-        $t->caption = get_string('feedback', 'assign');
-        $t->captionhide = true; // Hidden because it matches the title above.
 
         // Grade.
         if (isset($status->gradefordisplay)) {
@@ -482,7 +471,7 @@ class renderer extends \plugin_renderer_base {
         if ($status->teamsubmissionenabled) {
             $group = $status->submissiongroup;
             if ($group) {
-                $team = format_string($group->name, false, ['context' => $status->context]);
+                $team = format_string($group->name, false, $status->context);
             } else if ($status->preventsubmissionnotingroup) {
                 if (count($status->usergroups) == 0) {
                     $team = '<span class="alert alert-error">' . get_string('noteam', 'assign') . '</span>';
@@ -654,8 +643,6 @@ class renderer extends \plugin_renderer_base {
 
         $t = new \html_table();
         $t->attributes['class'] = 'generaltable table-bordered';
-        $t->caption = get_string('submissionstatusheading', 'assign');
-        $t->captionhide = true; // Hidden because it matches the title above.
 
         $warningmsg = '';
         if ($status->teamsubmissionenabled) {
@@ -681,8 +668,7 @@ class renderer extends \plugin_renderer_base {
             $this->add_table_row_tuple($t, $cell1content, $cell2content);
         }
 
-        // If multiple attempts are allowed.
-        if ($status->maxattempts > 1 || $status->maxattempts == ASSIGN_UNLIMITED_ATTEMPTS) {
+        if ($status->attemptreopenmethod != ASSIGN_ATTEMPT_REOPEN_METHOD_NONE) {
             $currentattempt = 1;
             if (!$status->teamsubmissionenabled) {
                 if ($status->submission) {
@@ -942,8 +928,6 @@ class renderer extends \plugin_renderer_base {
             $o .= $this->heading(get_string('attemptheading', 'assign', $attemptsummaryparams), 4);
 
             $t = new \html_table();
-            $t->caption = get_string('attemptheading', 'assign', $attemptsummaryparams);
-            $t->captionhide = true; // Hidden because it matches the title above.
 
             if ($submission) {
                 $cell1content = get_string('submissionstatus', 'assign');
@@ -1068,7 +1052,7 @@ class renderer extends \plugin_renderer_base {
             $link = '';
             if ($showviewlink) {
                 $previewstr = get_string('viewsubmission', 'assign');
-                $icon = $this->output->pix_icon('t/viewdetails', $previewstr);
+                $icon = $this->output->pix_icon('t/preview', $previewstr);
 
                 $expandstr = get_string('viewfull', 'assign');
                 $expandicon = $this->output->pix_icon('t/switch_plus', $expandstr);
@@ -1139,7 +1123,24 @@ class renderer extends \plugin_renderer_base {
         $o .= $this->output->box_start('boxaligncenter gradingtable position-relative');
 
         $this->page->requires->js_init_call('M.mod_assign.init_grading_table', array());
-        $o .= $this->flexible_table($table, $table->get_rows_per_page(), false);
+        $this->page->requires->string_for_js('nousersselected', 'assign');
+        $this->page->requires->string_for_js('batchoperationconfirmgrantextension', 'assign');
+        $this->page->requires->string_for_js('batchoperationconfirmlock', 'assign');
+        $this->page->requires->string_for_js('batchoperationconfirmremovesubmission', 'assign');
+        $this->page->requires->string_for_js('batchoperationconfirmreverttodraft', 'assign');
+        $this->page->requires->string_for_js('batchoperationconfirmunlock', 'assign');
+        $this->page->requires->string_for_js('batchoperationconfirmaddattempt', 'assign');
+        $this->page->requires->string_for_js('batchoperationconfirmdownloadselected', 'assign');
+        $this->page->requires->string_for_js('batchoperationconfirmsetmarkingworkflowstate', 'assign');
+        $this->page->requires->string_for_js('batchoperationconfirmsetmarkingallocation', 'assign');
+        $this->page->requires->string_for_js('editaction', 'assign');
+        foreach ($table->plugingradingbatchoperations as $plugin => $operations) {
+            foreach ($operations as $operation => $description) {
+                $this->page->requires->string_for_js('batchoperationconfirm' . $operation,
+                                                     'assignfeedback_' . $plugin);
+            }
+        }
+        $o .= $this->flexible_table($table, $table->get_rows_per_page(), true);
         $o .= $this->output->box_end();
 
         return $o;
@@ -1168,7 +1169,7 @@ class renderer extends \plugin_renderer_base {
             $link = '';
             if ($showviewlink) {
                 $previewstr = get_string('viewfeedback', 'assign');
-                $icon = $this->output->pix_icon('t/viewdetails', $previewstr);
+                $icon = $this->output->pix_icon('t/preview', $previewstr);
 
                 $expandstr = get_string('viewfull', 'assign');
                 $expandicon = $this->output->pix_icon('t/switch_plus', $expandstr);
@@ -1396,13 +1397,11 @@ class renderer extends \plugin_renderer_base {
             $result .= '<li yuiConfig=\'' . json_encode($yuiconfig) . '\'>' .
                 '<div>' .
                     '<div class="fileuploadsubmission">' . $image . ' ' .
-                    html_writer::link($tree->get_file_url($file), $file->get_filename(), [
-                        'target' => '_blank',
-                    ]) . ' ' .
+                    $file->fileurl . ' ' .
                     $plagiarismlinks . ' ' .
-                    $this->get_portfolio_button($tree, $file) . ' ' .
+                    $file->portfoliobutton . ' ' .
                     '</div>' .
-                    '<div class="fileuploadsubmissiontime">' . $tree->get_modified_time($file) . '</div>' .
+                    '<div class="fileuploadsubmissiontime">' . $file->timemodified . '</div>' .
                 '</div>' .
             '</li>';
         }
@@ -1410,36 +1409,6 @@ class renderer extends \plugin_renderer_base {
         $result .= '</ul>';
 
         return $result;
-    }
-
-    /**
-     * Get the portfolio button content for the specified file.
-     *
-     * @param assign_files $tree
-     * @param stored_file $file
-     * @return string
-     */
-    protected function get_portfolio_button(assign_files $tree, stored_file $file): string {
-        global $CFG;
-        if (empty($CFG->enableportfolios)) {
-            return '';
-        }
-
-        if (!has_capability('mod/assign:exportownsubmission', $tree->context)) {
-            return '';
-        }
-
-        require_once($CFG->libdir . '/portfoliolib.php');
-
-        $button = new portfolio_add_button();
-        $portfolioparams = [
-            'cmid' => $tree->cm->id,
-            'fileid' => $file->get_id(),
-        ];
-        $button->set_callback_options('assign_portfolio_caller', $portfolioparams, 'mod_assign');
-        $button->set_format_by_file($file);
-
-        return (string) $button->to_html(PORTFOLIO_ADD_ICON_LINK);
     }
 
     /**

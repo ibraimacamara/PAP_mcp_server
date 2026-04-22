@@ -43,7 +43,7 @@ final class edittreelib_test extends \advanced_testcase {
         }
     }
 
-    public function test_grade_edit_tree_column_range_get_item_cell(): void {
+    public function test_grade_edit_tree_column_range_get_item_cell() {
         global $DB, $CFG;
 
         $this->resetAfterTest(true);
@@ -134,5 +134,3 @@ final class edittreelib_test extends \advanced_testcase {
         $this->assertEquals(null, $gradeitem->scaleid);
     }
 }
-
-

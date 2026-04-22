@@ -16,7 +16,7 @@
 
 namespace quizaccess_delaybetweenattempts;
 
-use mod_quiz\quiz_settings;
+use quiz;
 use quizaccess_delaybetweenattempts;
 
 defined('MOODLE_INTERNAL') || die();
@@ -43,7 +43,7 @@ final class rule_test extends \basic_testcase {
         $quiz->timeclose = 0;
         $cm = new \stdClass();
         $cm->id = 0;
-        $quizobj = new quiz_settings($quiz, $cm, null);
+        $quizobj = new quiz($quiz, $cm, null);
         $attempt = new \stdClass();
         $attempt->timefinish = 10000;
 
@@ -68,7 +68,7 @@ final class rule_test extends \basic_testcase {
         $this->assertFalse($rule->prevent_new_attempt(2, $attempt));
     }
 
-    public function test_just_second_delay(): void {
+    public function test_just_second_delay() {
         $quiz = new \stdClass();
         $quiz->attempts = 5;
         $quiz->timelimit = 0;
@@ -77,7 +77,7 @@ final class rule_test extends \basic_testcase {
         $quiz->timeclose = 0;
         $cm = new \stdClass();
         $cm->id = 0;
-        $quizobj = new quiz_settings($quiz, $cm, null);
+        $quizobj = new quiz($quiz, $cm, null);
         $attempt = new \stdClass();
         $attempt->timefinish = 10000;
 
@@ -107,7 +107,7 @@ final class rule_test extends \basic_testcase {
             get_string('youmustwait', 'quizaccess_delaybetweenattempts', userdate(10001)));
     }
 
-    public function test_just_both_delays(): void {
+    public function test_just_both_delays() {
         $quiz = new \stdClass();
         $quiz->attempts = 5;
         $quiz->timelimit = 0;
@@ -116,7 +116,7 @@ final class rule_test extends \basic_testcase {
         $quiz->timeclose = 0;
         $cm = new \stdClass();
         $cm->id = 0;
-        $quizobj = new quiz_settings($quiz, $cm, null);
+        $quizobj = new quiz($quiz, $cm, null);
         $attempt = new \stdClass();
         $attempt->timefinish = 10000;
 
@@ -158,7 +158,7 @@ final class rule_test extends \basic_testcase {
             get_string('youmustwait', 'quizaccess_delaybetweenattempts', userdate(10001)));
     }
 
-    public function test_with_close_date(): void {
+    public function test_with_close_date() {
         $quiz = new \stdClass();
         $quiz->attempts = 5;
         $quiz->timelimit = 0;
@@ -167,7 +167,7 @@ final class rule_test extends \basic_testcase {
         $quiz->timeclose = 15000;
         $cm = new \stdClass();
         $cm->id = 0;
-        $quizobj = new quiz_settings($quiz, $cm, null);
+        $quizobj = new quiz($quiz, $cm, null);
         $attempt = new \stdClass();
         $attempt->timefinish = 13000;
 
@@ -214,7 +214,7 @@ final class rule_test extends \basic_testcase {
         $this->assertFalse($rule->prevent_new_attempt(2, $attempt));
     }
 
-    public function test_time_limit_and_overdue(): void {
+    public function test_time_limit_and_overdue() {
         $quiz = new \stdClass();
         $quiz->attempts = 5;
         $quiz->timelimit = 100;
@@ -223,7 +223,7 @@ final class rule_test extends \basic_testcase {
         $quiz->timeclose = 0;
         $cm = new \stdClass();
         $cm->id = 0;
-        $quizobj = new quiz_settings($quiz, $cm, null);
+        $quizobj = new quiz($quiz, $cm, null);
         $attempt = new \stdClass();
         $attempt->timestart = 9900;
         $attempt->timefinish = 10100;

@@ -123,7 +123,7 @@ final class format_message_test extends \advanced_testcase {
      * @dataProvider chat_format_message_manually_provider
      */
     public function test_chat_format_message_manually($messagetext, $issystem, $willreturn,
-            $expecttext, $refreshusers, $expectbeep): void {
+            $expecttext, $refreshusers, $expectbeep) {
 
         $this->resetAfterTest();
 

@@ -28,7 +28,6 @@ use core_privacy\local\request\deletion_criteria;
 use core_privacy\local\request\writer;
 use mod_quiz\privacy\provider;
 use mod_quiz\privacy\helper;
-use mod_quiz\quiz_attempt;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -41,7 +40,6 @@ require_once($CFG->dirroot . '/question/tests/privacy_helper.php');
  * @package    mod_quiz
  * @copyright  2018 Andrew Nicols <andrew@nicols.co.uk>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @covers \mod_quiz\privacy\provider
  */
 final class provider_test extends \core_privacy\tests\provider_testcase {
 
@@ -50,7 +48,7 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
     /**
      * Test that a user who has no data gets no contexts
      */
-    public function test_get_contexts_for_userid_no_data(): void {
+    public function test_get_contexts_for_userid_no_data() {
         global $USER;
         $this->resetAfterTest();
         $this->setAdminUser();
@@ -62,7 +60,7 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
     /**
      * Test for provider::get_contexts_for_userid() when there is no quiz attempt at all.
      */
-    public function test_get_contexts_for_userid_no_attempt_with_override(): void {
+    public function test_get_contexts_for_userid_no_attempt_with_override() {
         global $DB;
         $this->resetAfterTest(true);
 
@@ -92,7 +90,7 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
     /**
      * The export function should handle an empty contextlist properly.
      */
-    public function test_export_user_data_no_data(): void {
+    public function test_export_user_data_no_data() {
         global $USER;
         $this->resetAfterTest();
         $this->setAdminUser();
@@ -114,7 +112,7 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
     /**
      * The delete function should handle an empty contextlist properly.
      */
-    public function test_delete_data_for_user_no_data(): void {
+    public function test_delete_data_for_user_no_data() {
         global $USER;
         $this->resetAfterTest();
         $this->setAdminUser();
@@ -132,7 +130,7 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
     /**
      * Export + Delete quiz data for a user who has made a single attempt.
      */
-    public function test_user_with_data(): void {
+    public function test_user_with_data() {
         global $DB;
         $this->resetAfterTest(true);
 
@@ -171,7 +169,6 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
         provider::export_user_data($approvedcontextlist);
 
         // Ensure that the quiz data was exported correctly.
-        /** @var \core_privacy\tests\request\content_writer $writer */
         $writer = writer::with_context($context);
         $this->assertTrue($writer->has_any_data());
 
@@ -191,7 +188,7 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
 
         $attempt = $attemptobj->get_attempt();
         $this->assertTrue(isset($attemptdata->state));
-        $this->assertEquals(quiz_attempt::state_name($attemptobj->get_state()), $attemptdata->state);
+        $this->assertEquals(\quiz_attempt::state_name($attemptobj->get_state()), $attemptdata->state);
         $this->assertTrue(isset($attemptdata->timestart));
         $this->assertTrue(isset($attemptdata->timefinish));
         $this->assertTrue(isset($attemptdata->timemodified));
@@ -215,13 +212,13 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
         $this->setUser();
         provider::delete_data_for_user($approvedcontextlist);
         $this->expectException(\dml_missing_record_exception::class);
-        quiz_attempt::create($attemptobj->get_quizid());
+        \quiz_attempt::create($attemptobj->get_quizid());
     }
 
     /**
      * Export + Delete quiz data for a user who has made a single attempt.
      */
-    public function test_user_with_preview(): void {
+    public function test_user_with_preview() {
         global $DB;
         $this->resetAfterTest(true);
 
@@ -241,15 +238,15 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
         $questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
         $cat = $questiongenerator->create_question_category();
 
-        $saq = $questiongenerator->create_question('shortanswer', null, ['category' => $cat->id]);
+        $saq = $questiongenerator->create_question('shortanswer', null, array('category' => $cat->id));
         quiz_add_quiz_question($saq->id, $quiz);
-        $numq = $questiongenerator->create_question('numerical', null, ['category' => $cat->id]);
+        $numq = $questiongenerator->create_question('numerical', null, array('category' => $cat->id));
         quiz_add_quiz_question($numq->id, $quiz);
 
         // Run as the user and make an attempt on the quiz.
         $this->setUser($user);
         $starttime = time();
-        $quizobj = \mod_quiz\quiz_settings::create($quiz->id, $user->id);
+        $quizobj = \quiz::create($quiz->id, $user->id);
         $context = $quizobj->get_context();
 
         $quba = \question_engine::make_questions_usage_by_activity('mod_quiz', $quizobj->get_context());
@@ -261,7 +258,7 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
         quiz_attempt_save_started($quizobj, $quba, $attempt);
 
         // Answer the questions.
-        $attemptobj = quiz_attempt::create($attempt->id);
+        $attemptobj = \quiz_attempt::create($attempt->id);
 
         $tosubmit = [
             1 => ['answer' => 'frog'],
@@ -271,7 +268,7 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
         $attemptobj->process_submitted_actions($starttime, false, $tosubmit);
 
         // Finish the attempt.
-        $attemptobj = quiz_attempt::create($attempt->id);
+        $attemptobj = \quiz_attempt::create($attempt->id);
         $this->assertTrue($attemptobj->has_response_to_at_least_one_graded_question());
         $attemptobj->process_finish($starttime, false);
 
@@ -284,7 +281,7 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
     /**
      * Export + Delete quiz data for a user who has made a single attempt.
      */
-    public function test_delete_data_for_all_users_in_context(): void {
+    public function test_delete_data_for_all_users_in_context() {
         global $DB;
         $this->resetAfterTest(true);
 
@@ -339,7 +336,7 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
     /**
      * Export + Delete quiz data for a user who has made a single attempt.
      */
-    public function test_wrong_context(): void {
+    public function test_wrong_context() {
         global $DB;
         $this->resetAfterTest(true);
 
@@ -368,7 +365,6 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
         provider::export_user_data($approvedcontextlist);
 
         // Ensure that nothing was exported.
-        /** @var \core_privacy\tests\request\content_writer $writer */
         $writer = writer::with_context($context);
         $this->assertFalse($writer->has_any_data_in_any_context());
 
@@ -396,7 +392,7 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
      * Create a test quiz for the specified course.
      *
      * @param   \stdClass $course
-     * @return  \stdClass
+     * @return  array
      */
     protected function create_test_quiz($course) {
         global $DB;
@@ -414,9 +410,9 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
         $questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
         $cat = $questiongenerator->create_question_category();
 
-        $saq = $questiongenerator->create_question('shortanswer', null, ['category' => $cat->id]);
+        $saq = $questiongenerator->create_question('shortanswer', null, array('category' => $cat->id));
         quiz_add_quiz_question($saq->id, $quiz);
-        $numq = $questiongenerator->create_question('numerical', null, ['category' => $cat->id]);
+        $numq = $questiongenerator->create_question('numerical', null, array('category' => $cat->id));
         quiz_add_quiz_question($numq->id, $quiz);
 
         return $quiz;
@@ -433,7 +429,7 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
         $this->setUser($user);
 
         $starttime = time();
-        $quizobj = \mod_quiz\quiz_settings::create($quiz->id, $user->id);
+        $quizobj = \quiz::create($quiz->id, $user->id);
         $context = $quizobj->get_context();
 
         $quba = \question_engine::make_questions_usage_by_activity('mod_quiz', $quizobj->get_context());
@@ -445,7 +441,7 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
         quiz_attempt_save_started($quizobj, $quba, $attempt);
 
         // Answer the questions.
-        $attemptobj = quiz_attempt::create($attempt->id);
+        $attemptobj = \quiz_attempt::create($attempt->id);
 
         $tosubmit = [
             1 => ['answer' => 'frog'],
@@ -455,7 +451,7 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
         $attemptobj->process_submitted_actions($starttime, false, $tosubmit);
 
         // Finish the attempt.
-        $attemptobj = quiz_attempt::create($attempt->id);
+        $attemptobj = \quiz_attempt::create($attempt->id);
         $attemptobj->process_finish($starttime, false);
 
         $this->setUser();
@@ -466,7 +462,7 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
     /**
      * Test for provider::get_users_in_context().
      */
-    public function test_get_users_in_context(): void {
+    public function test_get_users_in_context() {
         global $DB;
         $this->resetAfterTest(true);
 
@@ -502,7 +498,7 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
     /**
      * Test for provider::delete_data_for_users().
      */
-    public function test_delete_data_for_users(): void {
+    public function test_delete_data_for_users() {
         global $DB;
         $this->resetAfterTest(true);
 
@@ -535,7 +531,7 @@ final class provider_test extends \core_privacy\tests\provider_testcase {
         // Delete the data for user1 and user3 in course1 and check it is removed.
         $quiz1context = $quiz1obj->get_context();
         $approveduserlist = new \core_privacy\local\request\approved_userlist($quiz1context, 'mod_quiz',
-            [$user1->id, $user3->id]);
+                [$user1->id, $user3->id]);
         provider::delete_data_for_users($approveduserlist);
 
         // Only the attempt of user2 should be remained in quiz1.

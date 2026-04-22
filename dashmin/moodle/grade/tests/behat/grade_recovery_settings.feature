@@ -23,17 +23,18 @@ Feature: Admin can set Recover grades default setting
       | recovergradesdefault  | <recovergradesetting>  |
     # Grade student 1 via quick grading
     And I am on the "Assign 1" "assign activity" page logged in as admin
-    And I navigate to "Submissions" in current page administration
+    And I follow "View all submissions"
     And I click on "Quick grading" "checkbox"
     And I set the field "User grade" to "60.00"
-    And I click on "Save" "button" in the "sticky-footer" "region"
+    And I press "Save all quick grading changes"
     # Confirm that assigned grade was saved
     And I am on the "Course 1" "grades > Grader report > View" page
     And I should see "60.00" in the "Student One" "table_row"
     And I navigate to course participants
     And I click on "Unenrol" "icon" in the "Student One" "table_row"
     And I click on "Unenrol" "button" in the "Unenrol" "dialogue"
-    And I press "Enrol users"
+    # The button at the top is hidden by the un-enrolment confirmation dialogue so the button at the bottom is clicked instead.
+    And I click on "Enrol users" "button" in the "div.justify-content-end .enrolusersbutton" "css_element"
     And I set the field "Select users" to "student1"
     # Confirm the "Recover user's old grades if possible" checkbox state based on Recover grades default setting
     When I click on "Show more..." "link"

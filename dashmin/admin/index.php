@@ -154,7 +154,23 @@ include 'nav-menu.php';
         margin-bottom: 12px;
         display: block;
     }
+
+    #attachBtn {
+        border: none;
+        background: #fff;
+        color: #333;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        flex-shrink: 0;
+        border: 1px solid #ddd;
+    }
 </style>
+
 <div class="chat-page">
     <div class="chat-messages" id="chatMessages">
         <div class="chat-welcome" id="welcomeMsg">
@@ -166,7 +182,14 @@ include 'nav-menu.php';
 
     <div class="chat-input-area">
         <div class="chat-input-box">
+            <button type="button" id="attachBtn" title="Anexar">
+                <i class="fa fa-plus"></i>
+            </button>
+
+            <input type="file" id="fileInput" multiple hidden>
+
             <textarea id="userInput" rows="1" placeholder="Faça uma pergunta..."></textarea>
+
             <button id="sendBtn" onclick="sendMessage()" title="Enviar">
                 <i class="fa fa-paper-plane"></i>
             </button>
@@ -185,18 +208,38 @@ include 'nav-menu.php';
     const sendBtn = document.getElementById('sendBtn');
     const messages = document.getElementById('chatMessages');
 
-    // Auto-grow textarea
+    const attachBtn = document.getElementById('attachBtn');
+    const fileInput = document.getElementById('fileInput');
+
+    let selectedFiles = [];
+
+    // auto resize textarea
     textarea.addEventListener('input', () => {
         textarea.style.height = 'auto';
         textarea.style.height = textarea.scrollHeight + 'px';
     });
 
-    // Enter sends, Shift+Enter = new line
+    // Enter envia
     textarea.addEventListener('keydown', e => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             sendMessage();
         }
+    });
+
+    // botão +
+    attachBtn.addEventListener('click', () => {
+        fileInput.click();
+    });
+
+    // guardar ficheiros escolhidos
+    fileInput.addEventListener('change', () => {
+        const files = Array.from(fileInput.files);
+        selectedFiles.push(...files);
+
+        console.log('Ficheiros selecionados:', selectedFiles);
+
+        alert('Selecionaste ' + selectedFiles.length + ' ficheiro(s)');
     });
 
     function appendMessage(text, role) {
@@ -219,18 +262,20 @@ include 'nav-menu.php';
         const content = document.createElement('div');
         content.textContent = text;
         bubble.appendChild(content);
+
         wrap.appendChild(bubble);
         messages.appendChild(wrap);
         messages.scrollTop = messages.scrollHeight;
-        return bubble;
     }
 
     function showTyping() {
         const bubble = document.createElement('div');
         bubble.classList.add('msg-bubble', 'msg-agent');
         bubble.id = 'typingIndicator';
-        bubble.innerHTML = '<div class="agent-label"><i class="fa fa-robot"></i> Assistente SGE-ECP</div>' +
+        bubble.innerHTML =
+            '<div class="agent-label"><i class="fa fa-robot"></i> Assistente SGE-ECP</div>' +
             '<div class="typing-indicator"><span></span><span></span><span></span></div>';
+
         messages.appendChild(bubble);
         messages.scrollTop = messages.scrollHeight;
     }
@@ -241,19 +286,34 @@ include 'nav-menu.php';
 
     async function sendMessage() {
         const text = textarea.value.trim();
-        if (!text) return;
 
-        appendMessage(text, 'user');
+        if (!text && selectedFiles.length === 0) return;
+
+        // mostrar mensagem do user
+        let previewText = text;
+
+        if (selectedFiles.length > 0) {
+            const nomes = selectedFiles.map(f => f.name).join(', ');
+            previewText += (text ? '\n' : '') + 'Anexos: ' + nomes;
+        }
+
+        appendMessage(previewText, 'user');
+
         textarea.value = '';
         textarea.style.height = 'auto';
         sendBtn.disabled = true;
+
         showTyping();
 
         try {
+            // IMPORTANTE: continua a usar JSON (para não quebrar o n8n)
             const res = await fetch(N8N_WEBHOOK, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ chatInput: text, sessionId: sessionId })
+                body: JSON.stringify({
+                    chatInput: text,
+                    sessionId: sessionId
+                })
             });
 
             if (!res.ok) throw new Error('Erro HTTP ' + res.status);
@@ -261,18 +321,26 @@ include 'nav-menu.php';
             const data = await res.json();
             removeTyping();
 
-            // n8n Chat Trigger returns { output: "..." } or { text: "..." }
-            const reply = data.output ?? data.text ?? data.message ?? data.response ?? JSON.stringify(data);
+            const reply =
+                data.output ??
+                data.text ??
+                data.message ??
+                data.response ??
+                JSON.stringify(data);
+
             appendMessage(reply, 'agent');
 
         } catch (err) {
             removeTyping();
-            appendMessage('Erro ao contactar o assistente. Verifique se o n8n está em execução.', 'agent');
+            appendMessage('Erro ao contactar o assistente.', 'agent');
             console.error(err);
         }
 
         sendBtn.disabled = false;
         textarea.focus();
+
+        // limpar ficheiros depois de enviar
+        selectedFiles = [];
     }
 </script>
 

@@ -16,7 +16,6 @@ Feature: View activity completion information in the chat activity
       | user | course | role           |
       | student1 | C1 | student        |
       | teacher1 | C1 | editingteacher |
-    And I enable "chat" "mod" plugin
 
   Scenario: View automatic completion items
     Given I log in as "teacher1"
@@ -47,7 +46,7 @@ Feature: View activity completion information in the chat activity
       | completion     | 1             |
     And I am on "Course 1" course homepage
     # Teacher view.
-    And "Music history" should have the "Mark as done" completion condition
+    And the manual completion button for "Music history" should be disabled
     And I log out
     # Student view.
     And I am on the "Music history" Activity page logged in as student1

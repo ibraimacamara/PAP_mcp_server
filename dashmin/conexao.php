@@ -3,7 +3,7 @@
 $host = 'localhost';
 $user = 'root';
 $pass = '';
-$db   = 'sge';
+$db   = 'sgei';
 
 try {
     $pdo = new PDO(

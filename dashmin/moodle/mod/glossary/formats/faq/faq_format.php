@@ -1,42 +1,17 @@
 <?php
 
-/**
- * Displays a glossary entry in FAQ format.
- *
- * @param stdClass $course The course object.
- * @param stdClass $cm The course module object.
- * @param stdClass $glossary The glossary object.
- * @param stdClass $entry The glossary entry object.
- * @param string $mode The mode in which the entry is being displayed.
- * @param string $hook
- * @param int $printicons Whether to print editing icons.
- * @param bool $aliases Whether to show aliases popup.
- * @param int $conceptheadinglevel The heading level to use for rendering the concept within the heading element.
- * @return void
- * @package mod_glossary
- */
-function glossary_show_entry_faq(
-    $course,
-    $cm,
-    $glossary,
-    $entry,
-    $mode = "",
-    $hook = "",
-    $printicons = 1,
-    $aliases = true,
-    $conceptheadinglevel = 3,
-) {
+function glossary_show_entry_faq($course, $cm, $glossary, $entry, $mode="", $hook="", $printicons=1, $aliases=true) {
     global $USER, $OUTPUT;
     if ( $entry ) {
 
-        echo '<table class="glossarypost faq" cellspacing="0" role="presentation">';
+        echo '<table class="glossarypost faq" cellspacing="0">';
 
         echo '<tr valign="top">';
         echo '<th class="entryheader">';
         $entry->course = $course->id;
 
         echo '<div class="concept">' . get_string('question','glossary') . ': ';
-        glossary_print_entry_concept($entry, headinglevel: $conceptheadinglevel);
+        glossary_print_entry_concept($entry);
         echo '</div>';
 
         echo '<span class="time">('.get_string('lastedited').': '.
@@ -67,38 +42,22 @@ function glossary_show_entry_faq(
         echo '</td></tr></table>';
 
     } else {
-        echo html_writer::div(get_string('noentry', 'glossary'), 'text-center');
+        echo '<div style="text-align:center">';
+        print_string('noentry', 'glossary');
+        echo '</div>';
     }
 }
 
-/**
- * Display entries in the Frequently Answered Questions (FAQ) glossary format for printing.
- *
- * @param stdClass $course The course object.
- * @param stdClass $cm The course module object.
- * @param stdClass $glossary The glossary object.
- * @param stdClass $entry The glossary entry object.
- * @param string $mode The mode in which the entry is being displayed.
- * @param string $hook
- * @param int $printicons Whether to print editing icons.
- * @param int $conceptheadinglevel The heading level to use for rendering the concept within the heading element.
- * @package mod_glossary
- */
-function glossary_print_entry_faq(
-    $course,
-    $cm,
-    $glossary,
-    $entry,
-    $mode = '',
-    $hook = '',
-    $printicons = 1,
-    $conceptheadinglevel = 3
-) {
-    // The print view for this format is exactly the normal view, so we use it.
+function glossary_print_entry_faq($course, $cm, $glossary, $entry, $mode='', $hook='', $printicons=1) {
 
-    // Take out auto-linking in definitions in print view.
-    $entry->definition = '<span class="nolink">' . $entry->definition . '</span>';
+    //The print view for this format is exactly the normal view, so we use it
 
-    // Call to view function (without icons, ratings and aliases) and return its result.
-    glossary_show_entry_faq($course, $cm, $glossary, $entry, $mode, $hook, false, false, $conceptheadinglevel);
+    //Take out autolinking in definitions un print view
+    $entry->definition = '<span class="nolink">'.$entry->definition.'</span>';
+
+    //Call to view function (without icons, ratings and aliases) and return its result
+    return glossary_show_entry_faq($course, $cm, $glossary, $entry, $mode, $hook, false, false, false);
+
 }
+
+

@@ -27,7 +27,7 @@ namespace mod_resource;
  */
 final class generator_test extends \advanced_testcase {
 
-    public function test_generator(): void {
+    public function test_generator() {
         global $DB, $SITE;
 
         $this->resetAfterTest(true);

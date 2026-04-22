@@ -302,47 +302,6 @@ def list_aluno() -> dict:
         cur.close()
         conn.close()                         
         
-        
-# @mcp.tool
-# def update_aluno(numero_aluno: int, updates: str) -> dict:
-#     """
-#     Atualiza dados de um aluno pelo seu número de identificação.
-#     updates: dict ou JSON string com os campos a alterar.
-#     Ex: {"email":"novo@email.com", "contato":"912345678"}
-#     """
-#     conn = get_connection()
-#     if not conn:
-#         return {"success": False, "message": "Sem conexão ao banco"}
-
-#     cur = conn.cursor()
-#     try:
-#         updates_dict = json.loads(updates) if isinstance(updates, str) else updates
-#         if not isinstance(updates_dict, dict):
-#             return {"success": False, "message": "Updates deve ser dict/JSON"}
-
-#         cur.execute("DESCRIBE `aluno`")
-#         colunas = [c[0] for c in cur.fetchall()]
-#         validos = {k: v for k, v in updates_dict.items() if k in colunas}
-
-#         if not validos:
-#             return {"success": False, "message": "Nenhuma coluna válida para update",
-#                     "error": f"Colunas disponíveis: {', '.join(colunas)}"}
-
-#         set_clause = ", ".join(f"`{k}`=%s" for k in validos.keys())
-#         sql = f"UPDATE `aluno` SET {set_clause} WHERE numero_aluno=%s"
-#         cur.execute(sql, list(validos.values()) + [numero_aluno])
-#         conn.commit()
-
-#         return {"success": True, "message": "Aluno atualizado com sucesso",
-#                 "rows_affected": cur.rowcount, "error": None}
-#     except Exception as e:
-#         conn.rollback()
-#         return {"success": False, "message": "Erro ao atualizar aluno", "error": str(e)}
-#     finally:
-#         cur.close()
-#         conn.close()
-
-
 
 @mcp.tool
 def update_aluno(numero_aluno: int, updates: str) -> dict:
@@ -543,6 +502,412 @@ def delete_aluno(identifier: str) -> dict:
 # Encarregado
 # ---------------------------------------------------------------------------
 
+
+
+
+# @mcp.tool
+# def insert_encarregado(data: str) -> dict:
+#     """
+#     Insere um encarregado no sistema.
+
+#     Fluxo:
+#     1. valida os dados obrigatórios;
+#     2. verifica duplicados em users e encarregado;
+#     3. cria utilizador em users com:
+#        - username = email
+#        - senha = hash do BI
+#        - categoria = 'encarregado'
+#     4. insere o encarregado com o user_id criado.
+#     """
+
+#     conn = get_connection()
+#     if conn is None:
+#         return {
+#             "success": False,
+#             "message": "Sem conexão à base de dados.",
+#             "error": "get_connection retornou None"
+#         }
+
+#     cur = conn.cursor(dictionary=True)
+
+#     try:
+#         data_dict = json.loads(data) if isinstance(data, str) else data
+
+#         if not isinstance(data_dict, dict):
+#             return {
+#                 "success": False,
+#                 "message": "Os dados devem ser um objeto JSON.",
+#                 "error": "Formato inválido"
+#             }
+
+#         nome = str(data_dict.get("nome", "")).strip()
+#         email = str(data_dict.get("email", "")).strip().lower()
+#         bi = str(data_dict.get("bi", "")).strip()
+#         contato = str(data_dict.get("contato", "")).strip()
+#         morada = str(data_dict.get("morada", "")).strip()
+#         genero = str(data_dict.get("genero", "")).strip().lower()
+#         distrito = str(data_dict.get("distrito", "")).strip()
+#         freguesia = str(data_dict.get("freguesia", "")).strip()
+
+#         # validação mínima
+#         if not nome or not email or not bi or not contato:
+#             return {
+#                 "success": False,
+#                 "message": "Faltam dados obrigatórios do encarregado.",
+#                 "error": "nome, email, bi e contato são obrigatórios"
+#             }
+
+#         conn.start_transaction()
+
+#         # verificar se já existe utilizador com este email
+#         cur.execute("SELECT id FROM users WHERE username = %s", (email,))
+#         if cur.fetchone():
+#             conn.rollback()
+#             return {
+#                 "success": False,
+#                 "message": "Já existe utilizador com este email.",
+#                 "error": email
+#             }
+
+#         # verificar duplicados na tabela encarregado
+#         cur.execute(
+#             "SELECT id FROM encarregado WHERE email = %s OR bi = %s",
+#             (email, bi)
+#         )
+#         if cur.fetchone():
+#             conn.rollback()
+#             return {
+#                 "success": False,
+#                 "message": "Já existe encarregado com este email ou BI.",
+#                 "error": f"{email} / {bi}"
+#             }
+
+#         # criar utilizador
+#         senha_hash = hashlib.sha256(bi.encode("utf-8")).hexdigest()
+
+#         cur.execute("""
+#             INSERT INTO users (username, senha, categoria, foto, primeiro_login)
+#             VALUES (%s, %s, %s, %s, %s)
+#         """, (
+#             email,
+#             senha_hash,
+#             "encarregado",
+#             None,
+#             1
+#         ))
+
+#         user_id = cur.lastrowid
+
+#         # inserir encarregado
+#         cur.execute("""
+#             INSERT INTO encarregado (
+#                 user_id,
+#                 nome,
+#                 contato,
+#                 email,
+#                 bi,
+#                 morada,
+#                 genero,
+#                 distrito,
+#                 freguesia
+#             ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+#         """, (
+#             user_id,
+#             nome,
+#             contato,
+#             email,
+#             bi,
+#             morada or None,
+#             genero or None,
+#             distrito or None,
+#             freguesia or None
+#         ))
+
+#         encarregado_id = cur.lastrowid
+#         conn.commit()
+
+#         return {
+#             "success": True,
+#             "message": "Encarregado inserido com sucesso.",
+#             "data": {
+#                 "encarregado_id": encarregado_id,
+#                 "user_id": user_id,
+#                 "username": email,
+#                 "categoria": "encarregado"
+#             },
+#             "error": None
+#         }
+
+#     except Exception as e:
+#         conn.rollback()
+#         return {
+#             "success": False,
+#             "message": "Erro ao inserir encarregado.",
+#             "error": str(e)
+#         }
+#     finally:
+#         cur.close()
+#         conn.close()
+
+
+
+
+@mcp.tool
+def insert_encarregado(data: str) -> dict:
+    """
+    Regista um novo encarregado:
+    1. cria utilizador em users com username=email e senha=hash do BI
+    2. insere encarregado com o user_id criado
+    """
+
+    conn = get_connection()
+    if conn is None:
+        return {
+            "success": False,
+            "message": "Sem conexão à base de dados.",
+            "error": "get_connection retornou None"
+        }
+
+    cur = conn.cursor(dictionary=True)
+
+    try:
+        data_dict = json.loads(data) if isinstance(data, str) else data
+
+        if not isinstance(data_dict, dict):
+            return {
+                "success": False,
+                "message": "Os dados devem ser um objeto JSON.",
+                "error": "Formato inválido"
+            }
+
+        nome = str(data_dict.get("nome", "")).strip()
+        email = str(data_dict.get("email", "")).strip().lower()
+        bi = str(data_dict.get("bi", "")).strip()
+        contato = str(data_dict.get("contato", "")).strip()
+        morada = str(data_dict.get("morada", "")).strip()
+        genero = str(data_dict.get("genero", "")).strip().lower()
+        distrito = str(data_dict.get("distrito", "")).strip()
+        freguesia = str(data_dict.get("freguesia", "")).strip()
+
+        if not all([nome, email, bi, contato, morada, genero, distrito, freguesia]):
+            return {
+                "success": False,
+                "message": "Preencha todos os campos obrigatórios.",
+                "error": "nome, email, bi, contato, morada, genero, distrito e freguesia são obrigatórios"
+            }
+
+        conn.start_transaction()
+
+        # verificar utilizador duplicado
+        cur.execute("SELECT id FROM users WHERE username = %s LIMIT 1", (email,))
+        if cur.fetchone():
+            conn.rollback()
+            return {
+                "success": False,
+                "message": "Já existe utilizador com este email.",
+                "error": email
+            }
+
+        # verificar encarregado duplicado
+        cur.execute(
+            "SELECT id FROM encarregado WHERE email = %s OR bi = %s LIMIT 1",
+            (email, bi)
+        )
+        if cur.fetchone():
+            conn.rollback()
+            return {
+                "success": False,
+                "message": "Já existe este encarregado.",
+                "error": f"{email} / {bi}"
+            }
+
+        # hash compatível com PHP password_hash/password_verify
+        senha_hash = bcrypt.hashpw(bi.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
+        # inserir em users
+        cur.execute("""
+            INSERT INTO users (username, senha, categoria)
+            VALUES (%s, %s, %s)
+        """, (email, senha_hash, "encarregado", None))
+
+        user_id = cur.lastrowid
+
+        if not user_id:
+            conn.rollback()
+            return {
+                "success": False,
+                "message": "Falha ao criar utilizador.",
+                "error": "lastrowid não gerado"
+            }
+
+        # inserir em encarregado
+        cur.execute("""
+            INSERT INTO encarregado (
+                user_id, nome, email, bi, morada, contato, genero, distrito, freguesia
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (
+            user_id,
+            nome,
+            email,
+            bi,
+            morada,
+            contato,
+            genero,
+            distrito,
+            freguesia
+        ))
+
+        encarregado_id = cur.lastrowid
+        conn.commit()
+
+        return {
+            "success": True,
+            "message": "Encarregado registado com sucesso.",
+            "data": {
+                "encarregado_id": encarregado_id,
+                "user_id": user_id,
+                "username": email,
+                "categoria": "encarregado"
+            },
+            "error": None
+        }
+
+    except Exception as e:
+        conn.rollback()
+        return {
+            "success": False,
+            "message": "Erro ao inserir encarregado.",
+            "error": str(e)
+        }
+    finally:
+        cur.close()
+        conn.close()
+        
+        
+
+@mcp.tool
+def insert_encarregado(dados: str) -> dict:
+    """
+    Insere um novo encarregado na tabela encarregado.
+
+    Ex:
+    dados = {
+        "nome": "Adão Lopes",
+        "contato": "923456789",
+        "email": "adao@email.com",
+        "bi": "123456789LA123",
+        "morada": "Rua Principal",
+        "genero": "Masculino",
+        "distrito": "Luanda",
+        "freguesia": "Ingombota",
+        "user_id": 5
+    }
+    """
+    conn = get_connection()
+    if not conn:
+        return {
+            "success": False,
+            "message": "Sem conexão ao banco"
+        }
+
+    cur = conn.cursor(dictionary=True)
+
+    try:
+        dados_dict = json.loads(dados) if isinstance(dados, str) else dados
+
+        if not isinstance(dados_dict, dict):
+            return {
+                "success": False,
+                "message": "Os dados devem ser um dict ou JSON válido"
+            }
+
+        # Ver colunas reais da tabela
+        cur.execute("DESCRIBE `encarregado`")
+        colunas = [c["Field"] for c in cur.fetchall()]
+
+        # Campos que não devem ser inseridos manualmente
+        bloqueadas = {"id", "inserido_em"}
+
+        # Filtrar apenas colunas válidas
+        validos = {
+            k: v for k, v in dados_dict.items()
+            if k in colunas and k not in bloqueadas
+        }
+
+        if not validos:
+            return {
+                "success": False,
+                "message": "Nenhum campo válido para inserção",
+                "error": f"Colunas permitidas: {', '.join([c for c in colunas if c not in bloqueadas])}"
+            }
+
+        # Validação mínima
+        obrigatorios = ["nome"]
+        faltam = [campo for campo in obrigatorios if not validos.get(campo)]
+
+        if faltam:
+            return {
+                "success": False,
+                "message": "Faltam campos obrigatórios",
+                "error": f"Campos em falta: {', '.join(faltam)}"
+            }
+
+        # Evitar duplicados por BI ou email, se existirem
+        if validos.get("bi"):
+            cur.execute("SELECT id FROM encarregado WHERE bi = %s", (validos["bi"],))
+            if cur.fetchone():
+                return {
+                    "success": False,
+                    "message": "Já existe um encarregado com este BI",
+                    "error": f"BI duplicado: {validos['bi']}"
+                }
+
+        if validos.get("email"):
+            cur.execute("SELECT id FROM encarregado WHERE email = %s", (validos["email"],))
+            if cur.fetchone():
+                return {
+                    "success": False,
+                    "message": "Já existe um encarregado com este email",
+                    "error": f"Email duplicado: {validos['email']}"
+                }
+
+        campos = ", ".join(f"`{k}`" for k in validos.keys())
+        placeholders = ", ".join(["%s"] * len(validos))
+        sql = f"INSERT INTO `encarregado` ({campos}) VALUES ({placeholders})"
+
+        cur.execute(sql, list(validos.values()))
+        conn.commit()
+
+        novo_id = cur.lastrowid
+
+        cur.execute("""
+            SELECT id, nome, contato, email, bi, morada, genero, distrito, freguesia, user_id
+            FROM encarregado
+            WHERE id = %s
+        """, (novo_id,))
+        novo = cur.fetchone()
+
+        return {
+            "success": True,
+            "message": "Encarregado inserido com sucesso",
+            "inserted_id": novo_id,
+            "data": novo,
+            "error": None
+        }
+
+    except Exception as e:
+        conn.rollback()
+        return {
+            "success": False,
+            "message": "Erro ao inserir encarregado",
+            "error": str(e)
+        }
+    finally:
+        cur.close()
+        conn.close()
+
+
 @mcp.tool
 def list_encarregado() -> dict:
     """
@@ -612,7 +977,7 @@ def list_encarregado() -> dict:
         cur.close()
         conn.close()
 
-import json
+
 
 @mcp.tool
 def update_encarregado(nome_atual: str, updates: str) -> dict:
@@ -1072,7 +1437,7 @@ def list_turma() -> dict:
         conn.close()
         
 
-import json
+
 
 @mcp.tool
 def update_turma(codigo_atual: str, updates: str) -> dict:
@@ -1450,7 +1815,7 @@ def list_professor() -> dict:
         conn.close()
         
 
-import json
+
 
 @mcp.tool
 def update_professor(professor_id: int, updates: str) -> dict:
@@ -1620,37 +1985,285 @@ def list_funcionario() -> dict:
 @mcp.tool
 def update_funcionario(funcionario_id: int, updates: str) -> dict:
     """
-    Atualiza dados de um funcionario de educação pelo ID.
-    updates: dict ou JSON string com os campos a alterar.
-    """
-    conn = get_connection()
-    if not conn:
-        return {"success": False, "message": "Sem conexão ao banco"}
+    Atualiza um funcionário pelo ID.
 
-    cur = conn.cursor()
+    Permite editar apenas campos de negócio da tabela `funcionario`.
+    Campos bloqueados:
+    - id
+    - user_id
+    - inserido_em
+
+    Regras:
+    - se o email mudar, também atualiza o username na tabela users
+    - valida formato do email
+    - impede duplicados de email, BI e NIF noutros funcionários
+    """
+
+
+
+    conn = get_connection()
+    if conn is None:
+        return {
+            "success": False,
+            "message": "Sem conexão ao banco",
+            "error": "get_connection retornou None"
+        }
+
+    cur = conn.cursor(dictionary=True)
+
     try:
         updates_dict = json.loads(updates) if isinstance(updates, str) else updates
-        if not isinstance(updates_dict, dict):
-            return {"success": False, "message": "Updates deve ser dict/JSON"}
 
-        cur.execute("DESCRIBE `funcionario`")
-        colunas = [c[0] for c in cur.fetchall()]
-        validos = {k: v for k, v in updates_dict.items() if k in colunas}
+        if not isinstance(updates_dict, dict):
+            return {
+                "success": False,
+                "message": "Updates deve ser um objeto JSON/dict.",
+                "error": "Formato inválido"
+            }
+
+        # 1. Verificar se o funcionário existe
+        cur.execute("""
+            SELECT *
+            FROM funcionario
+            WHERE id = %s
+            LIMIT 1
+        """, (funcionario_id,))
+        funcionario = cur.fetchone()
+
+        if not funcionario:
+            return {
+                "success": False,
+                "message": "Funcionário não encontrado.",
+                "error": f"Não existe funcionário com id={funcionario_id}"
+            }
+
+        # 2. Campos permitidos
+        bloqueados = {"id", "user_id", "inserido_em"}
+        permitidos = {
+            "nome",
+            "bi",
+            "email",
+            "contato",
+            "data_nascimento",
+            "morada",
+            "nacionalidade",
+            "nif",
+            "genero",
+            "distrito",
+            "freguesia",
+            "cargo",
+            "tipo_c",
+            "h_profissional",
+            "h_academica"
+        }
+
+        invalidos = [k for k in updates_dict.keys() if k not in permitidos and k not in bloqueados]
+        if invalidos:
+            return {
+                "success": False,
+                "message": "Existem campos inválidos no update.",
+                "error": f"Campos permitidos: {', '.join(sorted(permitidos))}. Inválidos: {', '.join(invalidos)}"
+            }
+
+        if any(k in bloqueados for k in updates_dict.keys()):
+            return {
+                "success": False,
+                "message": "Tentativa de alterar campos bloqueados.",
+                "error": f"Campos bloqueados: {', '.join(sorted(bloqueados))}"
+            }
+
+        # 3. Limpeza básica dos dados
+        validos = {}
+        for campo in permitidos:
+            if campo in updates_dict:
+                valor = updates_dict[campo]
+
+                if isinstance(valor, str):
+                    valor = valor.strip()
+
+                validos[campo] = valor
 
         if not validos:
-            return {"success": False, "message": "Nenhuma coluna válida para update",
-                    "error": f"Colunas disponíveis: {', '.join(colunas)}"}
+            return {
+                "success": False,
+                "message": "Nenhum campo válido para atualizar.",
+                "error": f"Envie pelo menos um destes campos: {', '.join(sorted(permitidos))}"
+            }
 
-        set_clause = ", ".join(f"`{k}`=%s" for k in validos.keys())
-        sql = f"UPDATE `funcionario` SET {set_clause} WHERE id=%s"
-        cur.execute(sql, list(validos.values()) + [funcionario_id])
+        # 4. Validações de formato
+        if "email" in validos:
+            email = str(validos["email"]).strip().lower()
+            email_regex = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
+            if not re.match(email_regex, email):
+                return {
+                    "success": False,
+                    "message": "Email inválido.",
+                    "error": email
+                }
+            validos["email"] = email
+
+        if "nome" in validos and not validos["nome"]:
+            return {
+                "success": False,
+                "message": "Nome inválido.",
+                "error": "O campo nome não pode estar vazio"
+            }
+
+        if "bi" in validos and not str(validos["bi"]).strip():
+            return {
+                "success": False,
+                "message": "BI inválido.",
+                "error": "O campo bi não pode estar vazio"
+            }
+
+        if "nif" in validos and not str(validos["nif"]).strip():
+            return {
+                "success": False,
+                "message": "NIF inválido.",
+                "error": "O campo nif não pode estar vazio"
+            }
+
+        # 5. Evitar duplicados
+        if "email" in validos:
+            cur.execute("""
+                SELECT id
+                FROM funcionario
+                WHERE email = %s AND id <> %s
+                LIMIT 1
+            """, (validos["email"], funcionario_id))
+            if cur.fetchone():
+                return {
+                    "success": False,
+                    "message": "Já existe outro funcionário com este email.",
+                    "error": validos["email"]
+                }
+
+            # também verificar se username na tabela users já pertence a outro user
+            cur.execute("""
+                SELECT id
+                FROM users
+                WHERE username = %s AND id <> %s
+                LIMIT 1
+            """, (validos["email"], funcionario["user_id"]))
+            if cur.fetchone():
+                return {
+                    "success": False,
+                    "message": "Já existe outro utilizador com este email.",
+                    "error": validos["email"]
+                }
+
+        if "bi" in validos:
+            cur.execute("""
+                SELECT id
+                FROM funcionario
+                WHERE bi = %s AND id <> %s
+                LIMIT 1
+            """, (validos["bi"], funcionario_id))
+            if cur.fetchone():
+                return {
+                    "success": False,
+                    "message": "Já existe outro funcionário com este BI.",
+                    "error": validos["bi"]
+                }
+
+        if "nif" in validos:
+            cur.execute("""
+                SELECT id
+                FROM funcionario
+                WHERE nif = %s AND id <> %s
+                LIMIT 1
+            """, (validos["nif"], funcionario_id))
+            if cur.fetchone():
+                return {
+                    "success": False,
+                    "message": "Já existe outro funcionário com este NIF.",
+                    "error": validos["nif"]
+                }
+
+        # 6. Detetar alterações reais
+        mudancas_reais = {}
+        for campo, novo_valor in validos.items():
+            valor_atual = funcionario.get(campo)
+
+            if isinstance(valor_atual, str):
+                valor_atual = valor_atual.strip()
+
+            if novo_valor != valor_atual:
+                mudancas_reais[campo] = novo_valor
+
+        if not mudancas_reais:
+            return {
+                "success": False,
+                "message": "Nenhuma alteração foi feita.",
+                "rows_affected": 0,
+                "data": funcionario,
+                "error": "Os novos valores são iguais aos atuais"
+            }
+
+        conn.start_transaction()
+
+        # 7. Atualizar tabela funcionario
+        set_clause = ", ".join(f"`{campo}` = %s" for campo in mudancas_reais.keys())
+        valores = list(mudancas_reais.values()) + [funcionario_id]
+
+        sql = f"UPDATE `funcionario` SET {set_clause} WHERE id = %s"
+        cur.execute(sql, valores)
+        rows_affected = cur.rowcount
+
+        # 8. Se email mudou, atualizar também users.username
+        if "email" in mudancas_reais and funcionario.get("user_id"):
+            cur.execute("""
+                UPDATE users
+                SET username = %s
+                WHERE id = %s
+            """, (mudancas_reais["email"], funcionario["user_id"]))
+
         conn.commit()
 
-        return {"success": True, "message": "funcionario atualizado com sucesso",
-                "rows_affected": cur.rowcount, "error": None}
+        # 9. Buscar dados atualizados
+        cur.execute("""
+            SELECT
+                f.id,
+                f.user_id,
+                f.nome,
+                f.bi,
+                f.email,
+                f.contato,
+                f.data_nascimento,
+                f.morada,
+                f.nacionalidade,
+                f.nif,
+                f.genero,
+                f.distrito,
+                f.freguesia,
+                f.cargo,
+                f.tipo_c,
+                f.h_profissional,
+                f.h_academica,
+                f.inserido_em
+            FROM funcionario f
+            WHERE f.id = %s
+            LIMIT 1
+        """, (funcionario_id,))
+        atualizado = cur.fetchone()
+
+        return {
+            "success": True,
+            "message": "Funcionário atualizado com sucesso.",
+            "rows_affected": rows_affected,
+            "updated_fields": list(mudancas_reais.keys()),
+            "data": atualizado,
+            "error": None
+        }
+
     except Exception as e:
         conn.rollback()
-        return {"success": False, "message": "Erro ao atualizar encarregado", "error": str(e)}
+        return {
+            "success": False,
+            "message": "Erro ao atualizar funcionário.",
+            "error": str(e)
+        }
+
     finally:
         cur.close()
         conn.close()

@@ -122,7 +122,7 @@ $turma = $pdo->query(
                         <div class="col-md-6 mb-3">
                             <label for="formFile" class="form-label">Foto</label>
                             <input class="form-control" name="foto" type="file"
-                                accept="image/png, image/jpeg, image/jpg, image/webp" required>
+                                accept="image/jpeg, image/jpg, image/png, image/gif" required>
                         </div>
                     </div>
                     <div class="row">

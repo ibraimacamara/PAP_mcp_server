@@ -20,8 +20,8 @@ use backup;
 use backup_controller;
 use component_generator_base;
 use mod_quiz_generator;
-use mod_quiz\quiz_attempt;
-use mod_quiz\quiz_settings;
+use quiz;
+use quiz_attempt;
 use restore_controller;
 use stdClass;
 use question_engine;
@@ -55,6 +55,7 @@ trait question_helper_test_trait {
      * @return  stdClass
      */
     protected function create_test_quiz(stdClass $course): stdClass {
+
         /** @var mod_quiz_generator $quizgenerator */
         $quizgenerator = $this->getDataGenerator()->get_plugin_generator('mod_quiz');
 
@@ -77,11 +78,11 @@ trait question_helper_test_trait {
         // Create a couple of questions.
         $cat = $questiongenerator->create_question_category($override);
 
-        $saq = $questiongenerator->create_question('shortanswer', null, ['category' => $cat->id]);
+        $saq = $questiongenerator->create_question('shortanswer', null, array('category' => $cat->id));
         // Create another version.
         $questiongenerator->update_question($saq);
         quiz_add_quiz_question($saq->id, $quiz);
-        $numq = $questiongenerator->create_question('numerical', null, ['category' => $cat->id]);
+        $numq = $questiongenerator->create_question('numerical', null, array('category' => $cat->id));
         // Create two version.
         $questiongenerator->update_question($numq);
         $questiongenerator->update_question($numq);
@@ -98,9 +99,9 @@ trait question_helper_test_trait {
     protected function add_one_random_question($questiongenerator, stdClass $quiz, $override = []): void {
         // Create a random question.
         $cat = $questiongenerator->create_question_category($override);
-        $questiongenerator->create_question('truefalse', null, ['category' => $cat->id]);
-        $questiongenerator->create_question('essay', null, ['category' => $cat->id]);
-        $this->add_random_questions($quiz->id, 0, $cat->id, 1);
+        $questiongenerator->create_question('truefalse', null, array('category' => $cat->id));
+        $questiongenerator->create_question('essay', null, array('category' => $cat->id));
+        quiz_add_random_questions($quiz, 0, $cat->id, 1, false);
     }
 
     /**
@@ -115,7 +116,7 @@ trait question_helper_test_trait {
         $this->setUser($user);
 
         $starttime = time();
-        $quizobj = quiz_settings::create($quiz->id, $user->id);
+        $quizobj = quiz::create($quiz->id, $user->id);
 
         $quba = question_engine::make_questions_usage_by_activity('mod_quiz', $quizobj->get_context());
         $quba->set_preferred_behaviour($quizobj->get_quiz()->preferredbehaviour);
@@ -149,14 +150,8 @@ trait question_helper_test_trait {
 
         $backupid = 'test-question-backup-restore';
 
-        $bc = new backup_controller(
-            backup::TYPE_1ACTIVITY,
-            $quiz->cmid,
-            backup::FORMAT_MOODLE,
-            backup::INTERACTIVE_NO,
-            backup::MODE_GENERAL,
-            $user->id,
-        );
+        $bc = new backup_controller(backup::TYPE_1ACTIVITY, $quiz->cmid, backup::FORMAT_MOODLE,
+            backup::INTERACTIVE_NO, backup::MODE_GENERAL, $user->id);
         $bc->execute_plan();
 
         $results = $bc->get_results();
@@ -193,29 +188,5 @@ trait question_helper_test_trait {
      */
     protected function duplicate_quiz($course, $quiz): ?\cm_info {
         return duplicate_module($course, get_fast_modinfo($course)->get_cm($quiz->cmid));
-    }
-
-    /**
-     * Add random questions to a quiz, with a filter condition based on a category ID.
-     *
-     * @param int $quizid The quiz to add the questions to.
-     * @param int $page The page number to add the questions to.
-     * @param int $categoryid The category ID to use for the filter condition.
-     * @param int $number The number of questions to add.
-     * @return void
-     */
-    protected function add_random_questions(int $quizid, int $page, int $categoryid, int $number): void {
-        $quizobj = quiz_settings::create($quizid);
-        $structure = $quizobj->get_structure();
-        $filtercondition = [
-            'filter' => [
-                'category' => [
-                    'jointype' => \core_question\local\bank\condition::JOINTYPE_DEFAULT,
-                    'values' => [$categoryid],
-                    'filteroptions' => ['includesubcategories' => false],
-                ],
-            ],
-        ];
-        $structure->add_random_questions($page, $number, $filtercondition);
     }
 }

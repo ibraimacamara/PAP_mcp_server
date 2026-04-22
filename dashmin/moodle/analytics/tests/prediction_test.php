@@ -63,7 +63,6 @@ final class prediction_test extends \advanced_testcase {
         foreach ($models as $model) {
             $model->delete();
         }
-        parent::tearDown();
     }
 
     /**
@@ -71,7 +70,7 @@ final class prediction_test extends \advanced_testcase {
      *
      * @return void
      */
-    public function test_static_prediction(): void {
+    public function test_static_prediction() {
         global $DB;
 
         $this->resetAfterTest(true);
@@ -124,7 +123,7 @@ final class prediction_test extends \advanced_testcase {
     /**
      * test_model_contexts
      */
-    public function test_model_contexts(): void {
+    public function test_model_contexts() {
         global $DB;
 
         $this->resetAfterTest(true);
@@ -184,7 +183,7 @@ final class prediction_test extends \advanced_testcase {
      * @return void
      */
     public function test_ml_training_and_prediction($timesplittingid, $predictedrangeindex, $nranges, $predictionsprocessorclass,
-            $forcedconfig): void {
+            $forcedconfig) {
         global $DB;
 
         $this->resetAfterTest(true);
@@ -359,7 +358,7 @@ final class prediction_test extends \advanced_testcase {
      * @param array $forcedconfig
      * @dataProvider provider_ml_processors
      */
-    public function test_ml_export_import($predictionsprocessorclass, $forcedconfig): void {
+    public function test_ml_export_import($predictionsprocessorclass, $forcedconfig) {
         $this->resetAfterTest(true);
 
         $this->set_forced_config($forcedconfig);
@@ -440,7 +439,7 @@ final class prediction_test extends \advanced_testcase {
      * @param array $forcedconfig
      * @return void
      */
-    public function test_ml_classifiers_return($success, $nsamples, $classes, $predictionsprocessorclass, $forcedconfig): void {
+    public function test_ml_classifiers_return($success, $nsamples, $classes, $predictionsprocessorclass, $forcedconfig) {
         $this->resetAfterTest();
 
         $this->set_forced_config($forcedconfig);
@@ -531,7 +530,7 @@ final class prediction_test extends \advanced_testcase {
      * @throws coding_exception
      * @throws moodle_exception
      */
-    public function test_ml_multi_classifier($timesplittingid, $predictionsprocessorclass, $forcedconfig): void {
+    public function test_ml_multi_classifier($timesplittingid, $predictionsprocessorclass, $forcedconfig) {
         global $DB;
 
         $this->resetAfterTest(true);
@@ -604,7 +603,7 @@ final class prediction_test extends \advanced_testcase {
      * @return void
      */
     public function test_ml_evaluation_configuration($modelquality, $ncourses, $expected, $predictionsprocessorclass,
-            $forcedconfig): void {
+            $forcedconfig) {
         $this->resetAfterTest(true);
 
         $this->set_forced_config($forcedconfig);
@@ -658,7 +657,7 @@ final class prediction_test extends \advanced_testcase {
      * @param array $forcedconfig
      * @return null
      */
-    public function test_ml_evaluation_trained_model($predictionsprocessorclass, $forcedconfig): void {
+    public function test_ml_evaluation_trained_model($predictionsprocessorclass, $forcedconfig) {
         $this->resetAfterTest(true);
 
         $this->set_forced_config($forcedconfig);
@@ -692,7 +691,7 @@ final class prediction_test extends \advanced_testcase {
      *
      * @return void
      */
-    public function test_read_indicator_calculations(): void {
+    public function test_read_indicator_calculations() {
         global $DB;
 
         $this->resetAfterTest(true);
@@ -712,7 +711,7 @@ final class prediction_test extends \advanced_testcase {
     /**
      * test_not_null_samples
      */
-    public function test_not_null_samples(): void {
+    public function test_not_null_samples() {
         $this->resetAfterTest(true);
 
         $timesplitting = \core_analytics\manager::get_time_splitting('\core\analytics\time_splitting\quarters');

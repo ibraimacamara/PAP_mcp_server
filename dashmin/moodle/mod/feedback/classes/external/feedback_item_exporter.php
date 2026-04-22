@@ -24,6 +24,7 @@
 namespace mod_feedback\external;
 defined('MOODLE_INTERNAL') || die();
 
+use mod_feedback\feedback;
 use core\external\exporter;
 use renderer_base;
 use core_files\external\stored_file_exporter;
@@ -56,12 +57,6 @@ class feedback_item_exporter extends exporter {
                 'type' => PARAM_RAW,
                 'description' => 'The item name.',
             ),
-            'nameformat' => [
-                'choices' => [FORMAT_HTML, FORMAT_MOODLE, FORMAT_PLAIN, FORMAT_MARKDOWN],
-                'type' => PARAM_INT,
-                'description' => 'The format of the item name.',
-                'default' => FORMAT_HTML,
-            ],
             'label' => array(
                 'type' => PARAM_NOTAGS,
                 'description' => 'The item label.',
@@ -70,12 +65,6 @@ class feedback_item_exporter extends exporter {
                 'type' => PARAM_RAW,
                 'description' => 'The text describing the item or the available possible answers.',
             ),
-            'presentationformat' => [
-                'choices' => [FORMAT_HTML, FORMAT_MOODLE, FORMAT_PLAIN, FORMAT_MARKDOWN],
-                'type' => PARAM_INT,
-                'description' => 'The format of the text describing the item or the available possible answers.',
-                'default' => FORMAT_HTML,
-            ],
             'typ' => array(
                 'type' => PARAM_ALPHA,
                 'description' => 'The type of the item.',
@@ -170,8 +159,7 @@ class feedback_item_exporter extends exporter {
         return [
             'component' => 'mod_feedback',
             'filearea' => 'item',
-            'itemid' => $this->data->id,
-            'options' => ['noclean' => true, 'para' => false],
+            'itemid' => $this->data->id
         ];
     }
 
@@ -184,8 +172,7 @@ class feedback_item_exporter extends exporter {
         return [
             'component' => 'mod_feedback',
             'filearea' => 'item',
-            'itemid' => $this->data->id,
-            'options' => ['noclean' => true, 'para' => false],
+            'itemid' => $this->data->id
         ];
     }
 }

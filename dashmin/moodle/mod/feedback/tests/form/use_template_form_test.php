@@ -66,7 +66,7 @@ final class use_template_form_test extends \advanced_testcase {
      * @param bool $expected Whether or not the form should be validated
      * @dataProvider usetemplate_form_provider
      */
-    public function test_usetemplate_form(string $loginas, bool $private, bool $expected): void {
+    public function test_usetemplate_form(string $loginas, bool $private, bool $expected) {
         [$user, $feedback] = $this->setup_instance();
         switch($loginas) {
             case 'admin':

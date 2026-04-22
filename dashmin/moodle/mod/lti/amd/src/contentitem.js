@@ -31,10 +31,10 @@ define(
         'core/str',
         'core/templates',
         'mod_lti/form-field',
-        'core/modal',
+        'core/modal_factory',
         'core/modal_events'
     ],
-    function($, notification, str, templates, FormField, Modal, ModalEvents) {
+    function($, notification, str, templates, FormField, ModalFactory, ModalEvents) {
         var dialogue;
         var doneCallback;
         var contentItem = {
@@ -42,15 +42,13 @@ define(
              * Init function.
              *
              * @param {string} url The URL for the content item selection.
-             * @param {string} toolUrl The URL of the LTI tool.
              * @param {object} postData The data to be sent for the content item selection request.
              * @param {Function} cb The callback to run once the content item has been processed.
              */
-            init: function(url, toolUrl, postData, cb) {
+            init: function(url, postData, cb) {
                 doneCallback = cb;
                 var context = {
                     url: url,
-                    toolUrl: toolUrl,
                     postData: postData
                 };
                 var bodyPromise = templates.render('mod_lti/contentitem', context);
@@ -64,11 +62,10 @@ define(
                 }
 
                 str.get_string('selectcontent', 'lti').then(function(title) {
-                    return Modal.create({
+                    return ModalFactory.create({
                         title: title,
                         body: bodyPromise,
-                        large: true,
-                        show: true,
+                        large: true
                     });
                 }).then(function(modal) {
                     dialogue = modal;
@@ -80,6 +77,9 @@ define(
                         // Fetch notifications.
                         notification.fetchNotifications();
                     });
+
+                    // Display the dialogue.
+                    modal.show();
                     return;
                 }).catch(notification.exception);
             }
@@ -230,9 +230,6 @@ define(
                     field.setFieldValue(value);
                 }
                 field.setFieldValue(value);
-
-                // Update the UI element which signifies content has been selected.
-                document.querySelector("#id_selectcontentindicator").innerHTML = returnData.selectcontentindicator;
             }
 
             if (doneCallback) {

@@ -24,9 +24,6 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use core_external\external_single_structure;
-use core_external\external_value;
-
 defined('MOODLE_INTERNAL') || die();
 // File area for online text submission assignment.
 define('ASSIGNSUBMISSION_ONLINETEXT_FILEAREA', 'submissions_onlinetext');
@@ -422,7 +419,7 @@ class assign_submission_onlinetext extends assign_submission_plugin {
 
         // Note that this check is the same logic as the result from the is_empty function but we do
         // not call it directly because we already have the submission record.
-        if ($onlinetextsubmission && !html_is_blank($onlinetextsubmission->onlinetext)) {
+        if ($onlinetextsubmission) {
             // Do not pass the text through format_text. The result may not be displayed in Moodle and
             // may be passed to external services such as document conversion or portfolios.
             $formattedtext = $this->assignment->download_rewrite_pluginfile_urls($onlinetextsubmission->onlinetext, $user, $this);
@@ -563,6 +560,23 @@ class assign_submission_onlinetext extends assign_submission_plugin {
     }
 
     /**
+     * Formatting for log info
+     *
+     * @param stdClass $submission The new submission
+     * @return string
+     */
+    public function format_for_log(stdClass $submission) {
+        // Format the info for each submission plugin (will be logged).
+        $onlinetextsubmission = $this->get_onlinetext_submission($submission->id);
+        $onlinetextloginfo = '';
+        $onlinetextloginfo .= get_string('numwordsforlog',
+                                         'assignsubmission_onlinetext',
+                                         count_words($onlinetextsubmission->onlinetext));
+
+        return $onlinetextloginfo;
+    }
+
+    /**
      * The assignment has been deleted - cleanup
      *
      * @return bool
@@ -664,7 +678,7 @@ class assign_submission_onlinetext extends assign_submission_plugin {
     /**
      * Return a description of external params suitable for uploading an onlinetext submission from a webservice.
      *
-     * @return \core_external\external_description|null
+     * @return external_description|null
      */
     public function get_external_parameters() {
         $editorparams = array('text' => new external_value(PARAM_RAW, 'The text for this submission.'),
@@ -711,3 +725,5 @@ class assign_submission_onlinetext extends assign_submission_plugin {
         return (array) $this->get_config();
     }
 }
+
+

@@ -32,7 +32,6 @@ use \core_xapi\local\statement\item_activity;
 use \core_xapi\local\statement\item_definition;
 use \core_xapi\local\statement\item_verb;
 use \core_xapi\local\statement\item_result;
-use core_xapi\test_helper;
 use stdClass;
 
 /**
@@ -64,35 +63,15 @@ final class attempt_test extends \advanced_testcase {
     /**
      * Test for create_attempt method.
      */
-    public function test_create_attempt(): void {
-        global $CFG, $DB;
-        require_once($CFG->dirroot.'/lib/xapi/tests/helper.php');
+    public function test_create_attempt() {
 
-        [$cm, $student, $course] = $this->generate_testing_scenario();
-        $student2 = $this->getDataGenerator()->create_and_enrol($course, 'student');
-
-        // Save the current state for this activity for student1 and student2 (before creating the first attempt).
-        $manager = manager::create_from_coursemodule($cm);
-        $this->setUser($student2);
-        test_helper::create_state([
-            'activity' => item_activity::create_from_id($manager->get_context()->id),
-            'component' => 'mod_h5pactivity',
-        ], true);
-        $this->setUser($student);
-        test_helper::create_state([
-            'activity' => item_activity::create_from_id($manager->get_context()->id),
-            'component' => 'mod_h5pactivity',
-        ], true);
-
-        $this->assertEquals(2, $DB->count_records('xapi_states'));
+        list($cm, $student) = $this->generate_testing_scenario();
 
         // Create first attempt.
         $attempt = attempt::new_attempt($student, $cm);
         $this->assertEquals($student->id, $attempt->get_userid());
         $this->assertEquals($cm->instance, $attempt->get_h5pactivityid());
         $this->assertEquals(1, $attempt->get_attempt());
-        $this->assertEquals(1, $DB->count_records('xapi_states'));
-        $this->assertEquals(0, $DB->count_records('xapi_states', ['userid' => $student->id]));
 
         // Create a second attempt.
         $attempt = attempt::new_attempt($student, $cm);
@@ -104,7 +83,7 @@ final class attempt_test extends \advanced_testcase {
     /**
      * Test for last_attempt method
      */
-    public function test_last_attempt(): void {
+    public function test_last_attempt() {
 
         list($cm, $student) = $this->generate_testing_scenario();
 
@@ -146,7 +125,7 @@ final class attempt_test extends \advanced_testcase {
      * @param bool $hasresult generate result
      * @param array $results 0 => insert ok, 1 => maxscore, 2 => rawscore, 3 => count
      */
-    public function test_save_statement(string $subcontent, bool $hasdefinition, bool $hasresult, array $results): void {
+    public function test_save_statement(string $subcontent, bool $hasdefinition, bool $hasresult, array $results) {
 
         list($cm, $student) = $this->generate_testing_scenario();
 
@@ -212,7 +191,7 @@ final class attempt_test extends \advanced_testcase {
     /**
      * Test delete results from attempt.
      */
-    public function test_delete_results(): void {
+    public function test_delete_results() {
 
         list($cm, $student) = $this->generate_testing_scenario();
 
@@ -224,7 +203,7 @@ final class attempt_test extends \advanced_testcase {
     /**
      * Test delete attempt.
      */
-    public function test_delete_attempt(): void {
+    public function test_delete_attempt() {
         global $DB;
 
         list($cm, $student) = $this->generate_testing_scenario();
@@ -265,7 +244,7 @@ final class attempt_test extends \advanced_testcase {
      * @param bool $hasstudent if user is specificed
      * @param int[] 0-3 => statements count results, 4-5 => totals
      */
-    public function test_delete_all_attempts(bool $hasstudent, array $results): void {
+    public function test_delete_all_attempts(bool $hasstudent, array $results) {
         global $DB;
 
         list($cm, $student, $course) = $this->generate_testing_scenario();

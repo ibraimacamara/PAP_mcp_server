@@ -24,8 +24,6 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->libdir . '/google/lib.php');
-
 /**
  * Callback to get the required scopes for system account.
  *
@@ -34,7 +32,7 @@ require_once($CFG->libdir . '/google/lib.php');
  */
 function fileconverter_googledrive_oauth2_system_scopes(\core\oauth2\issuer $issuer) {
     if ($issuer->get('id') == get_config('fileconverter_googledrive', 'issuerid')) {
-        return Google_Service_Drive::DRIVE_FILE;
+        return 'https://www.googleapis.com/auth/drive';
     }
     return '';
 }

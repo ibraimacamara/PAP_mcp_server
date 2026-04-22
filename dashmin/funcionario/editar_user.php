@@ -67,7 +67,7 @@ if (!$user) {
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Imagem (deixa vazio para manter a atual)</label>
                             <input type="file" name="foto" class="form-control"
-                                accept="image/png, image/jpeg, image/jpg, image/webp">
+                                accept="image/jpeg, image/jpg, image/png, image/gif">
                             <?php if (!empty($user['foto'])): ?>
                                 <small class="text-muted">Atual: <?= htmlspecialchars($user['foto']) ?></small>
                             <?php endif; ?>

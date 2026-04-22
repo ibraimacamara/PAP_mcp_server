@@ -37,7 +37,6 @@ final class events_test extends \advanced_testcase {
      * Setup testcase.
      */
     public function setUp(): void {
-        parent::setUp();
         $this->setAdminUser();
         $this->resetAfterTest();
     }
@@ -45,7 +44,7 @@ final class events_test extends \advanced_testcase {
     /**
      * Test the report viewed event.
      */
-    public function test_report_viewed(): void {
+    public function test_report_viewed() {
         $requestedqtype = 'all';
         $event = \report_questioninstances\event\report_viewed::create(array('other' => array('requestedqtype' => $requestedqtype)));
 
@@ -57,6 +56,8 @@ final class events_test extends \advanced_testcase {
 
         $this->assertInstanceOf('\report_questioninstances\event\report_viewed', $event);
         $this->assertEquals(\context_system::instance(), $event->get_context());
+        $expected = array(SITEID, "admin", "report questioninstances", "report/questioninstances/index.php?qtype=$requestedqtype", $requestedqtype);
+        $this->assertEventLegacyLogData($expected, $event);
         $this->assertEventContextNotUsed($event);
         $url = new \moodle_url('/report/questioninstances/index.php', array('qtype' => $requestedqtype));
         $this->assertEquals($url, $event->get_url());

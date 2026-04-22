@@ -86,6 +86,8 @@ echo $OUTPUT->header();
 // Print the selector dropdown.
 $pluginname = get_string('pluginname', 'report_participation');
 report_helper::print_report_selector($pluginname);
+// Release session lock.
+\core\session\manager::write_close();
 
 // Logs will not have been recorded before the course timecreated time.
 $minlog = $course->timecreated;
@@ -147,6 +149,7 @@ if (!empty($instanceid) && !empty($roleid)) {
     }
 
     $table = new flexible_table('course-participation-'.$course->id.'-'.$cm->id.'-'.$roleid);
+    $table->course = $course;
 
     $actionheader = !empty($action) ? get_string($action) : get_string('allactions');
 
@@ -181,9 +184,6 @@ if (!empty($instanceid) && !empty($roleid)) {
                                         TABLE_VAR_PAGE    => 'spage'
                                         ));
     $table->setup();
-
-    // Unlock the session only after outputting the table, since the table writes to the session.
-    \core\session\manager::write_close();
 
     // We want to query both the current context and parent contexts.
     list($relatedctxsql, $params) = $DB->get_in_or_equal($context->get_parent_context_ids(true), SQL_PARAMS_NAMED, 'relatedctx');
@@ -260,8 +260,6 @@ if (!empty($instanceid) && !empty($roleid)) {
 
     // Get record from sql_internal_table_reader and merge with records got from legacy log (if needed).
     if (!$onlyuselegacyreader) {
-        $anonymoussql = !has_capability('moodle/site:viewanonymousevents', $context) ? 'AND l.anonymous = 0' : '';
-
         $sql = "SELECT ra.userid, $usernamefields, u.idnumber, COUNT(DISTINCT l.timecreated) AS count
                   FROM {user} u
                   JOIN {role_assignments} ra ON u.id = ra.userid AND ra.contextid $relatedctxsql AND ra.roleid = :roleid
@@ -270,7 +268,7 @@ if (!empty($instanceid) && !empty($roleid)) {
                      ON l.contextinstanceid = :instanceid
                        AND l.timecreated > :timefrom" . $crudsql ."
                        AND l.edulevel = :edulevel
-                       " . $anonymoussql . "
+                       AND l.anonymous = 0
                        AND l.contextlevel = :contextlevel
                        AND (l.origin = 'web' OR l.origin = 'ws')
                        AND l.userid = ra.userid";
@@ -390,7 +388,11 @@ if (!empty($instanceid) && !empty($roleid)) {
         echo '</div>'."\n";
         echo '</form>'."\n";
 
-        $PAGE->requires->js_call_amd('report_participation/participants', 'init');
+        $options = new stdClass();
+        $options->courseid = $course->id;
+        $options->noteStateNames = note_get_state_names();
+        $options->stateHelpIcon = $OUTPUT->help_icon('publishstate', 'notes');
+        $PAGE->requires->js_call_amd('report_participation/participants', 'init', [$options]);
     }
     echo '</div>'."\n";
 }

@@ -33,7 +33,7 @@ final class manager_test extends \advanced_testcase {
     /**
      * Test for static create methods.
      */
-    public function test_create(): void {
+    public function test_create() {
 
         $this->resetAfterTest();
         $this->setAdminUser();
@@ -61,19 +61,15 @@ final class manager_test extends \advanced_testcase {
     }
 
     /**
-     * Test for is_tracking_enabled and can_submit methods.
+     * Test for is_tracking_enabled.
      *
-     * @covers ::is_tracking_enabled
-     * @covers ::can_submit
      * @dataProvider is_tracking_enabled_data
      * @param bool $login if the user is logged in
      * @param string $role user role in course
      * @param int $enabletracking if tracking is enabled
-     * @param bool $expectedtracking expected result for is_tracking_enabled()
-     * @param bool $expectedsubmit expected result for can_submit()
+     * @param bool $expected expected result
      */
-    public function test_is_tracking_enabled_and_can_submit(bool $login, string $role, int $enabletracking, bool $expectedtracking,
-            bool $expectedsubmit): void {
+    public function test_is_tracking_enabled(bool $login, string $role, int $enabletracking, bool $expected) {
 
         $this->resetAfterTest();
         $this->setAdminUser();
@@ -91,40 +87,39 @@ final class manager_test extends \advanced_testcase {
         }
 
         $manager = manager::create_from_instance($activity);
-        $this->assertEquals($expectedtracking, $manager->is_tracking_enabled());
-        $this->assertEquals($expectedsubmit, $manager->can_submit($param));
+        $this->assertEquals($expected, $manager->is_tracking_enabled($param));
     }
 
     /**
-     * Data provider for test_is_tracking_enabled_and_can_submit.
+     * Data provider for is_tracking_enabled.
      *
      * @return array
      */
     public static function is_tracking_enabled_data(): array {
         return [
             'Logged student, tracking enabled' => [
-                true, 'student', 1, true, true,
+                true, 'student', 1, true
             ],
             'Logged student, tracking disabled' => [
-                true, 'student', 0, false, true,
+                true, 'student', 0, false
             ],
             'Logged teacher, tracking enabled' => [
-                true, 'editingteacher', 1, true, false,
+                true, 'editingteacher', 1, false
             ],
             'Logged teacher, tracking disabled' => [
-                true, 'editingteacher', 0, false, false,
+                true, 'editingteacher', 0, false
             ],
             'No logged student, tracking enabled' => [
-                true, 'student', 1, true, true,
+                true, 'student', 1, true
             ],
             'No logged student, tracking disabled' => [
-                true, 'student', 0, false, true,
+                true, 'student', 0, false
             ],
             'No logged teacher, tracking enabled' => [
-                true, 'editingteacher', 1, true, false,
+                true, 'editingteacher', 1, false
             ],
             'No logged teacher, tracking disabled' => [
-                true, 'editingteacher', 0, false, false,
+                true, 'editingteacher', 0, false
             ],
         ];
     }
@@ -138,7 +133,7 @@ final class manager_test extends \advanced_testcase {
      * @param array $result1 student 1 results (scaled, timemodified, attempt number)
      * @param array $result2 student 2 results (scaled, timemodified, attempt number)
      */
-    public function test_get_users_scaled_score(int $enabletracking, int $gradingmethod, array $result1, array $result2): void {
+    public function test_get_users_scaled_score(int $enabletracking, int $gradingmethod, array $result1, array $result2) {
         global $DB;
 
         $this->resetAfterTest();
@@ -252,7 +247,7 @@ final class manager_test extends \advanced_testcase {
     /**
      * Test static get_grading_methods.
      */
-    public function test_get_grading_methods(): void {
+    public function test_get_grading_methods() {
         $methods = manager::get_grading_methods();
         $this->assertCount(5, $methods);
         $this->assertNotEmpty($methods[manager::GRADEHIGHESTATTEMPT]);
@@ -270,7 +265,7 @@ final class manager_test extends \advanced_testcase {
      * @param int $gradingmethod new grading method
      * @param int $result the expected result
      */
-    public function test_get_selected_attempt(int $enabletracking, int $gradingmethod, int $result): void {
+    public function test_get_selected_attempt(int $enabletracking, int $gradingmethod, int $result) {
         $this->resetAfterTest();
         $this->setAdminUser();
 
@@ -329,7 +324,7 @@ final class manager_test extends \advanced_testcase {
     /**
      * Test static get_review_modes.
      */
-    public function test_get_review_modes(): void {
+    public function test_get_review_modes() {
         $methods = manager::get_review_modes();
         $this->assertCount(2, $methods);
         $this->assertNotEmpty($methods[manager::REVIEWCOMPLETION]);
@@ -339,7 +334,7 @@ final class manager_test extends \advanced_testcase {
     /**
      * Test get_grader method.
      */
-    public function test_get_grader(): void {
+    public function test_get_grader() {
         $this->resetAfterTest();
         $this->setAdminUser();
 
@@ -364,7 +359,7 @@ final class manager_test extends \advanced_testcase {
      * @param bool $useloggedin if test must be done with the loggedin user
      * @param bool $result the expected result
      */
-    public function test_can_view_all_attempts(int $enabletracking, bool $usestudent, bool $useloggedin, bool $result): void {
+    public function test_can_view_all_attempts(int $enabletracking, bool $usestudent, bool $useloggedin, bool $result) {
         global $USER;
 
         $this->resetAfterTest();
@@ -442,7 +437,7 @@ final class manager_test extends \advanced_testcase {
      * @param bool $result the expected result
      */
     public function test_can_view_own_attempts(int $enabletracking, int $reviewmode,
-            bool $useloggedin, bool $hasattempts, bool $result): void {
+            bool $useloggedin, bool $hasattempts, bool $result) {
 
         $this->resetAfterTest();
         $this->setAdminUser();
@@ -530,7 +525,7 @@ final class manager_test extends \advanced_testcase {
     /**
      * Test static count_attempts of one user.
      */
-    public function test_count_attempts(): void {
+    public function test_count_attempts() {
 
         $this->resetAfterTest();
         $this->setAdminUser();
@@ -567,7 +562,7 @@ final class manager_test extends \advanced_testcase {
      * @param bool $extrarole if an extra role without submit capability is required
      * @param int $result the expected result
      */
-    public function test_count_attempts_all(bool $canview, bool $cansubmit, bool $extrarole, int $result): void {
+    public function test_count_attempts_all(bool $canview, bool $cansubmit, bool $extrarole, int $result) {
         global $DB;
 
         $this->resetAfterTest();
@@ -634,7 +629,7 @@ final class manager_test extends \advanced_testcase {
      * @param bool $allpotentialusers if the join should return all potential users or only the submitted ones.
      * @param int $result the expected result
      */
-    public function test_get_active_users_join(bool $allpotentialusers, int $result): void {
+    public function test_get_active_users_join(bool $allpotentialusers, int $result) {
         global $DB;
 
         $this->resetAfterTest();
@@ -715,27 +710,15 @@ final class manager_test extends \advanced_testcase {
         $grouptwo = $this->getDataGenerator()->create_group(['courseid' => $course->id]);
         $this->getDataGenerator()->create_group_member(['groupid' => $grouptwo->id, 'userid' => $usertwo->id]);
 
-        // User three in no group.
-        $userthree = $this->getDataGenerator()->create_and_enrol($course, 'student');
-
-        // User four in a non-participation group.
-        $userfour = $this->getDataGenerator()->create_and_enrol($course, 'student');
-        $groupthree = $this->getDataGenerator()->create_group(['courseid' => $course->id, 'participation' => 0]);
-        $this->getDataGenerator()->create_group_member(['groupid' => $groupthree->id, 'userid' => $userfour->id]);
-
-        // Editing teacher in no group.
-        $editingteacher = $this->getDataGenerator()->create_and_enrol($course, 'editingteacher');
-
         $activity = $this->getDataGenerator()->create_module('h5pactivity', ['course' => $course]);
         $manager = manager::create_from_instance($activity);
 
-        // Admin user can view all participants (any group and none).
+        // Admin user can view all participants.
         $usersjoin = $manager->get_active_users_join(true, 0);
         $users = $DB->get_fieldset_sql("SELECT u.username FROM {user} u {$usersjoin->joins} WHERE {$usersjoin->wheres}",
             $usersjoin->params);
 
-        $this->assertEqualsCanonicalizing(
-                [$userone->username, $usertwo->username, $userthree->username, $userfour->username], $users);
+        $this->assertEqualsCanonicalizing([$teacher->username, $userone->username, $usertwo->username], $users);
 
         // Switch to teacher, who cannot view all participants.
         $this->setUser($teacher);
@@ -751,17 +734,7 @@ final class manager_test extends \advanced_testcase {
         $users = $DB->get_fieldset_sql("SELECT u.username FROM {user} u {$usersjoin->joins} WHERE {$usersjoin->wheres}",
             $usersjoin->params);
 
-        $this->assertEqualsCanonicalizing([$userone->username], $users);
-
-        // Switch to editing teacher, who can view all participants.
-        $this->setUser($editingteacher);
-
-        $usersjoin = $manager->get_active_users_join(true, 0);
-        $users = $DB->get_fieldset_sql("SELECT u.username FROM {user} u {$usersjoin->joins} WHERE {$usersjoin->wheres}",
-            $usersjoin->params);
-
-        $this->assertEqualsCanonicalizing(
-                [$userone->username, $usertwo->username, $userthree->username, $userfour->username], $users);
+        $this->assertEqualsCanonicalizing([$teacher->username, $userone->username], $users);
     }
 
     /**
@@ -802,7 +775,7 @@ final class manager_test extends \advanced_testcase {
     /**
      * Test static count_attempts.
      */
-    public function test_count_users_attempts(): void {
+    public function test_count_users_attempts() {
 
         $this->resetAfterTest();
         $this->setAdminUser();
@@ -843,7 +816,7 @@ final class manager_test extends \advanced_testcase {
      * @param array $results the expected classname (or null)
      */
     public function test_get_report(int $enabletracking, int $reviewmode, bool $createattempts,
-            string $role, array $results): void {
+            string $role, array $results) {
 
         $this->resetAfterTest();
         $this->setAdminUser();

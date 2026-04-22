@@ -70,7 +70,7 @@ $imagem = null;
 
 if (!empty($_FILES['imagem']['name'])) {
 
-    $allowed = ['image/jpeg', 'image/png', 'image/webp'];
+    $allowed = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
 
     $finfo = finfo_open(FILEINFO_MIME_TYPE);
     $mime  = finfo_file($finfo, $_FILES['imagem']['tmp_name']);

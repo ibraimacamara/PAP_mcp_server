@@ -22,23 +22,22 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use mod_quiz\output\grades\grade_out_of;
-use mod_quiz\output\renderer;
 
 require_once("../../config.php");
 require_once("locallib.php");
 
 $id = required_param('id', PARAM_INT);
-
-$PAGE->set_url('/mod/quiz/index.php', ['id' => $id]);
-$course = get_course($id);
+$PAGE->set_url('/mod/quiz/index.php', array('id'=>$id));
+if (!$course = $DB->get_record('course', array('id' => $id))) {
+    throw new \moodle_exception('invalidcourseid');
+}
 $coursecontext = context_course::instance($id);
 require_login($course);
 $PAGE->set_pagelayout('incourse');
 
-$params = [
+$params = array(
     'context' => $coursecontext
-];
+);
 $event = \mod_quiz\event\course_module_instance_list_viewed::create($params);
 $event->trigger();
 
@@ -47,10 +46,8 @@ $strquizzes = get_string("modulenameplural", "quiz");
 $PAGE->navbar->add($strquizzes);
 $PAGE->set_title($strquizzes);
 $PAGE->set_heading($course->fullname);
-/** @var renderer $output */
-$output = $PAGE->get_renderer('mod_quiz');
-echo $output->header();
-echo $output->heading($strquizzes, 2);
+echo $OUTPUT->header();
+echo $OUTPUT->heading($strquizzes, 2);
 
 // Get all the appropriate data.
 if (!$quizzes = get_all_instances_in_course("quiz", $course)) {
@@ -70,8 +67,8 @@ foreach ($quizzes as $quiz) {
 }
 
 // Configure table for displaying the list of instances.
-$headings = [get_string('name')];
-$align = ['left'];
+$headings = array(get_string('name'));
+$align = array('left');
 
 array_push($headings, get_string('quizcloses', 'quiz'));
 array_push($align, 'left');
@@ -90,9 +87,9 @@ if (has_capability('mod/quiz:viewreports', $coursecontext)) {
     array_push($align, 'left');
     $showing = 'stats';
 
-} else if (has_any_capability(['mod/quiz:reviewmyattempts', 'mod/quiz:attempt'],
+} else if (has_any_capability(array('mod/quiz:reviewmyattempts', 'mod/quiz:attempt'),
         $coursecontext)) {
-    array_push($headings, get_string('gradenoun'));
+    array_push($headings, get_string('grade', 'quiz'));
     array_push($align, 'left');
     if ($showfeedback) {
         array_push($headings, get_string('feedback', 'quiz'));
@@ -105,7 +102,7 @@ if (has_capability('mod/quiz:viewreports', $coursecontext)) {
             FROM {quiz_grades} qg
             JOIN {quiz} q ON q.id = qg.quiz
             WHERE q.course = ? AND qg.userid = ?',
-            [$course->id, $USER->id]);
+            array($course->id, $USER->id));
 }
 
 $table = new html_table();
@@ -119,7 +116,7 @@ $timeclosedates = quiz_get_user_timeclose($course->id);
 foreach ($quizzes as $quiz) {
     $cm = get_coursemodule_from_instance('quiz', $quiz->id);
     $context = context_module::instance($cm->id);
-    $data = [];
+    $data = array();
 
     // Section number if necessary.
     $strsection = '';
@@ -165,8 +162,10 @@ foreach ($quizzes as $quiz) {
         $feedback = '';
         if ($quiz->grade && array_key_exists($quiz->id, $grades)) {
             if ($alloptions->marks >= question_display_options::MARK_AND_MAX) {
-                $grade = $output->render(new grade_out_of(
-                        $quiz, $grades[$quiz->id], $quiz->grade, $quiz->sumgrades, style: grade_out_of::SHORT));
+                $a = new stdClass();
+                $a->grade = quiz_format_grade($quiz, $grades[$quiz->id]);
+                $a->maxgrade = quiz_format_grade($quiz, $quiz->grade);
+                $grade = get_string('outofshort', 'quiz', $a);
             }
             if ($alloptions->overallfeedback) {
                 $feedback = quiz_feedback_for_grade($grades[$quiz->id], $quiz, $context);
@@ -185,4 +184,4 @@ foreach ($quizzes as $quiz) {
 echo html_writer::table($table);
 
 // Finish the page.
-echo $output->footer();
+echo $OUTPUT->footer();

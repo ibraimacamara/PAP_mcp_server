@@ -18,7 +18,6 @@ namespace core_grades;
 
 use grade_plugin_return;
 use grade_report_grader;
-use mod_quiz\quiz_settings;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -42,7 +41,7 @@ final class report_graderlib_test extends \advanced_testcase {
      *
      * process_data() processes submitted grade and feedback data
      */
-    public function test_process_data(): void {
+    public function test_process_data() {
         global $DB, $CFG;
 
         $this->resetAfterTest(true);
@@ -112,7 +111,7 @@ final class report_graderlib_test extends \advanced_testcase {
         $this->assertEquals($studentgrade->finalgrade, $toobig);
     }
 
-    public function test_collapsed_preferences(): void {
+    public function test_collapsed_preferences() {
         $this->resetAfterTest(true);
 
         $emptypreferences = array('aggregatesonly' => array(), 'gradesonly' => array());
@@ -239,7 +238,7 @@ final class report_graderlib_test extends \advanced_testcase {
      * @covers \grade_report_grader::get_collapsed_preferences
      * @covers \grade_report_grader::filter_collapsed_categories
      */
-    public function test_old_collapsed_preferences(): void {
+    public function test_old_collapsed_preferences() {
         $this->resetAfterTest(true);
 
         $user1 = $this->getDataGenerator()->create_user();
@@ -459,7 +458,7 @@ final class report_graderlib_test extends \advanced_testcase {
      * Previously, with an ungraded quiz (which results in a grade item with type GRADETYPE_NONE)
      * there was a bug in get_right_rows in some situations.
      */
-    public function test_get_right_rows(): void {
+    public function test_get_right_rows() {
         global $USER, $DB;
         $this->resetAfterTest(true);
 
@@ -479,7 +478,8 @@ final class report_graderlib_test extends \advanced_testcase {
 
         // Set the grade for the second one to 0 (note, you have to do this after creating it,
         // otherwise it doesn't create an ungraded grade item).
-        quiz_settings::create($ungradedquiz->id)->get_grade_calculator()->update_quiz_maximum_grade(0);
+        $ungradedquiz->instance = $ungradedquiz->id;
+        quiz_set_grade(0, $ungradedquiz);
 
         // Set current user.
         $this->setUser($manager);

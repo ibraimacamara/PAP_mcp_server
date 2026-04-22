@@ -27,7 +27,6 @@ use mod_forum\local\exporters\discussion as discussion_exporter;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class exporters_discussion_test extends \advanced_testcase {
-
     /** @var \mod_forum\local\builders\exported_posts */
     private $builder;
 
@@ -35,7 +34,6 @@ final class exporters_discussion_test extends \advanced_testcase {
      * Test set up function.
      */
     public function setUp(): void {
-        parent::setUp();
         // We must clear the subscription caches. This has to be done both before each test, and after in case of other
         // tests using these functions.
         \mod_forum\subscriptions::reset_forum_cache();
@@ -51,13 +49,12 @@ final class exporters_discussion_test extends \advanced_testcase {
         // We must clear the subscription caches. This has to be done both before each test, and after in case of other
         // tests using these functions.
         \mod_forum\subscriptions::reset_forum_cache();
-        parent::tearDown();
     }
 
     /**
      * Test the export function returns expected values.
      */
-    public function test_export(): void {
+    public function test_export() {
         global $PAGE;
         $this->resetAfterTest();
 

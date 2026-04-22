@@ -107,7 +107,9 @@ class assign_override_form extends moodleform {
             if ($this->groupid) {
                 // There is already a groupid, so freeze the selector.
                 $groupchoices = [
-                    $this->groupid => format_string(groups_get_group_name($this->groupid), true, ['context' => $this->context]),
+                    $this->groupid => format_string(groups_get_group_name($this->groupid), true, [
+                        'context' => $this->context,
+                    ]),
                 ];
                 $mform->addElement('select', 'groupid',
                         get_string('overridegroup', 'assign'), $groupchoices);
@@ -128,9 +130,9 @@ class assign_override_form extends moodleform {
 
                 $groupchoices = array();
                 foreach ($groups as $group) {
-                    if ($group->visibility != GROUPS_VISIBILITY_NONE) {
-                        $groupchoices[$group->id] = format_string($group->name, true, ['context' => $this->context]);
-                    }
+                    $groupchoices[$group->id] = format_string($group->name, true, [
+                        'context' => $this->context,
+                    ]);
                 }
                 unset($groups);
 
@@ -160,14 +162,23 @@ class assign_override_form extends moodleform {
 
                 // Get the list of appropriate users, depending on whether and how groups are used.
                 $userfieldsapi = \core_user\fields::for_name();
-                $userfields = 'u.id, u.email, ' . $userfieldsapi->get_sql('u', false, '', '', false)->selects;
-                $groupids = 0;
-                if (!$accessallgroups) {
-                    $groups = groups_get_activity_allowed_groups($cm);
-                    $groupids = array_keys($groups);
+                if ($accessallgroups) {
+                    $users = get_enrolled_users($this->context, '', 0,
+                            'u.id, u.email, ' . $userfieldsapi->get_sql('u', false, '', '', false)->selects, $sort);
+                } else if ($groups = groups_get_activity_allowed_groups($cm)) {
+                    $enrolledjoin = get_enrolled_join($this->context, 'u.id');
+                    $userfields = 'u.id, u.email, ' . $userfieldsapi->get_sql('u', false, '', '', false)->selects;
+                    list($ingroupsql, $ingroupparams) = $DB->get_in_or_equal(array_keys($groups), SQL_PARAMS_NAMED);
+                    $params = $enrolledjoin->params + $ingroupparams;
+                    $sql = "SELECT $userfields
+                              FROM {user} u
+                              JOIN {groups_members} gm ON gm.userid = u.id
+                                   {$enrolledjoin->joins}
+                             WHERE gm.groupid $ingroupsql
+                                   AND {$enrolledjoin->wheres}
+                          ORDER BY $sort";
+                    $users = $DB->get_records_sql($sql, $params);
                 }
-                $users = get_enrolled_users($this->context, '',
-                        $groupids, $userfields, $sort);
 
                 // Filter users based on any fixed restrictions (groups, profile).
                 $info = new \core_availability\info_module($cm);
@@ -263,12 +274,9 @@ class assign_override_form extends moodleform {
         }
 
         // Time limit.
-        $timelimitenabled = get_config('assign', 'enabletimelimit');
-        if ($timelimitenabled) {
-            $mform->addElement('duration', 'timelimit',
-                get_string('timelimit', 'assign'), array('optional' => true));
-            $mform->setDefault('timelimit', $assigninstance->timelimit);
-        }
+        $mform->addElement('duration', 'timelimit',
+            get_string('timelimit', 'assign'), array('optional' => true));
+        $mform->setDefault('timelimit', $assigninstance->timelimit);
 
         // Submit buttons.
         $mform->addElement('submit', 'resetbutton',
@@ -347,7 +355,7 @@ class assign_override_form extends moodleform {
         $changed = false;
         $keys = array('duedate', 'cutoffdate', 'allowsubmissionsfromdate', 'timelimit');
         foreach ($keys as $key) {
-            if (isset($data[$key]) && $data[$key] != $assigninstance->{$key}) {
+            if ($data[$key] != $assigninstance->{$key}) {
                 $changed = true;
                 break;
             }

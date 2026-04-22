@@ -1,4 +1,4 @@
-@mod @mod_lesson @javascript
+@mod @mod_lesson
 Feature: Set end of lesson reached as a completion condition for a lesson
   In order to ensure students really see all lesson pages
   As a teacher
