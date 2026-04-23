@@ -215,7 +215,7 @@ if ($foto !== '') {
 
                 <form action="index.php?page=remover_funcionario" method="POST" class="m-0"
                     onsubmit="return confirm('Tens a certeza que desejas remover este funcionario?');">
-                    <input type="hidden" name="id" value="<?= $professor['id'] ?>">
+                    <input type="hidden" name="id" value="<?= $funcionario['id'] ?>">
                     <button type="submit" class="btn btn-danger">Remover</button>
                 </form>
             </div>

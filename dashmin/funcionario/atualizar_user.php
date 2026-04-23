@@ -132,7 +132,7 @@ try {
         'msg' => 'Utilizador atualizado com sucesso.'
     ];
 
-    header('Location: index.php?page=home');
+    header('Location:index.php?page=home');
 
 } catch (Exception $e) {
 

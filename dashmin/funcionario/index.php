@@ -26,14 +26,7 @@ if (!estaAutenticado() || !eAdmin()) {
     redirecionar('../login.php');
 }
 
-/*
-|--------------------------------------------------------------------------
-| PRIMEIRO LOGIN
-|--------------------------------------------------------------------------
-*/
-if (!empty($_SESSION['forcar_edicao'])) {
-    redirecionar('editar_user.php?id=' . (int)$_SESSION['user_id']);
-}
+
 
 /*
 |--------------------------------------------------------------------------
@@ -74,6 +67,7 @@ $rotas = [
 
 
     'editar_user'       => 'editar_user.php',
+    'atualizar_user'       => 'atualizar_user.php',
     'logout'            => 'logout.php'
 ];
 

@@ -40,7 +40,7 @@ if (!$user) {
             <div class="bg-white shadow rounded p-4">
                 <h6 class="mb-4">Editar Meus Dados</h6>
 
-                <form action="atualizar_user.php" method="POST">
+                <form action="index.php?page=atualizar_user" method="POST">
                     <input type="hidden" name="id" value="<?= htmlspecialchars($user['id'], ENT_QUOTES) ?>">
                     <input type="hidden" name="csrf_token"
                         value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
@@ -85,7 +85,7 @@ if (!$user) {
 
                     <!-- Botões -->
                     <div class="d-flex gap-2 justify-content-center">
-                        <a href="index.php?page=lista_encarregado" class="btn btn-secondary w-25">Cancelar</a>
+                        <a href="index.php?page=home" class="btn btn-secondary w-25">Cancelar</a>
                         <button type="submit" class="btn btn-primary w-25">Atualizar</button>
                     </div>
                 </form>
