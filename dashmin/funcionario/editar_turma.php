@@ -1,5 +1,5 @@
 <?php
-session_start();
+
 include('../conexao.php');
 include('menu.php');
 include('nav-menu.php');
@@ -83,7 +83,7 @@ $professores = $pdo->query("SELECT id, nome FROM professor ORDER BY nome ASC")->
                     </div>
 
                     <div class="d-flex gap-2 justify-content-center">
-                        <a href="lista_turma.php" class="btn btn-secondary w-25">Cancelar</a>
+                        <a href="index.php?page=lista_turma" class="btn btn-secondary w-25">Cancelar</a>
                         <button type="submit" class="btn btn-primary w-25">Atualizar</button>
                     </div>
                 </form>

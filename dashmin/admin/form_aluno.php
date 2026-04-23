@@ -1,5 +1,5 @@
 <?php
-session_start();
+
 include '../conexao.php';
 include 'menu.php';
 
@@ -64,7 +64,7 @@ $turma = $pdo->query(
 
             <div class="bg-white shadow rounded  p-4">
                 <h6 class="mb-4">Registar Aluno</h6>
-                <form action="salvar_aluno.php" method="POST" enctype="multipart/form-data">
+                <form action="index.php?page=salvar_aluno" method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="csrf_token_aluno"
                         value="<?= htmlspecialchars($_SESSION['csrf_token_aluno'], ENT_QUOTES, 'UTF-8') ?>">
                     <div class="row">

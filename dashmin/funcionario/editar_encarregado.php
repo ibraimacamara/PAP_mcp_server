@@ -90,7 +90,7 @@ if (!$encarregado) {
                     </div>
 
                     <div class="d-flex gap-2 justify-content-center">
-                        <a href="lista_encarregado.php" class="btn btn-secondary w-25">Cancelar</a>
+                        <a href="index.php?page=lista_encarregado" class="btn btn-secondary w-25">Cancelar</a>
                         <button type="submit" class="btn btn-primary w-25">Atualizar</button>
                     </div>
                 </form>

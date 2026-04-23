@@ -47,7 +47,7 @@ if ($turma_id !== null) {
     LEFT JOIN turma t ON t.id = a.turma_id
     LEFT JOIN encarregado ep ON ep.id = a.encarregado_principal_id
     LEFT JOIN encarregado es ON es.id = a.encarregado_secundario_id
-    ORDER BY t.codigo ASC, a.nome ASC
+    ORDER BY c.nome ASC, t.codigo ASC, a.nome ASC
     ");
 }
 
@@ -58,9 +58,7 @@ $alunos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <style>
     .col-xl-2 {
         flex: 0 0 auto;
-        /* garante que não encolha automaticamente */
         width: 225px;
-        /* aumenta 20px além da largura padrão */
     }
 
     .course-card {
@@ -70,66 +68,50 @@ $alunos = $stmt->fetchAll(PDO::FETCH_ASSOC);
         padding: 5px;
         overflow: hidden;
         width: 200px;
-        /* O card ocupa toda a largura da coluna */
-        height: 250px;
-        /* Define altura fixa para todos os cards */
+        height: 260px;
         display: flex;
         flex-direction: column;
-        overflow: hidden;
     }
 
     .course-image {
         width: 100%;
-        height: 150px;
-        /* altura fixa */
+        height: 140px;
         overflow: hidden;
-        object-fit: cover;
         border-radius: 8px;
-
     }
 
     .course-image img {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        /* mantém proporção e corta excesso */
         display: block;
         border-radius: 8px;
-        /* arredonda a imagem dentro do div */
     }
 
     .course-text {
-        padding: 5px;
+        padding: 10px;
         flex: 1;
-        margin: 0px;
-        /* ocupa o espaço restante do card */
         overflow: hidden;
     }
+    .card-footer-custom{
+    background: #0180f7;
+    color: white;
+    text-align: center;
+    padding: 8px;
+    margin-top: 1px;
 
+    border-top-left-radius: 120px 40px;
+    border-top-right-radius: 120px 40px;
+}
 </style>
-<?php
-include 'nav-menu.php';
-?>
+<?php include 'nav-menu.php'; ?>
 
-<!-- Sales Chart Start -->
 <div class="container-fluid pt-4 px-4">
     <div class="row g-4">
-        <!-- <div class="col-sm-12 col-xl-4">
-            <a href="#">
-                <div class="bg-white shadow text-center rounded p-4">
-                    <div class="d-flex align-items-center justify-content-between mb-4">
-
-
-                    </div>
-
-                </div>
-            </a>
-        </div> -->
         <?php foreach ($alunos as $a): ?>
             <div class="col-sm-12 col-xl-2">
-                <a href="detalhe_aluno.php?id=<?= $a['id'] ?>" class="text-decoration-none text-dark">
+                <a href="index.php?page=detalhe_aluno&id=<?= $a['id'] ?>" class="text-decoration-none text-dark">
                     <div class="bg-white shadow rounded overflow-hidden h-100">
-
                         <div class="course-card">
                             <div class="course-image">
                                 <img src="../uploads/<?= htmlspecialchars($a['imagem'] ?? 'default.jpg') ?>"
@@ -143,9 +125,12 @@ include 'nav-menu.php';
                                 ?>
 
                                 <h5><?= htmlspecialchars($primeiro . ' ' . $ultimo) ?></h5>
-
-                                <h6>ID: <?= htmlspecialchars($a['id']) ?> </h6>
-
+                                <h6 class="mb-1">Turma: <?= htmlspecialchars($a['turma']) ?></h6>
+                                
+                            </div>
+                            <div class="card-footer-custom">
+                                ID:<?= htmlspecialchars($a['id']) ?>
+                            
                             </div>
                         </div>
 
@@ -153,7 +138,6 @@ include 'nav-menu.php';
                 </a>
             </div>
         <?php endforeach; ?>
-
     </div>
 </div>
 <!-- Sales Chart End -->

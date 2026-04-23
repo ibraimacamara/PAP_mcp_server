@@ -14,7 +14,7 @@ function erroUtilizador(string $mensagem, array $dados = [], bool $tinhaFoto = f
     $_SESSION['alerta_aluno'] = ['tipo' => 'warning', 'msg' => $mensagem];
     $_SESSION['old_aluno'] = $dados;
     $_SESSION['tinha_foto_aluno'] = $tinhaFoto;
-    header('Location: form_aluno.php');
+    header('Location: index.php?page=form_aluno');
     exit;
 }
 function erroTecnico(string $logMsg, int $httpCode = 500): void
@@ -23,7 +23,7 @@ function erroTecnico(string $logMsg, int $httpCode = 500): void
     http_response_code($httpCode);
     $_SESSION['alerta_aluno'] = ['tipo' => 'danger', 'msg' => 'Ocorreu um erro interno.'];
     unset($_SESSION['old_aluno'], $_SESSION['tinha_foto_aluno']);
-    header('Location: form_aluno.php');
+    header('Location: index.php?page=form_aluno');
     exit;
 }
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -176,5 +176,5 @@ try {
 
     erroTecnico('Erro BD em salvar_aluno.php: ' . $e->getMessage());
 }
-header('Location: form_aluno.php');
+header('Location: index.php?page=form_aluno');
 exit;

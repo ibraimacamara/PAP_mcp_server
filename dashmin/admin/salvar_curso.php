@@ -20,11 +20,11 @@ function logErro(string $mensagem): void
 
 function erroUtilizador(string $mensagem): void
 {
-    $_SESSION['alerta'] = [
+    $_SESSION['alerta_curso'] = [
         'tipo' => 'warning',
         'msg'  => $mensagem
     ];
-    header('Location: curso_turma.php');
+    header('Location: index.php?page=curso_turma');
     exit;
 }
 
@@ -36,12 +36,12 @@ function erroTecnico(string $logMsg, int $httpCode = 500): void
 
     http_response_code($httpCode);
 
-    $_SESSION['alerta'] = [
+    $_SESSION['alerta_curso'] = [
         'tipo' => 'danger',
         'msg'  => 'Ocorreu um erro interno. Tente novamente mais tarde.'
     ];
 
-    header('Location: curso_turma.php');
+    header('Location: index.php?page=curso_turma');
     exit;
 }
 
@@ -137,7 +137,7 @@ try {
         ':imagem'      => $fotoPath
     ]);
 
-    $_SESSION['alerta'] = [
+    $_SESSION['alerta_curso'] = [
         'tipo' => 'success',
         'msg'  => 'Curso registado com sucesso.'
     ];
@@ -153,5 +153,5 @@ try {
 
 
 unset($_SESSION['csrf_token']);
-header('Location: curso_turma.php');
+header('Location: index.php?page=curso_turma');
 exit;

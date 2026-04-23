@@ -44,10 +44,10 @@ include 'nav-menu.php';
                                     <td><?= htmlspecialchars($e['morada']) ?></td>
         
                                     <td>
-                                        <a href="editar_encarregado.php?id=<?= htmlspecialchars($e['id']) ?>"
+                                        <a href="index.php?page=editar_encarregado&id=<?= htmlspecialchars($e['id']) ?>"
                                             class="btn btn-sm btn-primary mb-1">Editar</a>
 
-                                        <form action="remover_encarregado.php" method="POST" style="display:inline;"
+                                        <form action="index.php?page=remover_encarregado" method="POST" style="display:inline;"
                                             onsubmit="return confirm('Tem certeza que deseja remover?')">
                                             <input type="hidden" name="id" value="<?= htmlspecialchars($e['id']) ?>">
                                             <button type="submit" class="btn btn-sm btn-danger mb-1">Remover</button>

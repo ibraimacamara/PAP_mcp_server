@@ -73,7 +73,7 @@ if ($foto !== '') {
 
     .aluno-foto {
         width: 40%;
-        height: 50%;
+        height: 500px%;
         background: #ffffff;
         display: flex;
         align-items: stretch;
@@ -82,7 +82,7 @@ if ($foto !== '') {
         margin-left: 10px;
         margin-top: 10px;
         border-radius: 15px;
-        border: solid #2563eb 5px;
+       
     }
 
     .aluno-foto-inner {
@@ -197,27 +197,34 @@ if ($foto !== '') {
 
             <div class="aluno-fields">
                 <p><span class="aluno-label">BI:</span> <?= htmlspecialchars($professor['bi'] ?? '—') ?></p>
-                <p><span class="aluno-label">Data Nasc.:</span> <?= htmlspecialchars($professor['data_nascimento'] ?? '—') ?></p>
+                <p><span class="aluno-label">Data Nasc.:</span>
+                    <?= htmlspecialchars($professor['data_nascimento'] ?? '—') ?></p>
                 <p><span class="aluno-label">Email:</span> <?= htmlspecialchars($professor['email'] ?? '—') ?></p>
                 <p><span class="aluno-label">Contato:</span> <?= htmlspecialchars($professor['contato'] ?? '—') ?></p>
                 <p><span class="aluno-label">Género:</span> <?= htmlspecialchars($professor['genero'] ?? '—') ?></p>
                 <p><span class="aluno-label">Distrito:</span> <?= htmlspecialchars($professor['distrito'] ?? '—') ?></p>
-                <p><span class="aluno-label">Freguesia:</span> <?= htmlspecialchars($professor['freguesia'] ?? '—') ?></p>
-                <p><span class="aluno-label">Grupo Disciplinar:</span> <?= htmlspecialchars($professor['grupo_d'] ?? '—') ?></p>
-                <p><span class="aluno-label">Tipo de Contrato:</span> <?= htmlspecialchars($professor['tipo_c'] ?? '—') ?></p>
-                <p><span class="aluno-label">Habilitação Profissional:</span> <?= htmlspecialchars($professor['h_profissional'] ?? '—') ?></p>
-                <p><span class="aluno-label">Habilitação Académica:</span> <?= htmlspecialchars($professor['h_academica'] ?? '—') ?></p>
-                <p><span class="aluno-label">Registado em:</span> <?= htmlspecialchars($professor['inserido_em'] ?? '—') ?></p>
+                <p><span class="aluno-label">Freguesia:</span> <?= htmlspecialchars($professor['freguesia'] ?? '—') ?>
+                </p>
+                <p><span class="aluno-label">Grupo Disciplinar:</span>
+                    <?= htmlspecialchars($professor['grupo_d'] ?? '—') ?></p>
+                <p><span class="aluno-label">Tipo de Contrato:</span>
+                    <?= htmlspecialchars($professor['tipo_c'] ?? '—') ?></p>
+                <p><span class="aluno-label">Habilitação Profissional:</span>
+                    <?= htmlspecialchars($professor['h_profissional'] ?? '—') ?></p>
+                <p><span class="aluno-label">Habilitação Académica:</span>
+                    <?= htmlspecialchars($professor['h_academica'] ?? '—') ?></p>
+                <p><span class="aluno-label">Registado em:</span>
+                    <?= htmlspecialchars($professor['inserido_em'] ?? '—') ?></p>
             </div>
 
-            <div class="aluno-actions d-flex gap-2">
-                <a href="lista_professor.php" class="btn btn-outline-secondary btn-sm">Voltar</a>
-                <a href="editar_professor.php?id=<?= $professor['id'] ?>" class="btn btn-primary btn-sm">Editar</a>
+            <div class="aluno-actions d-flex gap-2 align-items-center flex-wrap">
+                <a href="index.php?page=lista_professor" class="btn btn-outline-secondary">Voltar</a>
+                <a href="index.php?page=editar_professor&id=<?= $professor['id'] ?>" class="btn btn-primary">Editar</a>
 
-                <form action="remover_professor.php" method="POST"
-                      onsubmit="return confirm('Tens certeza que deseja remover este professor?');">
+                <form action="index.php?page=remover_professor" method="POST" class="m-0"
+                    onsubmit="return confirm('Tens a certeza que desejas remover este professor?');">
                     <input type="hidden" name="id" value="<?= $professor['id'] ?>">
-                    <button type="submit" class="btn btn-sm btn-danger">Remover</button>
+                    <button type="submit" class="btn btn-danger">Remover</button>
                 </form>
             </div>
         </div>
@@ -239,4 +246,5 @@ if ($foto !== '') {
 <script src="lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js"></script>
 <script src="js/main.js"></script>
 </body>
+
 </html>

@@ -173,11 +173,11 @@ $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 </head>
 
 <body>
- <?php if (!empty($_SESSION['alerta'])): ?>
-    <div id="alerta" class="alert <?= $_SESSION['alerta']['tipo'] ?>">
-        <?= htmlspecialchars($_SESSION['alerta']['msg']) ?>
+ <?php if (!empty($_SESSION['alerta_login'])): ?>
+    <div id="alerta_login" class="alert <?= $_SESSION['alerta_login']['tipo'] ?>">
+        <?= htmlspecialchars($_SESSION['alerta_login']['msg']) ?>
     </div>
-    <?php unset($_SESSION['alerta']); ?>
+    <?php unset($_SESSION['alerta_login']); ?>
 <?php endif; ?>
 
     <div class="login-container">

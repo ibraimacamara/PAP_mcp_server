@@ -75,7 +75,7 @@ $turma = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <?php foreach ($turma as $t): ?>
             <div class="col-sm-12 col-xl-4">
                 <div class="course-card">
-                    <a href="lista_aluno.php?turma_id=<?= $t['id'] ?>">
+                    <a href="index.php?page=lista_aluno&turma_id=<?= $t['id'] ?>">
                         <div class="course-image">
                             <img src="../uploads/<?= htmlspecialchars($t['imagem'] ?? 'default.jpg') ?>"
                                 alt="<?= htmlspecialchars($t['nome_curso']) ?>">
@@ -91,23 +91,18 @@ $turma = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <?php endif; ?>
                         </small>
                     </div>
-                    <div class="px-2 pb-2 d-flex gap-2">
-                        <div class="px-2 pb-2 d-flex gap-2">
-                            <a href="editar_turma.php?id=<?= $t['id'] ?>" class="btn btn-sm btn-primary"
-                                style="padding: 2px 8px; white-space: nowrap;">
-                                Editar
-                            </a>
+                    <div class="px-2 pb-2 d-flex justify-content-between align-items-center">
+                        <a href="editar_turma.php?id=<?= (int) $t['id'] ?>" class="btn btn-primary btn-sm">
+                            Editar
+                        </a>
 
-                            <form action="remover_turma.php" method="POST"
-                                onsubmit="return confirm('Tem certeza que deseja remover esta turma?');"
-                                style="display:inline;">
-                                <input type="hidden" name="id" value="<?= $t['id'] ?>">
-                                <button type="submit" class="btn btn-sm btn-danger"
-                                    style="padding: 2px 8px; white-space: nowrap;">
-                                    Remover
-                                </button>
-                            </form>
-                        </div>
+                        <form action="remover_turma.php" method="POST" class="m-0"
+                            onsubmit="return confirm('Tens a certeza que desejas remover esta turma?');">
+                            <input type="hidden" name="id" value="<?= (int) $t['id'] ?>">
+                            <button type="submit" class="btn btn-danger btn-sm">
+                                Remover
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>

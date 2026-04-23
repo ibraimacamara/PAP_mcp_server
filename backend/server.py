@@ -502,156 +502,6 @@ def delete_aluno(identifier: str) -> dict:
 # Encarregado
 # ---------------------------------------------------------------------------
 
-
-
-
-# @mcp.tool
-# def insert_encarregado(data: str) -> dict:
-#     """
-#     Insere um encarregado no sistema.
-
-#     Fluxo:
-#     1. valida os dados obrigatórios;
-#     2. verifica duplicados em users e encarregado;
-#     3. cria utilizador em users com:
-#        - username = email
-#        - senha = hash do BI
-#        - categoria = 'encarregado'
-#     4. insere o encarregado com o user_id criado.
-#     """
-
-#     conn = get_connection()
-#     if conn is None:
-#         return {
-#             "success": False,
-#             "message": "Sem conexão à base de dados.",
-#             "error": "get_connection retornou None"
-#         }
-
-#     cur = conn.cursor(dictionary=True)
-
-#     try:
-#         data_dict = json.loads(data) if isinstance(data, str) else data
-
-#         if not isinstance(data_dict, dict):
-#             return {
-#                 "success": False,
-#                 "message": "Os dados devem ser um objeto JSON.",
-#                 "error": "Formato inválido"
-#             }
-
-#         nome = str(data_dict.get("nome", "")).strip()
-#         email = str(data_dict.get("email", "")).strip().lower()
-#         bi = str(data_dict.get("bi", "")).strip()
-#         contato = str(data_dict.get("contato", "")).strip()
-#         morada = str(data_dict.get("morada", "")).strip()
-#         genero = str(data_dict.get("genero", "")).strip().lower()
-#         distrito = str(data_dict.get("distrito", "")).strip()
-#         freguesia = str(data_dict.get("freguesia", "")).strip()
-
-#         # validação mínima
-#         if not nome or not email or not bi or not contato:
-#             return {
-#                 "success": False,
-#                 "message": "Faltam dados obrigatórios do encarregado.",
-#                 "error": "nome, email, bi e contato são obrigatórios"
-#             }
-
-#         conn.start_transaction()
-
-#         # verificar se já existe utilizador com este email
-#         cur.execute("SELECT id FROM users WHERE username = %s", (email,))
-#         if cur.fetchone():
-#             conn.rollback()
-#             return {
-#                 "success": False,
-#                 "message": "Já existe utilizador com este email.",
-#                 "error": email
-#             }
-
-#         # verificar duplicados na tabela encarregado
-#         cur.execute(
-#             "SELECT id FROM encarregado WHERE email = %s OR bi = %s",
-#             (email, bi)
-#         )
-#         if cur.fetchone():
-#             conn.rollback()
-#             return {
-#                 "success": False,
-#                 "message": "Já existe encarregado com este email ou BI.",
-#                 "error": f"{email} / {bi}"
-#             }
-
-#         # criar utilizador
-#         senha_hash = hashlib.sha256(bi.encode("utf-8")).hexdigest()
-
-#         cur.execute("""
-#             INSERT INTO users (username, senha, categoria, foto, primeiro_login)
-#             VALUES (%s, %s, %s, %s, %s)
-#         """, (
-#             email,
-#             senha_hash,
-#             "encarregado",
-#             None,
-#             1
-#         ))
-
-#         user_id = cur.lastrowid
-
-#         # inserir encarregado
-#         cur.execute("""
-#             INSERT INTO encarregado (
-#                 user_id,
-#                 nome,
-#                 contato,
-#                 email,
-#                 bi,
-#                 morada,
-#                 genero,
-#                 distrito,
-#                 freguesia
-#             ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-#         """, (
-#             user_id,
-#             nome,
-#             contato,
-#             email,
-#             bi,
-#             morada or None,
-#             genero or None,
-#             distrito or None,
-#             freguesia or None
-#         ))
-
-#         encarregado_id = cur.lastrowid
-#         conn.commit()
-
-#         return {
-#             "success": True,
-#             "message": "Encarregado inserido com sucesso.",
-#             "data": {
-#                 "encarregado_id": encarregado_id,
-#                 "user_id": user_id,
-#                 "username": email,
-#                 "categoria": "encarregado"
-#             },
-#             "error": None
-#         }
-
-#     except Exception as e:
-#         conn.rollback()
-#         return {
-#             "success": False,
-#             "message": "Erro ao inserir encarregado.",
-#             "error": str(e)
-#         }
-#     finally:
-#         cur.close()
-#         conn.close()
-
-
-
-
 @mcp.tool
 def insert_encarregado(data: str) -> dict:
     """
@@ -2261,6 +2111,72 @@ def update_funcionario(funcionario_id: int, updates: str) -> dict:
         return {
             "success": False,
             "message": "Erro ao atualizar funcionário.",
+            "error": str(e)
+        }
+
+    finally:
+        cur.close()
+        conn.close()
+        
+        
+@mcp.tool
+def get_funcionario_logado(user_id: int) -> dict:
+    """
+    Recebe um user_id (da sessão PHP) e devolve os dados do funcionário correspondente.
+    """
+
+    conn = get_connection()
+    if conn is None:
+        return {
+            "success": False,
+            "message": "Sem conexão à base de dados.",
+            "error": "get_connection retornou None"
+        }
+
+    cur = conn.cursor(dictionary=True)
+
+    try:
+        # procurar funcionário ligado ao user
+        query = """
+            SELECT
+                f.id AS funcionario_id,
+                f.user_id,
+                f.nome,
+                f.email,
+                f.bi,
+                f.contato,
+                f.morada,
+                f.genero,
+                f.distrito,
+                f.freguesia
+            FROM funcionario f
+            WHERE f.user_id = %s
+            LIMIT 1
+        """
+
+        cur.execute(query, (user_id,))
+        funcionario = cur.fetchone()
+
+        # se não encontrou
+        if not funcionario:
+            return {
+                "success": False,
+                "message": "Este utilizador não é um funcionário.",
+                "error": f"user_id {user_id} não existe na tabela funcionario"
+            }
+
+        # sucesso
+        return {
+            "success": True,
+            "message": "Funcionário encontrado.",
+            "data": funcionario,
+            "error": None
+        }
+
+    except Exception as e:
+        return {
+            "success": False,
+            "message": "Erro ao buscar funcionário.",
             "error": str(e)
         }
 

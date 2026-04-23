@@ -1,5 +1,5 @@
 <?php
-session_start();
+
 include('../conexao.php');
 include('menu.php');
 
@@ -23,21 +23,21 @@ if (empty($_SESSION['csrf_token'])) {
 <div class="container-fluid pt-4 px-4">
     <div class="row g-4">
 
-        <!-- ALERTA (linha inteira) -->
+        <!-- ALERTA_turma (linha inteira) -->
         <div class="col-12">
-            <?php if (!empty($_SESSION['alerta'])): ?>
-                <div id="alerta"
-                    class="alert alert-<?= htmlspecialchars($_SESSION['alerta']['tipo']) ?> alert-dismissible fade show"
+            <?php if (!empty($_SESSION['alerta_turma'])): ?>
+                <div id="alerta_turma"
+                    class="alert alert-<?= htmlspecialchars($_SESSION['alerta_turma']['tipo']) ?> alert-dismissible fade show"
                     role="alert">
-                    <?= htmlspecialchars($_SESSION['alerta']['msg'], ENT_QUOTES, 'UTF-8') ?>
+                    <?= htmlspecialchars($_SESSION['alerta_turma']['msg'], ENT_QUOTES, 'UTF-8') ?>
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
 
                 <script>
-                    setTimeout(() => document.getElementById('alerta')?.remove(), 3000);
+                    setTimeout(() => document.getElementById('alerta_turma')?.remove(), 3000);
                 </script>
 
-                <?php unset($_SESSION['alerta']); ?>
+                <?php unset($_SESSION['alerta_turma']); ?>
             <?php endif; ?>
         </div>
 
@@ -47,7 +47,7 @@ if (empty($_SESSION['csrf_token'])) {
             <div class="bg-white shadow rounded h-100 p-4 d-flex flex-column">
                 <h5 class="mb-4">Curso</h5>
 
-                <form action="salvar_curso.php" method="POST" enctype="multipart/form-data"
+                <form action="index.php?page=salvar_curso" method="POST" enctype="multipart/form-data"
                     class="d-flex flex-column flex-grow-1">
                     <input type="hidden" name="csrf_token"
                         value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">

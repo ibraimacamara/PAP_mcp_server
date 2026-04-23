@@ -1,23 +1,25 @@
 <?php
-session_start();
+
 include('../conexao.php');
 include('menu.php');
 
 
-if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+if (empty($_SESSION['csrf_token_encarregado'])) {
+    $_SESSION['csrf_token_encarregado'] = bin2hex(random_bytes(32));
 }
 
+$alertaEncarregado = $_SESSION['alerta_encarregado'] ?? null;
+unset($_SESSION['alerta_encarregado']);
 
 ?>
 
 <!-- Form Start -->
 <div class="col-12">
-    <?php if (!empty($_SESSION['alerta'])): ?>
+    <?php if (!empty($alertaEncarregado)): ?>
         <div id="alerta"
-            class="alert alert-<?= htmlspecialchars($_SESSION['alerta']['tipo']) ?> alert-dismissible fade show"
+            class="alert alert-<?= htmlspecialchars($alertaEncarregado['tipo']) ?> alert-dismissible fade show"
             role="alert">
-            <?= htmlspecialchars($_SESSION['alerta']['msg'], ENT_QUOTES, 'UTF-8') ?>
+            <?= htmlspecialchars($alertaEncarregado['msg'], ENT_QUOTES, 'UTF-8') ?>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
 
@@ -25,20 +27,20 @@ if (empty($_SESSION['csrf_token'])) {
             setTimeout(() => document.getElementById('alerta')?.remove(), 3000);
         </script>
 
-        <?php unset($_SESSION['alerta']); ?>
     <?php endif; ?>
 </div>
 
 <div class="container-fluid pt-4 px-4">
     <div class="row g-4">
         <div class="col-12">
+       
 
             <div class="col-12 mb-4">
                 <div class="bg-white shadow rounded h-100 p-4">
-                    <h6 class="mb-4">Encarregado</h6>
+                    <h6 class="mb-4">Registar Encarregado</h6>
                     <form action="salvar_encarregado.php" method="POST">
-                        <input type="hidden" name="csrf_token"
-                            value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+                        <input type="hidden" name="csrf_token_encarregado"
+                            value="<?= htmlspecialchars($_SESSION['csrf_token_encarregado'], ENT_QUOTES, 'UTF-8') ?>">
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Nome completo</label>
@@ -97,34 +99,10 @@ if (empty($_SESSION['csrf_token'])) {
                 </div>
             </div>
 
-            <?php
-            $alunoInserido = isset($_GET['aluno_inserido']) && $_GET['aluno_inserido'] == 1;
-            $idAluno = $_GET['idAluno'] ?? null;
-            ?>
-
-            <?php if ($alunoInserido && $idAluno): ?>
-                <div class="alert alert-success">
-                    Aluno inserido com sucesso. ID do aluno: <strong><?= htmlspecialchars($idAluno) ?></strong>
-                </div>
-            <?php endif; ?>
-
-            <?php if (!empty($_SESSION['mensagem_sucesso'])): ?>
-                <div class="alert alert-success">
-                    <?= htmlspecialchars($_SESSION['mensagem_sucesso'], ENT_QUOTES, 'UTF-8') ?>
-                </div>
-                <?php unset($_SESSION['mensagem_sucesso']); ?>
-            <?php endif; ?>
         </div>
     </div>
 </div>
 <!-- Form End -->
-<?php if (!empty($_SESSION['mensagem_sucesso'])): ?>
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <?= htmlspecialchars($_SESSION['mensagem_sucesso'], ENT_QUOTES, 'UTF-8') ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-    <?php unset($_SESSION['mensagem_sucesso']); endif; ?>
-
 
 <!-- Footer Start -->
 <?php

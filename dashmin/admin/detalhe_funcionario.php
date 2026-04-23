@@ -72,7 +72,7 @@ if ($foto !== '') {
 
     .aluno-foto {
         width: 40%;
-        height: 400px;
+        height: 500px;
         background: #ffffff;
         display: flex;
         align-items: stretch;
@@ -81,7 +81,7 @@ if ($foto !== '') {
         margin-left: 10px;
         margin-top: 10px;
         border-radius: 15px;
-        border: solid #2563eb 5px;
+      
     }
 
     .aluno-foto-inner {
@@ -209,14 +209,14 @@ if ($foto !== '') {
                 <p><span class="aluno-label">Registado em:</span> <?= htmlspecialchars($funcionario['inserido_em'] ?? '—') ?></p>
             </div>
 
-            <div class="aluno-actions d-flex gap-2">
-                <a href="lista_funcionario.php" class="btn btn-outline-secondary btn-sm">Voltar</a>
-                <a href="editar_funcionario.php?id=<?= $funcionario['id'] ?>" class="btn btn-primary btn-sm">Editar</a>
+             <div class="aluno-actions d-flex gap-2 align-items-center flex-wrap">
+                <a href="index.php?page=lista_funcionario" class="btn btn-outline-secondary">Voltar</a>
+                <a href="index.php?page=editar_funcionario&id=<?= $funcionario['id'] ?>" class="btn btn-primary">Editar</a>
 
-                <form action="remover_funcionario.php" method="POST"
-                      onsubmit="return confirm('Tem certeza que deseja remover este funcionário?');">
-                    <input type="hidden" name="id" value="<?= $funcionario['id'] ?>">
-                    <button type="submit" class="btn btn-danger btn-sm">Remover</button>
+                <form action="index.php?page=remover_funcionario" method="POST" class="m-0"
+                    onsubmit="return confirm('Tens a certeza que desejas remover este funcionario?');">
+                    <input type="hidden" name="id" value="<?= $professor['id'] ?>">
+                    <button type="submit" class="btn btn-danger">Remover</button>
                 </form>
             </div>
         </div>

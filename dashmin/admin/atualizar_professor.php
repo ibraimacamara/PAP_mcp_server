@@ -3,7 +3,7 @@ session_start();
 include('../conexao.php');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: lista_professor.php');
+    header('Location: index.php?page=lista_professor');
     exit;
 }
 
@@ -11,8 +11,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
    CSRF
 ================================ */
 if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
-    $_SESSION['alerta'] = ['tipo' => 'danger', 'msg' => 'Token CSRF inválido.'];
-    header('Location: lista_professor.php');
+    $_SESSION['alerta_professor'] = ['tipo' => 'danger', 'msg' => 'Token CSRF inválido.'];
+    header('index.php?page=Location: lista_professor');
     exit;
 }
 
@@ -22,7 +22,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_tok
 $id = (int) ($_POST['id'] ?? 0);
 
 if ($id <= 0) {
-    header('Location: lista_professor.php');
+    header('Location: index.php?page=lista_professor');
     exit;
 }
 
@@ -40,8 +40,8 @@ $stmt->execute([$id]);
 $dados = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$dados) {
-    $_SESSION['alerta'] = ['tipo' => 'danger', 'msg' => 'Professor não encontrado.'];
-    header('Location: lista_professor.php');
+    $_SESSION['alerta_professor'] = ['tipo' => 'danger', 'msg' => 'Professor não encontrado.'];
+    header('Location: index.php?page=lista_professor');
     exit;
 }
 
@@ -80,8 +80,8 @@ foreach ($campos as $campo) {
 }
 
 if (empty($set)) {
-    $_SESSION['alerta'] = ['tipo' => 'warning', 'msg' => 'Nenhum campo para atualizar.'];
-    header("Location: editar_professor.php?id=$id");
+    $_SESSION['alerta_professor'] = ['tipo' => 'warning', 'msg' => 'Nenhum campo para atualizar.'];
+    header("Location: index.php?page=editar_professor&id=$id");
     exit;
 }
 
@@ -141,23 +141,23 @@ try {
 
     $pdo->commit();
 
-    $_SESSION['alerta'] = [
+    $_SESSION['alerta_professor'] = [
         'tipo' => 'success',
         'msg' => 'Professor atualizado com sucesso.'
     ];
 
-    header('Location: lista_professor.php');
+    header('Location: index.php?page=lista_professor');
 
 } catch (Exception $e) {
 
     $pdo->rollBack();
 
-    $_SESSION['alerta'] = [
+    $_SESSION['alerta_professor'] = [
         'tipo' => 'danger',
         'msg' => 'Erro ao atualizar: ' . $e->getMessage()
     ];
 
-    header("Location: lista_professor.php?id=$id");
+    header("Location: index.php?page=lista_professor&id=$id");
 }
 
 exit;

@@ -66,7 +66,7 @@ $funcionario = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <div class="row g-4">
         <?php foreach ($funcionario as $f): ?>
             <div class="col-sm-12 col-xl-2">
-                <a href="detalhe_funcionario.php?id=<?= $f['id'] ?>" class="text-decoration-none text-dark">
+                <a href="index.php?page=detalhe_funcionario&id=<?= $f['id'] ?>" class="text-decoration-none text-dark">
                     <div class="bg-white shadow rounded overflow-hidden h-100">
                         <div class="course-card">
                             <div class="course-image">

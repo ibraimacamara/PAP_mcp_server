@@ -11,14 +11,14 @@ function logError($msg) {
 
 // VALIDAR MÉTODO
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location:editar_user.php');
+    header('Location:index.php?page=editar_user');
     exit;
 }
 
 // CSRF
 if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
-    $_SESSION['alerta'] = ['tipo' => 'danger', 'msg' => 'Token inválido.'];
-    header('Location: editar_user.php');
+    $_SESSION['alerta_user'] = ['tipo' => 'danger', 'msg' => 'Token inválido.'];
+    header('Location: index.php?page=editar_user');
     exit;
 }
 
@@ -26,8 +26,8 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_tok
 $id = (int) ($_POST['id'] ?? 0);
 
 if ($id <= 0) {
-    $_SESSION['alerta'] = ['tipo' => 'danger', 'msg' => 'ID inválido.'];
-    header('Location: editar_user.php');
+    $_SESSION['alerta_user'] = ['tipo' => 'danger', 'msg' => 'ID inválido.'];
+    header('Location: index.php?page=editar_user');
     exit;
 }
 
@@ -39,8 +39,8 @@ $confirm  = trim($_POST['confirmar_senha'] ?? '');
 
 // VALIDAÇÃO
 if (empty($username)) {
-    $_SESSION['alerta'] = ['tipo' => 'danger', 'msg' => 'nome de utilizador é obrigatório.'];
-    header("Location: editar_user.php?id=$id");
+    $_SESSION['alerta_user'] = ['tipo' => 'danger', 'msg' => 'nome de utilizador é obrigatório.'];
+    header("Location: index.php?page=editar_user&id=$id");
     exit;
 }
 
@@ -50,14 +50,14 @@ $senhaHash = null;
 if (!empty($senha)) {
 
     if ($senha !== $confirm) {
-        $_SESSION['alerta'] = ['tipo' => 'danger', 'msg' => 'Senhas não coincidem.'];
-        header("Location: editar_user.php?id=$id");
+        $_SESSION['alerta_user'] = ['tipo' => 'danger', 'msg' => 'Senhas não coincidem.'];
+        header("Location: index.php?page=editar_user&id=$id");
         exit;
     }
 
     if (strlen($senha) < 6) {
-        $_SESSION['alerta'] = ['tipo' => 'danger', 'msg' => 'Senha muito curta.'];
-        header("Location: editar_user.php?id=$id");
+        $_SESSION['alerta_user'] = ['tipo' => 'danger', 'msg' => 'Senha muito curta.'];
+        header("Location: index.php?page=editar_user&id=$id");
         exit;
     }
 
@@ -77,8 +77,8 @@ if (!empty($_FILES['imagem']['name'])) {
     finfo_close($finfo);
 
     if (!in_array($mime, $allowed)) {
-        $_SESSION['alerta'] = ['tipo' => 'danger', 'msg' => 'Imagem inválida.'];
-        header("Location: editar_user.php?id=$id");
+        $_SESSION['alerta_user'] = ['tipo' => 'danger', 'msg' => 'Imagem inválida.'];
+        header("Location: index.php?page=editar_user&id=$id");
         exit;
     }
 
@@ -95,8 +95,8 @@ if (!empty($_FILES['imagem']['name'])) {
     if (!move_uploaded_file($_FILES['imagem']['tmp_name'], $destPath)) {
         logError("Erro upload imagem user ID: $id");
 
-        $_SESSION['alerta'] = ['tipo' => 'danger', 'msg' => 'Erro no upload.'];
-        header("Location: editar_user.php?id=$id");
+        $_SESSION['alerta_user'] = ['tipo' => 'danger', 'msg' => 'Erro no upload.'];
+        header("Location: index.php?page=editar_user&id=$id");
         exit;
     }
 
@@ -127,23 +127,23 @@ try {
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
 
-    $_SESSION['alerta'] = [
+    $_SESSION['alerta_user'] = [
         'tipo' => 'success',
         'msg' => 'Utilizador atualizado com sucesso.'
     ];
 
-    header('Location: index.php');
+    header('Location: index.php?page=home');
 
 } catch (Exception $e) {
 
     logError("Erro update user ID $id: " . $e->getMessage());
 
-    $_SESSION['alerta'] = [
+    $_SESSION['alerta_user'] = [
         'tipo' => 'danger',
         'msg' => 'Erro ao atualizar utilizador.'
     ];
 
-    header("Location: editar_user.php?id=$id");
+    header("Location: index.php?page=editar_user&id=$id");
 }
 
 exit;

@@ -17,7 +17,7 @@ $totalProfessor = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
 <div class="container-fluid pt-4 px-4">
     <div class="row g-4">
         <div class="col-sm-6 col-xl-3">
-            <a href="lista_aluno.php" class="text-decoration-none text-dark">
+            <a href="index.php?page=lista_aluno" class="text-decoration-none text-dark">
                 <div class="bg-white shadow rounded d-flex align-items-center justify-content-between p-4">
                     <i class="fa fa-chart-line fa-3x text-primary"></i>
                     <div class="ms-3">
@@ -30,7 +30,7 @@ $totalProfessor = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
             </a>
         </div>
         <div class="col-sm-6 col-xl-3">
-            <a href="lista_curso.php" class="text-decoration-none text-dark">
+            <a href="index.php?page=lista_curso" class="text-decoration-none text-dark">
                 <div class="bg-white shadow rounded d-flex align-items-center justify-content-between p-4">
                     <i class="fa fa-chart-bar fa-3x text-primary"></i>
                     <div class="ms-3">
@@ -43,7 +43,7 @@ $totalProfessor = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
             </a>
         </div>
         <div class="col-sm-6 col-xl-3">
-            <a href="lista_turma.php" class="text-decoration-none text-dark">
+            <a href="index.php?page=lista_turma" class="text-decoration-none text-dark">
                 <div class="bg-white shadow rounded d-flex align-items-center justify-content-between p-4">
                     <i class="fa fa-chart-area fa-3x text-primary"></i>
                     <div class="ms-3">
@@ -56,7 +56,7 @@ $totalProfessor = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
             </a>
         </div>
         <div class="col-sm-6 col-xl-3">
-            <a href="lista_professor.php" class="text-decoration-none text-dark">
+            <a href="index.php?page=lista_professor" class="text-decoration-none text-dark">
                 <div class="bg-white shadow rounded d-flex align-items-center justify-content-between p-4">
                     <i class="fa fa-chart-pie fa-3x text-primary"></i>
                     <div class="ms-3">

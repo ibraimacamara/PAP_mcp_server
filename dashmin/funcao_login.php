@@ -16,7 +16,7 @@ function logErro(string $msg): void
 
 function redirectComMensagem(string $msg, string $tipo = 'danger'): void
 {
-    $_SESSION['alerta'] = [
+    $_SESSION['alerta_login'] = [
         'tipo' => $tipo,
         'msg' => $msg
     ];

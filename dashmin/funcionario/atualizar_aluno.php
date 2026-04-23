@@ -8,7 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
-    $_SESSION['alerta'] = ['tipo' => 'danger', 'msg' => 'Token CSRF inválido.'];
+    $_SESSION['alerta_aluno'] = ['tipo' => 'danger', 'msg' => 'Token CSRF inválido.'];
     header('Location: lista_aluno.php');
     exit;
 }
@@ -51,7 +51,7 @@ foreach ($campos as $campo) {
 }
 
 if (empty($set)) {
-    $_SESSION['alerta'] = ['tipo' => 'warning', 'msg' => 'Nenhum campo para atualizar.'];
+    $_SESSION['alerta_aluno'] = ['tipo' => 'warning', 'msg' => 'Nenhum campo para atualizar.'];
     header("Location: editar_aluno.php?id=$numero_aluno");
     exit;
 }
@@ -69,13 +69,13 @@ if ($userId > 0 && !empty($_FILES['foto']['name'])) {
         $tiposPermitidos = [
             'image/jpeg' => 'jpg',
             'image/jpg' => 'jpg',
-            'image/png'  => 'png',
-            'image/gif'  => 'gif'
+            'image/png' => 'png',
+            'image/gif' => 'gif'
         ];
 
         if (isset($tiposPermitidos[$foto['type']])) {
 
-            $uploadDir = __DIR__ . '../uploads/';
+            $uploadDir = __DIR__ . '/../uploads/';
             if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0777, true);
             }
@@ -112,7 +112,7 @@ try {
 
     $pdo->commit();
 
-    $_SESSION['alerta'] = [
+    $_SESSION['alerta_aluno'] = [
         'tipo' => 'success',
         'msg' => 'Aluno atualizado com sucesso.'
     ];
@@ -123,11 +123,11 @@ try {
 } catch (Exception $e) {
     $pdo->rollBack();
 
-    $_SESSION['alerta'] = [
+    $_SESSION['alerta_aluno'] = [
         'tipo' => 'danger',
         'msg' => 'Erro ao atualizar: ' . $e->getMessage()
     ];
 
-    header("Location: editar_aluno.php?id=$numero_aluno");
+    header("Location: index.php?page=editar_aluno&id=$numero_aluno");
     exit;
 }

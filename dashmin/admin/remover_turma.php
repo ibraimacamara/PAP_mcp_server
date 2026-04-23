@@ -2,7 +2,7 @@
 include('../conexao.php');
 
 if (!isset($_POST['id']) || !is_numeric($_POST['id'])) {
-    header('Location: lista_turma.php');
+    header('Location: index.php?page=lista_turma');
     exit;
 }
 
@@ -13,7 +13,7 @@ try {
     $stmt->bindParam(':id', $id, PDO::PARAM_INT);
     $stmt->execute();
 
-    header('Location: lista_turma.php');
+    header('Location: index.php?page=lista_turma');
     exit;
 } catch (PDOException $e) {
     echo 'Erro ao remover turma: ' . htmlspecialchars($e->getMessage());

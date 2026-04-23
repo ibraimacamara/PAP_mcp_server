@@ -49,7 +49,7 @@ try {
         $stmt->execute();
     }
 
-    header('Location: lista_funcionario.php');
+    header('Location: index.php?page=lista_funcionario.php');
     exit;
 
 } catch (Exception $e) {

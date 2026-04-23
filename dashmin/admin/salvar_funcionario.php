@@ -30,7 +30,7 @@ function redirecionarComErroUtilizador(string $mensagem): void
         $_SESSION['tinha_foto_funcionario'] = true;
     }
 
-    header('Location: form_funcionario.php');
+    header('Location: index.php?page=form_funcionario');
     exit;
 }
 
@@ -50,7 +50,7 @@ function redirecionarComErroTecnico(string $logMsg, int $httpCode = 500): void
         $_SESSION['tinha_foto_funcionario'] = true;
     }
 
-    header('Location: form_funcionario.php');
+    header('Location: index.php?page=form_funcionario');
     exit;
 }
 
@@ -373,7 +373,7 @@ try {
     unset($_SESSION['old_funcionario']);
     unset($_SESSION['tinha_foto_funcionario']);
 
-    header('Location: form_funcionario.php');
+    header('Location: index.php?page=form_funcionario');
     exit;
 } catch (PDOException $e) {
     if ($pdo->inTransaction()) {

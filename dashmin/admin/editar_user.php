@@ -1,5 +1,5 @@
 <?php
-session_start();
+
 include "../conexao.php";
 include "menu.php";
 include "nav-menu.php";
@@ -25,12 +25,12 @@ if (!$user) {
     die("Usuário não encontrado.");
 }
 ?>
-<?php if (isset($_SESSION['alerta'])): ?>
-    <div class="alert alert-<?= $_SESSION['alerta']['tipo'] ?> alert-dismissible fade show" role="alert">
-        <?= htmlspecialchars($_SESSION['alerta']['msg']) ?>
+<?php if (isset($_SESSION['alerta_user'])): ?>
+    <div class="alert alert-<?= $_SESSION['alerta_user']['tipo'] ?> alert-dismissible fade show" role="alert">
+        <?= htmlspecialchars($_SESSION['alerta_user']['msg']) ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
-    <?php unset($_SESSION['alerta']); ?>
+    <?php unset($_SESSION['alerta_user']); ?>
 <?php endif; ?>
 
 
@@ -85,7 +85,7 @@ if (!$user) {
 
                     <!-- Botões -->
                     <div class="d-flex gap-2 justify-content-center">
-                        <a href="lista_encarregado.php" class="btn btn-secondary w-25">Cancelar</a>
+                        <a href="index.php?page=lista_encarregado" class="btn btn-secondary w-25">Cancelar</a>
                         <button type="submit" class="btn btn-primary w-25">Atualizar</button>
                     </div>
                 </form>

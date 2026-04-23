@@ -3,21 +3,21 @@ session_start();
 include('../conexao.php');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: lista_curso.php');
+    header('Location: index.php?page=lista_curso');
     exit;
 }
 
 // Validação CSRF
 if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
-    $_SESSION['alerta'] = ['tipo' => 'danger', 'msg' => 'Token CSRF inválido.'];
-    header('Location: lista_curso.php');
+    $_SESSION['alerta_curso'] = ['tipo' => 'danger', 'msg' => 'Token CSRF inválido.'];
+    header('Location: index.php?page=lista_curso');
     exit;
 }
 
 // ID
 $id = (int) ($_POST['id'] ?? 0);
 if ($id <= 0) {
-    header('Location: lista_curso.php');
+    header('Location: index.php?page=lista_curso');
     exit;
 }
 
@@ -31,7 +31,7 @@ $coordenadorId = (int) ($_POST['coordenador_id'] ?? 0);
 // Validação
 if (empty($nome)) {
     $_SESSION['alerta'] = ['tipo' => 'danger', 'msg' => 'O nome do curso é obrigatório.'];
-    header("Location: editar_curso.php?id=$id");
+    header("Location: index.php?page=editar_curso&id=$id");
     exit;
 }
 
@@ -45,8 +45,8 @@ if (!empty($_FILES['imagem']['name'])) {
     finfo_close($finfo);
 
     if (!in_array($mime, $allowed)) {
-        $_SESSION['alerta'] = ['tipo' => 'danger', 'msg' => 'Tipo de ficheiro não permitido.'];
-        header("Location: editar_curso.php?id=$id");
+        $_SESSION['alerta_curso'] = ['tipo' => 'danger', 'msg' => 'Tipo de ficheiro não permitido.'];
+        header("Location: index.php?page=editar_curso&id=$id");
         exit;
     }
 
@@ -76,8 +76,8 @@ if (!empty($_FILES['imagem']['name'])) {
         }
 
     } else {
-        $_SESSION['alerta'] = ['tipo' => 'danger', 'msg' => 'Erro ao fazer upload da imagem.'];
-        header("Location: editar_curso.php?id=$id");
+        $_SESSION['alerta_curso'] = ['tipo' => 'danger', 'msg' => 'Erro ao fazer upload da imagem.'];
+        header("Location: index.php?page=editar_curso&id=$id");
         exit;
     }
 }
@@ -97,15 +97,15 @@ try {
         $id
     ]);
 
-    $_SESSION['alerta'] = ['tipo' => 'success', 'msg' => 'Curso atualizado com sucesso.'];
-    header('Location: lista_curso.php');
+    $_SESSION['alerta_curso'] = ['tipo' => 'success', 'msg' => 'Curso atualizado com sucesso.'];
+    header('Location: index.php?page=lista_curso');
 
 } catch (Exception $e) {
-    $_SESSION['alerta'] = [
+    $_SESSION['alerta_curso'] = [
         'tipo' => 'danger',
         'msg' => 'Erro ao atualizar: ' . $e->getMessage()
     ];
-    header("Location: editar_curso.php?id=$id");
+    header("Location: index.php?page=editar_curso&id=$id");
 }
 
 exit;

@@ -188,9 +188,9 @@ if (!empty($aluno['imagem'])) {
                 </p>
             </div>
             <div class="aluno-actions d-flex gap-2">
-                <a href="lista_aluno.php" class="btn btn-outline-secondary btn-sm">Voltar</a>
-                <a href="editar_aluno.php?id=<?= $aluno['numero_aluno'] ?>" class="btn btn-primary btn-sm">Editar</a>
-                <a href="remover_aluno.php?id=<?= $aluno['numero_aluno'] ?>" class="btn btn-danger btn-sm"
+                <a href="index.php?page=lista_aluno" class="btn btn-outline-secondary btn-sm">Voltar</a>
+                <a href="index.php?page=editar_aluno&id=<?= $aluno['numero_aluno'] ?>" class="btn btn-primary btn-sm">Editar</a>
+                <a href="index.php?page=remover_aluno&id=<?= $aluno['numero_aluno'] ?>" class="btn btn-danger btn-sm"
                     onclick="return confirm('Tem certeza que deseja remover este aluno?');">
                     Remover
                 </a>

@@ -110,7 +110,7 @@ $alunos = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <div class="row g-4">
         <?php foreach ($alunos as $a): ?>
             <div class="col-sm-12 col-xl-2">
-                <a href="detalhe_aluno.php?id=<?= $a['id'] ?>" class="text-decoration-none text-dark">
+                <a href="index.php?page=detalhe_aluno&id=<?= $a['id'] ?>" class="text-decoration-none text-dark">
                     <div class="bg-white shadow rounded overflow-hidden h-100">
                         <div class="course-card">
                             <div class="course-image">

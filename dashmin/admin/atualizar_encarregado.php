@@ -3,19 +3,19 @@ session_start();
 include('../conexao.php');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: lista_encarregado.php');
+    header('Location: index.php?page=lista_encarregado');
     exit;
 }
 
 if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
-    $_SESSION['alerta'] = ['tipo' => 'danger', 'msg' => 'Token CSRF inválido.'];
-    header('Location: lista_encarregado.php');
+    $_SESSION['alerta_encarregado'] = ['tipo' => 'danger', 'msg' => 'Token CSRF inválido.'];
+    header('Location: index.php?page=lista_encarregado');
     exit;
 }
 
 $id = (int) ($_POST['id'] ?? 0);
 if ($id <= 0) {
-    header('Location: lista_encarregado.php');
+    header('Location: index.php?page=lista_encarregado');
     exit;
 }
 
@@ -32,7 +32,7 @@ foreach ($campos as $campo) {
 
 if (empty($set)) {
     $_SESSION['alerta'] = ['tipo' => 'warning', 'msg' => 'Nenhum campo para atualizar.'];
-    header("Location: editar_encarregado.php?id=$id");
+    header("Location: index.php?page=editar_encarregado&id=$id");
     exit;
 }
 
@@ -43,9 +43,9 @@ try {
     $stmt = $pdo->prepare($sql);
     $stmt->execute($valores);
     $_SESSION['alerta'] = ['tipo' => 'success', 'msg' => 'Encarregado atualizado com sucesso.'];
-    header('Location: lista_encarregado.php');
+    header('Location: index.php?page=lista_encarregado');
 } catch (Exception $e) {
     $_SESSION['alerta'] = ['tipo' => 'danger', 'msg' => 'Erro ao atualizar: ' . $e->getMessage()];
-    header("Location: editar_encarregado.php?id=$id");
+    header("Location: index.php?page=editar_encarregado&id=$id");
 }
 exit;

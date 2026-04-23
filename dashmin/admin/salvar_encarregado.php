@@ -36,7 +36,7 @@ function erroUtilizador(string $mensagem): void
         'tipo' => 'warning',
         'msg' => $mensagem
     ];
-    header('Location: form_encarregado.php');
+    header('Location: index.php?page=form_encarregado');
     exit;
 }
 
@@ -52,7 +52,7 @@ function erroTecnico(string $logMsg, int $httpCode = 500): void
         'msg' => 'Ocorreu um erro interno. Tente novamente mais tarde.'
     ];
 
-    header('Location: form_encarregado.php');
+    header('Location: index.php?page=form_encarregado');
     exit;
 }
 
@@ -153,5 +153,5 @@ try {
 
 
 unset($_SESSION['csrf_token_encarregado']);
-header('Location: form_encarregado.php');
+header('Location: index.php?page=form_encarregado');
 exit;

@@ -20,7 +20,7 @@ function logErro(string $mensagem): void
 
 function erroUtilizador(string $mensagem): void
 {
-    $_SESSION['alerta'] = [
+    $_SESSION['alerta_curso'] = [
         'tipo' => 'warning',
         'msg'  => $mensagem
     ];
@@ -36,7 +36,7 @@ function erroTecnico(string $logMsg, int $httpCode = 500): void
 
     http_response_code($httpCode);
 
-    $_SESSION['alerta'] = [
+    $_SESSION['alerta_curso'] = [
         'tipo' => 'danger',
         'msg'  => 'Ocorreu um erro interno. Tente novamente mais tarde.'
     ];
@@ -137,7 +137,7 @@ try {
         ':imagem'      => $fotoPath
     ]);
 
-    $_SESSION['alerta'] = [
+    $_SESSION['alerta_curso'] = [
         'tipo' => 'success',
         'msg'  => 'Curso registado com sucesso.'
     ];

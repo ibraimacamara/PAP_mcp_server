@@ -53,7 +53,7 @@ try {
 
     $pdo->commit();
 
-    header('Location: lista_professor.php');
+    header('Location: index.php?page=lista_professor');
     exit;
 
 } catch (PDOException $e) {

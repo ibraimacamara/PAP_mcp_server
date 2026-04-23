@@ -1,5 +1,5 @@
 <?php
-session_start();
+
 include('../conexao.php');
 include('menu.php');
 include('nav-menu.php');
@@ -174,7 +174,7 @@ if (!$aluno) {
                     </div>
 
                     <div class="d-flex gap-2 justify-content-center">
-                        <a href="detalhe_aluno.php?id=<?= $aluno['numero_aluno'] ?>"
+                        <a href="index.php?page=detalhe_aluno&id=<?= $aluno['numero_aluno'] ?>"
                             class="btn btn-secondary w-25">Cancelar</a>
                         <button type="submit" class="btn btn-primary w-25">Atualizar</button>
                     </div>
