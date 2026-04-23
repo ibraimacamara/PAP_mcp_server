@@ -333,7 +333,7 @@ function isActive(string $page): string
                         </div>
                     </div>
 
-                    <div class="nav-item dropdown">
+                    <!-- <div class="nav-item dropdown">
                         <a href="#" class="nav-link" data-bs-toggle="dropdown">
                             <i class="bi bi-people me-2"></i>Modulo
                         </a>
@@ -347,7 +347,7 @@ function isActive(string $page): string
                                 <i class="fa fa-book-open me-2 text-primary"></i>Listar
                             </a>
                         </div>
-                    </div>
+                    </div> -->
                     <div class="nav-item dropdown">
                         <a href="#" class="nav-link" data-bs-toggle="dropdown">
                             <i class="fa fa-user-tie me-2"></i>Funcionário
