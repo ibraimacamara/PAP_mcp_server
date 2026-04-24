@@ -14,7 +14,12 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
 
 $id = (int) $_GET['id'];
 
-$stmt = $pdo->prepare("SELECT * FROM professor WHERE id = ?");
+$stmt = $pdo->prepare("
+    SELECT professor.*, users.foto
+    FROM professor
+    JOIN users ON users.id = professor.user_id
+    WHERE professor.id = ?
+");
 $stmt->execute([$id]);
 $professor = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -29,7 +34,7 @@ if (!$professor) {
             <div class="bg-white shadow rounded p-4">
                 <h6 class="mb-4">Editar Professor — <?= htmlspecialchars($professor['nome']) ?></h6>
 
-                <form action="atualizar_professor.php" method="POST" enctype="multipart/form-data">
+                <form action="index.php?page=atualizar_professor" method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="id" value="<?= $professor['id'] ?>">
                     <input type="hidden" name="csrf_token"
                         value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">

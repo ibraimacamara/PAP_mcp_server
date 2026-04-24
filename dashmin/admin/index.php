@@ -62,6 +62,7 @@ $rotas = [
     'detalhe_professor' => 'detalhe_prof.php',
     'remover_professor' => 'remover_prof.php',
     'salvar_professor' => 'salvar_prof.php',
+    'atualizar_professor' => 'atualizar_prof.php',
 
     'curso_turma' => 'curso_turma.php',
     'lista_curso' => 'lista_curso.php',
