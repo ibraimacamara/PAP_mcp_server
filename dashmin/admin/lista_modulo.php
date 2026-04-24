@@ -2,86 +2,118 @@
 include('../conexao.php');
 include('menu.php');
 
-// Buscar módulos com o nome do curso
 $stmt = $pdo->prepare("
     SELECT 
         m.id,
+        m.id_curso,
         m.nome_modulo,
         m.codigo_modulo,
         m.ordem,
         m.carga_horaria,
+        m.foto,
         c.nome AS nome_curso
     FROM modulo m
-    INNER JOIN curso c ON m.id_curso = c.id
-    ORDER BY c.nome ASC, m.ordem ASC
+    LEFT JOIN curso c ON c.id = m.id_curso
+    ORDER BY c.nome ASC, m.ordem ASC, m.nome_modulo ASC
 ");
 $stmt->execute();
 $modulos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
+<style>
+    .modulo-card {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        padding: 8px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .modulo-img {
+        width: 100%;
+        height: 190px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    .modulo-info {
+        font-size: 14px;
+    }
+</style>
+
 <?php include 'nav-menu.php'; ?>
 
 <div class="container-fluid pt-4 px-4">
     <div class="row g-4">
-        <div class="col-12">
-            <div class="bg-white shadow rounded p-4">
-                <h4 class="mb-4">Lista de Módulos</h4>
 
-                <div class="table-responsive">
-                    <table class="table table-striped table-bordered">
-                        <thead class="thead-dark">
-                            <tr>
-                                <th>ID</th>
-                                <th>Curso</th>
-                                <th>Módulo</th>
-                                <th>Código</th>
-                                <th>Ordem</th>
-                                <th>Carga Horária</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php if (!empty($modulos)): ?>
-                                <?php foreach ($modulos as $m): ?>
-                                    <tr>
-                                        <td><?= htmlspecialchars($m['id']) ?></td>
-                                        <td><?= htmlspecialchars($m['nome_curso']) ?></td>
-                                        <td><?= htmlspecialchars($m['nome_modulo']) ?></td>
-                                        <td><?= htmlspecialchars($m['codigo_modulo'] ?? '') ?></td>
-                                        <td><?= htmlspecialchars($m['ordem']) ?></td>
-                                        <td><?= htmlspecialchars($m['carga_horaria']) ?></td>
-                                        <td>
-                                            <a href="index.php?page=editar_modulo&id=<?= htmlspecialchars($m['id']) ?>"
-                                               class="btn btn-sm btn-primary mb-1">Editar</a>
+        <?php foreach ($modulos as $m): ?>
+            <div class="col-sm-12 col-xl-4 mb-4">
+                <div class="card h-100 shadow p-2 modulo-card">
+                    <a href="index.php?page=detalhe_modulo&id=<?= $m['id'] ?>" class="text-decoration-none text-dark">
+                    <img src="../uploads<?= htmlspecialchars($m['foto'] ?? 'default.jpg') ?>"
+                         class="modulo-img"
+                         alt="<?= htmlspecialchars($m['nome_modulo']) ?>">
 
-                                            <form action="index.php?page=remover_modulo" method="POST" style="display:inline;"
-                                                  onsubmit="return confirm('Tens a certeza que queres remover este módulo?')">
-                                                <input type="hidden" name="id" value="<?= htmlspecialchars($m['id']) ?>">
-                                                <button type="submit" class="btn btn-sm btn-danger mb-1">Remover</button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            <?php else: ?>
-                                <tr>
-                                    <td colspan="8" class="text-center">Nenhum módulo registado.</td>
-                                </tr>
-                            <?php endif; ?>
-                        </tbody>
-                    </table>
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title text-truncate"
+                            title="<?= htmlspecialchars($m['nome_modulo']) ?>">
+                            <?= htmlspecialchars($m['nome_modulo']) ?>
+                        </h5>
+
+                        <p class="mb-1 modulo-info">
+                            <strong>Curso:</strong>
+                            <?= !empty($m['nome_curso'])
+                                ? htmlspecialchars($m['nome_curso'])
+                                : '<span class="text-muted">Sem curso</span>' ?>
+                        </p>
+
+                        <p class="mb-1 modulo-info">
+                            <strong>Código:</strong>
+                            <?= htmlspecialchars($m['codigo_modulo']) ?>
+                        </p>
+
+                        <p class="mb-1 modulo-info">
+                            <strong>Ordem:</strong>
+                            <?= (int) $m['ordem'] ?>
+                        </p>
+
+                        <p class="mb-1 modulo-info">
+                            <strong>Carga horária:</strong>
+                            <?= (int) $m['carga_horaria'] ?> horas
+                        </p>
+
+                        <div class="mt-auto d-flex justify-content-between align-items-center">
+                            <a href="editar_modulo.php?id=<?= (int) $m['id'] ?>"
+                               class="btn btn-sm btn-primary">
+                                Editar
+                            </a>
+
+                            <form action="remover_modulo.php" method="POST" class="m-0"
+                                  onsubmit="return confirm('Tens a certeza que desejas remover este módulo?');">
+                                <input type="hidden" name="id" value="<?= (int) $m['id'] ?>">
+
+                                <button type="submit" class="btn btn-sm btn-danger">
+                                    Remover
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </a>
                 </div>
-
             </div>
-        </div>
+        <?php endforeach; ?>
+
     </div>
 </div>
 
 <?php include 'footer.php'; ?>
-</div>
 
 <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top">
     <i class="bi bi-arrow-up"></i>
 </a>
+
 </div>
 
 <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
@@ -94,5 +126,6 @@ $modulos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <script src="lib/tempusdominus/js/moment-timezone.min.js"></script>
 <script src="lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js"></script>
 <script src="js/main.js"></script>
+
 </body>
 </html>

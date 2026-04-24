@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 session_start();
@@ -87,6 +88,13 @@ $rotas = [
     'detalhe_funcionario' => 'detalhe_funcionario.php',
     'remover_funcionario' => 'remover_funcionario.php',
     'salvar_funcionario' => 'salvar_funcionario.php',
+
+    'salvar_modulo' => 'salvar_modulo.php',
+    'form_modulo' => 'form_modulo.php',
+    'detalhe_modulo' => 'detalhe_modulo.php',
+    'atribuir_mct' => 'atribuir_mct.php',
+    'salvar_atribuir_mct' => 'salvar_atribuir_mct.php',
+
 
     'editar_user' => 'editar_user.php',
     'atualizar_user' => 'atualizar_user.php',

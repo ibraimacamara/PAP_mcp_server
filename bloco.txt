@@ -1,0 +1,13 @@
+
+regista novo encarregado com seguentes dados:
+nome: Mussu Mané
+email: mussumane@gmail.com
+bi:2233HH44
+contato: 930 456 656
+morada:av. Amilcar Lopes cabral 77
+genero: feminino
+distriro: Bissau
+Freguesia: Horta das Figueiras
+
+
+e8401f0e06e5e7886ed1222c67589c09

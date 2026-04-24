@@ -103,8 +103,8 @@ try {
 
         $rotaEditar = [
             'admin' => 'admin/editar_user.php',
-            'aluno' => 'aluno/editar_aluno.php',
-            'professor' => 'prof/editar_professor.php',
+            'aluno' => 'aluno/editar_user.php',
+            'professor' => 'prof/editar_user.php',
             'funcionario' => 'funcionario/editar_user.php',
             'encarregado' => 'encarregado/editar_user.php'
 

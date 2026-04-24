@@ -1,99 +1,14 @@
 <?php
 declare(strict_types=1);
-
 date_default_timezone_set('Europe/Lisbon');
 session_start();
-
 include '../conexao.php';
-
 define('LOG_FILE', __DIR__ . '/../logs/app.log');
-
 function logErro(string $mensagem): void
 {
     $data = date('Y-m-d H:i:s');
     error_log("[$data] $mensagem\n", 3, LOG_FILE);
 }
-
-function moodleRequest(string $function, array $params): array
-{
-    $moodleUrl = 'https://ibraima.sieno.pt/sgei/webservice/rest/server.php';
-    $token = 'e8401f0e06e5e7886ed1222c67589c09';
-
-    $postFields = array_merge([
-        'wstoken' => $token,
-        'wsfunction' => $function,
-        'moodlewsrestformat' => 'json'
-    ], $params);
-
-    $ch = curl_init();
-
-    curl_setopt_array($ch, [
-        CURLOPT_URL => $moodleUrl,
-        CURLOPT_POST => true,
-        CURLOPT_POSTFIELDS => http_build_query($postFields),
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT => 30
-    ]);
-
-    $response = curl_exec($ch);
-
-    if ($response === false) {
-        $erro = curl_error($ch);
-        curl_close($ch);
-        throw new Exception('Erro cURL Moodle: ' . $erro);
-    }
-
-    curl_close($ch);
-
-    $decoded = json_decode($response, true);
-
-    if (!is_array($decoded)) {
-        throw new Exception('Resposta inválida do Moodle: ' . $response);
-    }
-
-    if (isset($decoded['exception'])) {
-        throw new Exception('Erro Moodle: ' . ($decoded['message'] ?? 'Erro desconhecido'));
-    }
-
-    return $decoded;
-}
-
-function criarOuObterAlunoMoodle(array $dados): int
-{
-    $email = strtolower(trim($dados['email']));
-
-    $existente = moodleRequest('core_user_get_users_by_field', [
-        'field' => 'email',
-        'values[0]' => $email
-    ]);
-
-    if (!empty($existente[0]['id'])) {
-        return (int) $existente[0]['id'];
-    }
-
-    $partesNome = preg_split('/\s+/', trim($dados['nome']), 2);
-    $firstname = $partesNome[0] ?? 'Aluno';
-    $lastname = $partesNome[1] ?? 'Sem apelido';
-    
-    $criado = moodleRequest('core_user_create_users', [
-        'users[0][username]'  => $email,
-        'users[0][password]'  => 'Aluno@' . preg_replace('/[^0-9]/', '', $dados['bi']) . 'a',
-        'users[0][firstname]' => $firstname,
-        'users[0][lastname]'  => $lastname,
-        'users[0][email]'     => $email,
-        'users[0][auth]'      => 'manual',
-        'users[0][idnumber]'  => $dados['bi'],
-        'users[0][city]'      => $dados['distrito'],
-        'users[0][country]'   => 'PT'
-    ]);
-
-    if (empty($criado[0]['id'])) {
-        throw new Exception('Moodle não devolveu o ID do aluno criado.');
-    }
-
-    return (int) $criado[0]['id'];
-}
-
 function erroUtilizador(string $mensagem, array $dados = [], bool $tinhaFoto = false): void
 {
     $_SESSION['alerta_aluno'] = ['tipo' => 'warning', 'msg' => $mensagem];
@@ -102,7 +17,6 @@ function erroUtilizador(string $mensagem, array $dados = [], bool $tinhaFoto = f
     header('Location: index.php?page=form_aluno');
     exit;
 }
-
 function erroTecnico(string $logMsg, int $httpCode = 500): void
 {
     logErro($logMsg);
@@ -112,7 +26,6 @@ function erroTecnico(string $logMsg, int $httpCode = 500): void
     header('Location: index.php?page=form_aluno');
     exit;
 }
-
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     erroTecnico('Método HTTP inválido');
 }
@@ -124,7 +37,6 @@ if (
 ) {
     erroUtilizador('Sessão expirada.');
 }
-
 $dados = [
     'nome' => trim($_POST['nome'] ?? ''),
     'data_nascimento' => $_POST['data_nascimento'] ?? '',
@@ -170,22 +82,14 @@ $fotoPath = null;
 
 if (!empty($_FILES['foto']['name'])) {
     $foto = $_FILES['foto'];
-
     if (!isset($foto['tmp_name']) || !is_uploaded_file($foto['tmp_name']) || $foto['error'] !== UPLOAD_ERR_OK) {
         erroUtilizador('Erro no upload da foto.', $dados, true);
     }
 
-    $tiposPermitidos = [
-        'image/jpeg' => 'jpg',
-        'image/jpg' => 'jpg',
-        'image/png' => 'png',
-        'image/gif' => 'gif'
-    ];
-
+    $tiposPermitidos = ['image/jpeg' => 'jpg', 'image/jpg' => 'jpg', 'image/png' => 'png', 'image/gif' => 'gif'];
     $finfo = finfo_open(FILEINFO_MIME_TYPE);
     $mime = finfo_file($finfo, $foto['tmp_name']);
     finfo_close($finfo);
-
     if (!isset($tiposPermitidos[$mime])) {
         erroUtilizador('Apenas imagens JPEG, PNG ou GIF são permitidas.', $dados, true);
     }
@@ -197,11 +101,9 @@ if (!empty($_FILES['foto']['name'])) {
 
     $novoNome = 'aluno_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $dados['bi']) . '.' . $tiposPermitidos[$mime];
     $destino = $uploadDir . $novoNome;
-
     if (!move_uploaded_file($foto['tmp_name'], $destino)) {
         erroUtilizador('Falha ao guardar a foto.', $dados, true);
     }
-
     $fotoPath = $novoNome;
 }
 
@@ -209,32 +111,26 @@ try {
     $pdo->beginTransaction();
 
     $senhaHash = password_hash($dados['bi'], PASSWORD_DEFAULT);
-
     $stmt = $pdo->prepare("
-        INSERT INTO users (username, senha, categoria, foto)
-        VALUES (:username, :senha, :categoria, :foto)
+    INSERT INTO users (username, senha, categoria, foto)
+    VALUES (:username, :senha, :categoria, :foto)
     ");
-
     $stmt->execute([
         ':username' => $dados['email'],
         ':senha' => $senhaHash,
         ':categoria' => 'aluno',
         ':foto' => $fotoPath
     ]);
-
     $userId = (int) $pdo->lastInsertId();
 
-    $moodleUserId = criarOuObterAlunoMoodle($dados);
-
     $stmt = $pdo->prepare("
-        INSERT INTO aluno 
-        (user_id, nome, data_nascimento, contato, bi, email, morada, genero, distrito, freguesia,
-        curso_id, turma_id, encarregado_principal_id, encarregado_secundario_id, moodle_user_id)
-        VALUES 
-        (:user_id, :nome, :data, :contato, :bi, :email, :morada, :genero, :distrito, :freguesia,
-        :curso, :turma, :enc_principal, :enc_secundario, :moodle_user_id)
+    INSERT INTO aluno 
+    (user_id, nome, data_nascimento, contato, bi, email, morada, genero, distrito, freguesia,
+    curso_id, turma_id, encarregado_principal_id, encarregado_secundario_id)
+    VALUES 
+    (:user_id, :nome, :data, :contato, :bi, :email, :morada, :genero, :distrito, :freguesia,
+    :curso, :turma, :enc_principal, :enc_secundario)
     ");
-
     $stmt->execute([
         ':user_id' => $userId,
         ':nome' => $dados['nome'],
@@ -249,20 +145,13 @@ try {
         ':curso' => $dados['curso_id'],
         ':turma' => $dados['turma_id'],
         ':enc_principal' => $dados['encarregado_principal_id'],
-        ':enc_secundario' => $dados['encarregado_secundario_id'] ?: null,
-        ':moodle_user_id' => $moodleUserId
+        ':enc_secundario' => $dados['encarregado_secundario_id'] ?: null
     ]);
 
     $pdo->commit();
-
-    $_SESSION['alerta_aluno'] = [
-        'tipo' => 'success',
-        'msg' => 'Aluno registado com sucesso e sincronizado com o Moodle.'
-    ];
-
+    $_SESSION['alerta_aluno'] = ['tipo' => 'success', 'msg' => 'Aluno registado com sucesso.'];
     unset($_SESSION['old_aluno'], $_SESSION['tinha_foto_aluno'], $_SESSION['csrf_token_aluno']);
-
-} catch (Exception $e) {
+} catch (PDOException $e) {
     if ($pdo->inTransaction()) {
         $pdo->rollBack();
     }
@@ -274,22 +163,18 @@ try {
         }
     }
 
-    if ($e instanceof PDOException && $e->getCode() === '23000') {
+    if ($e->getCode() === '23000') {
         $msg = strtolower($e->getMessage());
-
         if (str_contains($msg, 'username') || str_contains($msg, 'email')) {
             erroUtilizador('Email já registado.', $dados, $tinhaFoto);
         }
-
         if (str_contains($msg, 'bi')) {
             erroUtilizador('BI já registado.', $dados, $tinhaFoto);
         }
-
         erroUtilizador('Já existe um registo com os dados informados.', $dados, $tinhaFoto);
     }
 
-    erroTecnico('Erro ao guardar aluno/Moodle em salvar_aluno.php: ' . $e->getMessage());
+    erroTecnico('Erro BD em salvar_aluno.php: ' . $e->getMessage());
 }
-
 header('Location: index.php?page=form_aluno');
 exit;
