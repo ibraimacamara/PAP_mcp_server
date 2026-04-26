@@ -19,7 +19,7 @@ function logErro(string $mensagem): void
 
 function redirecionarComErroUtilizador(string $mensagem): void
 {
-    $_SESSION['alerta_funcionario'] = [
+    $_SESSION['alerta_funcionario_inserir'] = [
         'tipo' => 'warning',
         'msg' => $mensagem
     ];
@@ -39,7 +39,7 @@ function redirecionarComErroTecnico(string $logMsg, int $httpCode = 500): void
     logErro($logMsg);
     http_response_code($httpCode);
 
-    $_SESSION['alerta_funcionario'] = [
+    $_SESSION['alerta_funcionario_inserir'] = [
         'tipo' => 'danger',
         'msg' => 'Ocorreu um erro interno.'
     ];
@@ -364,7 +364,7 @@ try {
 
     $pdo->commit();
 
-    $_SESSION['alerta_funcionario'] = [
+    $_SESSION['alerta_funcionario_inserir'] = [
         'tipo' => 'success',
         'msg' => 'Funcionário registado com sucesso.'
     ];

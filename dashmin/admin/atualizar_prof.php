@@ -14,7 +14,7 @@ if (
     !isset($_POST['csrf_token'], $_SESSION['csrf_token']) ||
     !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])
 ) {
-    $_SESSION['alerta_professor'] = [
+    $_SESSION['alerta_professor_editar'] = [
         'tipo' => 'danger',
         'msg' => 'Token CSRF inválido.'
     ];
@@ -46,7 +46,7 @@ $stmt->execute([$id]);
 $dados = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$dados) {
-    $_SESSION['alerta_professor'] = [
+    $_SESSION['alerta_professor_editar'] = [
         'tipo' => 'danger',
         'msg' => 'Professor não encontrado.'
     ];
@@ -86,7 +86,7 @@ foreach ($campos as $campo) {
         $valor = trim($_POST[$campo]);
 
         if ($campo === 'email' && $valor !== '' && !filter_var($valor, FILTER_VALIDATE_EMAIL)) {
-            $_SESSION['alerta_professor'] = [
+            $_SESSION['alerta_professor_editar'] = [
                 'tipo' => 'danger',
                 'msg' => 'Email inválido.'
             ];
@@ -95,7 +95,7 @@ foreach ($campos as $campo) {
         }
 
         if ($campo === 'genero' && $valor !== '' && !in_array($valor, ['Masculino', 'Feminino'], true)) {
-            $_SESSION['alerta_professor'] = [
+            $_SESSION['alerta_professor_editar'] = [
                 'tipo' => 'danger',
                 'msg' => 'Género inválido.'
             ];
@@ -111,7 +111,7 @@ foreach ($campos as $campo) {
 $temFoto = !empty($_FILES['foto']['name']);
 
 if (empty($set) && !$temFoto) {
-    $_SESSION['alerta_professor'] = [
+    $_SESSION['alerta_professor_editar'] = [
         'tipo' => 'warning',
         'msg' => 'Nenhum campo para atualizar.'
     ];
@@ -176,7 +176,7 @@ try {
 
     $pdo->commit();
 
-    $_SESSION['alerta_professor'] = [
+    $_SESSION['alerta_professor_editar'] = [
         'tipo' => 'success',
         'msg' => 'Professor atualizado com sucesso.'
     ];
@@ -189,7 +189,7 @@ try {
         $pdo->rollBack();
     }
 
-    $_SESSION['alerta_professor'] = [
+    $_SESSION['alerta_professor_editar'] = [
         'tipo' => 'danger',
         'msg' => 'Erro ao atualizar: ' . $e->getMessage()
     ];

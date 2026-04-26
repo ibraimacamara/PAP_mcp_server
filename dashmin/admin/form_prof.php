@@ -13,12 +13,12 @@ function old_professor(string $campo): string
     return htmlspecialchars($oldProfessor[$campo] ?? '', ENT_QUOTES, 'UTF-8');
 }
 
-$alertaProfessor = $_SESSION['alerta_professor'] ?? null;
+$alertaProfessor = $_SESSION['alerta_professor_inserir'] ?? null;
 $oldProfessor = $_SESSION['old_professor'] ?? [];
 $tinhaFotoProfessor = $_SESSION['tinha_foto_professor'] ?? false;
 
 /* limpa logo após mostrar */
-unset($_SESSION['alerta_professor']);
+unset($_SESSION['alerta_professor_inserir']);
 unset($_SESSION['old_professor']);
 unset($_SESSION['tinha_foto_professor']);
 ?>
@@ -27,7 +27,7 @@ unset($_SESSION['tinha_foto_professor']);
 <!-- Form Start -->
 <div class="col-12">
     <?php if (!empty($alertaProfessor)): ?>
-        <div id="alerta_professor"
+        <div id="alerta_professor_inserir"
             class="alert alert-<?= htmlspecialchars($alertaProfessor['tipo']) ?> alert-dismissible fade show"
             role="alert">
             <?= htmlspecialchars($alertaProfessor['msg'], ENT_QUOTES, 'UTF-8') ?>
@@ -35,7 +35,7 @@ unset($_SESSION['tinha_foto_professor']);
         </div>
 
         <script>
-            setTimeout(() => document.getElementById('alerta_professor')?.remove(), 3000);
+            setTimeout(() => document.getElementById('alerta_professor_inserir')?.remove(), 3000);
         </script>
 
     <?php endif; ?>
@@ -49,6 +49,7 @@ unset($_SESSION['tinha_foto_professor']);
             <?php endif; ?>
             <div class="bg-white shadow rounded  p-4">
                 <h6 class="mb-4">Registar Professor</h6>
+
                 <form action="salvar_professor.php" method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="csrf_token_professor"
                         value="<?= htmlspecialchars($_SESSION['csrf_token_professor'], ENT_QUOTES, 'UTF-8') ?>">

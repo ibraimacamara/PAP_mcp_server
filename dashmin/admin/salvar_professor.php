@@ -16,7 +16,7 @@ function logErro(string $mensagem): void
 
 function erroUtilizador(string $mensagem, array $dados = [], bool $tinhaFoto = false): void
 {
-    $_SESSION['alerta_professor'] = ['tipo' => 'warning', 'msg' => $mensagem];
+    $_SESSION['alerta_professor_inserir'] = ['tipo' => 'warning', 'msg' => $mensagem];
     $_SESSION['old_professor'] = $dados;
     $_SESSION['tinha_foto_professor'] = $tinhaFoto;
     header('Location: index.php?page=form_professor');
@@ -25,7 +25,7 @@ function erroUtilizador(string $mensagem, array $dados = [], bool $tinhaFoto = f
 
 function sucessoUtilizador(string $mensagem): void
 {
-    $_SESSION['alerta_professor'] = ['tipo' => 'success', 'msg' => $mensagem];
+    $_SESSION['alerta_professor_inserir'] = ['tipo' => 'success', 'msg' => $mensagem];
     unset($_SESSION['old_professor'], $_SESSION['tinha_foto_professor'], $_SESSION['csrf_token_professor']);
     header('Location: index.php?page=form_professor');
     exit;
@@ -35,7 +35,7 @@ function erroTecnico(string $logMsg, int $httpCode = 500): void
 {
     logErro($logMsg);
     http_response_code($httpCode);
-    $_SESSION['alerta_professor'] = ['tipo' => 'danger', 'msg' => 'Ocorreu um erro interno.'];
+    $_SESSION['alerta_professor_inserir'] = ['tipo' => 'danger', 'msg' => 'Ocorreu um erro interno.'];
     unset($_SESSION['old_professor'], $_SESSION['tinha_foto_professor']);
     header('Location: index.php?page=form_professor');
     exit;

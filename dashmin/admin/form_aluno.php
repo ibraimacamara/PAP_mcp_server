@@ -9,11 +9,11 @@ if (empty($_SESSION['csrf_token_aluno'])) {
     $_SESSION['csrf_token_aluno'] = bin2hex(random_bytes(32));
 }
 
-$alertaAluno = $_SESSION['alerta_aluno'] ?? null;
+$alertaAluno = $_SESSION['alerta_aluno_inserir'] ?? null;
 $oldAluno = $_SESSION['old_aluno'] ?? [];
 $tinhaFotoAluno = $_SESSION['tinha_foto_aluno'] ?? false;
 
-unset($_SESSION['alerta_aluno'], $_SESSION['old_aluno'], $_SESSION['tinha_foto_aluno']);
+unset($_SESSION['alerta_aluno_inserir'], $_SESSION['old_aluno'], $_SESSION['tinha_foto_aluno']);
 
 function old_aluno(string $campo): string
 {

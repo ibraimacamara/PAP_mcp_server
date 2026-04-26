@@ -1,13 +1,14 @@
 <?php
 
-
 declare(strict_types=1);
 
 date_default_timezone_set('Europe/Lisbon');
-session_start();
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 include '../conexao.php';
-
 
 define('LOG_FILE', __DIR__ . '/../logs/app.log');
 
@@ -17,18 +18,91 @@ function logErro(string $mensagem): void
     error_log("[$data] $mensagem\n", 3, LOG_FILE);
 }
 
+function moodleRequest(string $function, array $params): array
+{
+    $moodleUrl = 'https://ibraima.sieno.pt/sgei/webservice/rest/server.php';
+    $token = '2e894f0f30032b1222827460a7aa1ef7';
+
+    $postFields = array_merge([
+        'wstoken' => $token,
+        'wsfunction' => $function,
+        'moodlewsrestformat' => 'json'
+    ], $params);
+
+    $ch = curl_init();
+
+    curl_setopt_array($ch, [
+        CURLOPT_URL => $moodleUrl,
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => http_build_query($postFields),
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT => 30
+    ]);
+
+    $response = curl_exec($ch);
+
+    if ($response === false) {
+        $erro = curl_error($ch);
+        curl_close($ch);
+        throw new Exception('Erro cURL Moodle: ' . $erro);
+    }
+
+    curl_close($ch);
+
+    $decoded = json_decode($response, true);
+
+    if (!is_array($decoded)) {
+        throw new Exception('Resposta inválida do Moodle: ' . $response);
+    }
+
+    if (isset($decoded['exception'])) {
+        throw new Exception('Erro Moodle: ' . ($decoded['message'] ?? 'Erro desconhecido'));
+    }
+
+    return $decoded;
+}
+
+function gerarShortnameCurso(string $nome): string
+{
+    $shortname = strtolower(trim(preg_replace('/[^A-Za-z0-9]+/', '-', $nome), '-'));
+
+    if ($shortname === '') {
+        $shortname = 'curso-' . time();
+    }
+
+    return $shortname . '-' . time();
+}
+
+function criarCursoNoMoodle(string $nome, string $descricao = '', int $categoriaId = 1): int
+{
+    $shortname = gerarShortnameCurso($nome);
+
+    $resposta = moodleRequest('core_course_create_courses', [
+        'courses[0][fullname]' => $nome,
+        'courses[0][shortname]' => $shortname,
+        'courses[0][categoryid]' => $categoriaId,
+        'courses[0][summary]' => $descricao,
+        'courses[0][summaryformat]' => 1,
+        'courses[0][visible]' => 1
+    ]);
+
+    if (empty($resposta[0]['id'])) {
+        throw new Exception('Moodle não devolveu o ID do curso criado.');
+    }
+
+    return (int) $resposta[0]['id'];
+}
 
 function erroUtilizador(string $mensagem): void
 {
-    $_SESSION['alerta_curso'] = [
+    $_SESSION['alerta_curso_inserir'] = [
         'tipo' => 'warning',
-        'msg'  => $mensagem
+        'msg' => $mensagem
     ];
-    header('Location: index.php?page=curso_turma');
+
+    header('Location: index.php?page=form_curso');
     exit;
 }
-
-
 
 function erroTecnico(string $logMsg, int $httpCode = 500): void
 {
@@ -36,21 +110,17 @@ function erroTecnico(string $logMsg, int $httpCode = 500): void
 
     http_response_code($httpCode);
 
-    $_SESSION['alerta_curso'] = [
+    $_SESSION['alerta_curso_inserir'] = [
         'tipo' => 'danger',
-        'msg'  => 'Ocorreu um erro interno. Tente novamente mais tarde.'
+        'msg' => 'Ocorreu um erro interno. Tente novamente mais tarde.'
     ];
 
-    header('Location: index.php?page=curso_turma');
+    header('Location: index.php?page=form_curso');
     exit;
 }
 
-
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    erroTecnico(
-        'Método HTTP inválido: ' . ($_SERVER['REQUEST_METHOD'] ?? 'UNKNOWN'),
-        405
-    );
+    erroTecnico('Método HTTP inválido: ' . ($_SERVER['REQUEST_METHOD'] ?? 'UNKNOWN'), 405);
 }
 
 if (
@@ -61,13 +131,17 @@ if (
     erroUtilizador('Sessão expirada. Recarregue o formulário.');
 }
 
-
-$nome          = trim($_POST['nome'] ?? '');
-$descricao     = trim($_POST['descricao'] ?? '');
+$nome = trim($_POST['nome'] ?? '');
+$descricao = trim($_POST['descricao'] ?? '');
 $coordenadorId = (int) ($_POST['coordenador_id'] ?? 0);
 
+if ($nome === '') {
+    erroUtilizador('Insere o nome do curso.');
+}
 
-
+if (mb_strlen($nome) < 3) {
+    erroUtilizador('O nome do curso é demasiado curto.');
+}
 
 $fotoPath = null;
 
@@ -80,27 +154,28 @@ if (!empty($_FILES['foto']['name'])) {
 
     $tiposPermitidos = [
         'image/jpeg' => 'jpg',
-        'image/jpg' => 'jpg',
-        'image/png'  => 'png',
-        'image/gif'  => 'gif'
+        'image/png' => 'png',
+        'image/gif' => 'gif'
     ];
 
-    if (!array_key_exists($foto['type'], $tiposPermitidos)) {
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $mime = finfo_file($finfo, $foto['tmp_name']);
+    finfo_close($finfo);
+
+    if (!array_key_exists($mime, $tiposPermitidos)) {
         erroUtilizador('Apenas imagens JPEG, PNG ou GIF são permitidas.');
     }
 
-    $uploadDir = '../uploads';
+    $uploadDir = __DIR__ . '/../uploads';
+
     if (!is_dir($uploadDir)) {
         erroUtilizador('A pasta de uploads não existe.');
     }
 
-    // Normalizar nome do curso
-    $slugCurso = strtolower(trim(preg_replace('/[^A-Za-z0-9]+/', '-', $nome)));
+    $slugCurso = strtolower(trim(preg_replace('/[^A-Za-z0-9]+/', '-', $nome), '-'));
+    $extensao = $tiposPermitidos[$mime];
 
-    // Adiciona timestamp para evitar sobrescrita
-    $extensao = $tiposPermitidos[$foto['type']];
     $novoNome = 'curso_' . $slugCurso . '_' . time() . '.' . $extensao;
-
     $destino = $uploadDir . '/' . $novoNome;
 
     if (!move_uploaded_file($foto['tmp_name'], $destino)) {
@@ -110,48 +185,48 @@ if (!empty($_FILES['foto']['name'])) {
     $fotoPath = $novoNome;
 }
 
-
-
-if ($nome === ''  ) {
-    erroUtilizador('Inseri o nome de curso.');
-}
-
-if (mb_strlen($nome) < 3) {
-    erroUtilizador('O nome do curso é demasiado curto.');
-}
-
-
-
-
 try {
+    $moodleCourseId = criarCursoNoMoodle($nome, $descricao, 1);
+
     $sql = "
-        INSERT INTO curso (nome, descricao, coordenador, imagem)
-        VALUES (:nome, :descricao, :coordenador, :imagem)
+        INSERT INTO curso 
+            (nome, descricao, coordenador, imagem, moodle_course_id)
+        VALUES 
+            (:nome, :descricao, :coordenador, :imagem, :moodle_course_id)
     ";
 
     $stmt = $pdo->prepare($sql);
+
     $stmt->execute([
-        ':nome'        => $nome,
-        ':descricao'   => $descricao,
+        ':nome' => $nome,
+        ':descricao' => $descricao,
         ':coordenador' => $coordenadorId > 0 ? $coordenadorId : null,
-        ':imagem'      => $fotoPath
+        ':imagem' => $fotoPath,
+        ':moodle_course_id' => $moodleCourseId
     ]);
 
-    $_SESSION['alerta_curso'] = [
+    $_SESSION['alerta_curso_inserir'] = [
         'tipo' => 'success',
-        'msg'  => 'Curso registado com sucesso.'
+        'msg' => 'Curso registado com sucesso.'
     ];
 
-} catch (PDOException $e) {
+    unset($_SESSION['csrf_token']);
 
-    if ($e->getCode() === '23000') {
-        erroUtilizador('Já existe um turma com esse nome.');
+    header('Location: index.php?page=form_curso');
+    exit;
+
+} catch (Exception $e) {
+    if ($fotoPath) {
+        $caminhoFoto = __DIR__ . '/../uploads/' . $fotoPath;
+
+        if (file_exists($caminhoFoto)) {
+            unlink($caminhoFoto);
+        }
     }
 
-    erroTecnico('Erro DB: ' . $e->getMessage());
+    if ($e instanceof PDOException && $e->getCode() === '23000') {
+        erroUtilizador('Já existe um curso com esse nome.');
+    }
+
+    erroTecnico('Erro ao guardar curso no Moodle: ' . $e->getMessage());
 }
-
-
-unset($_SESSION['csrf_token']);
-header('Location: index.php?page=curso_turma');
-exit;

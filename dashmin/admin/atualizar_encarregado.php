@@ -8,7 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
-    $_SESSION['alerta_encarregado'] = ['tipo' => 'danger', 'msg' => 'Token CSRF inválido.'];
+    $_SESSION['alerta_encarregado_editar'] = ['tipo' => 'danger', 'msg' => 'Token CSRF inválido.'];
     header('Location: index.php?page=lista_encarregado');
     exit;
 }

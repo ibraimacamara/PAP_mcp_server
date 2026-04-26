@@ -9,12 +9,12 @@ if (empty($_SESSION['csrf_token_funcionario'])) {
     $_SESSION['csrf_token_funcionario'] = bin2hex(random_bytes(32));
 }
 
-$alertaFuncionario = $_SESSION['alerta_funcionario'] ?? null;
+$alertaFuncionario = $_SESSION['alerta_funcionario_inserir'] ?? null;
 $oldFuncionario = $_SESSION['old_funcionario'] ?? [];
 $tinhaFotoFuncionario = $_SESSION['tinha_foto_funcionario'] ?? false;
 
 /* limpar após leitura */
-unset($_SESSION['alerta_funcionario']);
+unset($_SESSION['alerta_funcionario_inserir']);
 unset($_SESSION['old_funcionario']);
 unset($_SESSION['tinha_foto_funcionario']);
 
@@ -27,7 +27,7 @@ function old_funcionario(string $campo): string
 
 <div class="col-12">
     <?php if (!empty($alertaFuncionario)): ?>
-        <div id="alerta_funcionario"
+        <div id="alerta_funcionario_inserir"
              class="alert alert-<?= htmlspecialchars((string)$alertaFuncionario['tipo'], ENT_QUOTES, 'UTF-8') ?> alert-dismissible fade show"
              role="alert">
             <?= htmlspecialchars((string)$alertaFuncionario['msg'], ENT_QUOTES, 'UTF-8') ?>
@@ -35,7 +35,7 @@ function old_funcionario(string $campo): string
         </div>
 
         <script>
-            setTimeout(() => document.getElementById('alerta_funcionario')?.remove(), 3000);
+            setTimeout(() => document.getElementById('alerta_funcionario_inserir')?.remove(), 3000);
         </script>
     <?php endif; ?>
 </div>

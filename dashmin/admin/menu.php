@@ -306,8 +306,8 @@ function isActive(string $page): string
                             <i class="bi bi-book me-2"></i>Curso
                         </a>
                         <div class="dropdown-menu bg-transparent border-0">
-                            <a href="index.php?page=curso_turma"
-                                class="dropdown-item ps-5 <?= isActive('curso_turma') ? 'active bg-light text-dark shadow' : ''; ?>">
+                            <a href="index.php?page=form_curso"
+                                class="dropdown-item ps-5 <?= isActive('form_curso') ? 'active bg-light text-dark shadow' : ''; ?>">
                                 <i class="fa fa-user-plus me-2 text-primary"></i>Registar
                             </a>
                             <a href="index.php?page=lista_curso"
@@ -322,8 +322,8 @@ function isActive(string $page): string
                             <i class="bi bi-people me-2"></i>Turma
                         </a>
                         <div class="dropdown-menu bg-transparent border-0">
-                            <a href="index.php?page=curso_turma"
-                                class="dropdown-item ps-5 <?= isActive('curso_turma') ? 'active bg-light text-dark shadow' : ''; ?>">
+                            <a href="index.php?page=form_turma"
+                                class="dropdown-item ps-5 <?= isActive('form_turma') ? 'active bg-light text-dark shadow' : ''; ?>">
                                 <i class="fa fa-user-plus me-2 text-primary"></i>Registar
                             </a>
                             <a href="index.php?page=lista_turma"

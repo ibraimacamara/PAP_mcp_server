@@ -8,7 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
-    $_SESSION['alerta_aluno'] = ['tipo' => 'danger', 'msg' => 'Token CSRF inválido.'];
+    $_SESSION['alerta_aluno_editar'] = ['tipo' => 'danger', 'msg' => 'Token CSRF inválido.'];
     header('Location: index.php?page=lista_aluno');
     exit;
 }
@@ -51,7 +51,7 @@ foreach ($campos as $campo) {
 }
 
 if (empty($set)) {
-    $_SESSION['alerta_aluno'] = ['tipo' => 'warning', 'msg' => 'Nenhum campo para atualizar.'];
+    $_SESSION['alerta_aluno_editar'] = ['tipo' => 'warning', 'msg' => 'Nenhum campo para atualizar.'];
     header("Location: index.php?page=editar_aluno&id=$numero_aluno");
     exit;
 }
@@ -112,7 +112,7 @@ try {
 
     $pdo->commit();
 
-    $_SESSION['alerta_aluno'] = [
+    $_SESSION['alerta_aluno_editar'] = [
         'tipo' => 'success',
         'msg' => 'Aluno atualizado com sucesso.'
     ];
@@ -123,7 +123,7 @@ try {
 } catch (Exception $e) {
     $pdo->rollBack();
 
-    $_SESSION['alerta_aluno'] = [
+    $_SESSION['alerta_aluno_editar'] = [
         'tipo' => 'danger',
         'msg' => 'Erro ao atualizar: ' . $e->getMessage()
     ];

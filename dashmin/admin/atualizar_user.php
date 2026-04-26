@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 // CSRF
 if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
-    $_SESSION['alerta_user'] = ['tipo' => 'danger', 'msg' => 'Token inválido.'];
+    $_SESSION['alerta_user_editar'] = ['tipo' => 'danger', 'msg' => 'Token inválido.'];
     header('Location: index.php?page=editar_user');
     exit;
 }
@@ -26,7 +26,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_tok
 $id = (int) ($_POST['id'] ?? 0);
 
 if ($id <= 0) {
-    $_SESSION['alerta_user'] = ['tipo' => 'danger', 'msg' => 'ID inválido.'];
+    $_SESSION['alerta_user_editar'] = ['tipo' => 'danger', 'msg' => 'ID inválido.'];
     header('Location: index.php?page=editar_user');
     exit;
 }
@@ -39,7 +39,7 @@ $confirm  = trim($_POST['confirmar_senha'] ?? '');
 
 // VALIDAÇÃO
 if (empty($username)) {
-    $_SESSION['alerta_user'] = ['tipo' => 'danger', 'msg' => 'nome de utilizador é obrigatório.'];
+    $_SESSION['alerta_user_editar'] = ['tipo' => 'danger', 'msg' => 'nome de utilizador é obrigatório.'];
     header("Location: index.php?page=editar_user&id=$id");
     exit;
 }
@@ -50,13 +50,13 @@ $senhaHash = null;
 if (!empty($senha)) {
 
     if ($senha !== $confirm) {
-        $_SESSION['alerta_user'] = ['tipo' => 'danger', 'msg' => 'Senhas não coincidem.'];
+        $_SESSION['alerta_user_editar'] = ['tipo' => 'danger', 'msg' => 'Senhas não coincidem.'];
         header("Location: index.php?page=editar_user&id=$id");
         exit;
     }
 
     if (strlen($senha) < 6) {
-        $_SESSION['alerta_user'] = ['tipo' => 'danger', 'msg' => 'Senha muito curta.'];
+        $_SESSION['alerta_user_editar'] = ['tipo' => 'danger', 'msg' => 'Senha muito curta.'];
         header("Location: index.php?page=editar_user&id=$id");
         exit;
     }

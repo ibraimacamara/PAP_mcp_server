@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 session_start();
@@ -65,12 +64,13 @@ $rotas = [
     'salvar_professor' => 'salvar_prof.php',
     'atualizar_professor' => 'atualizar_prof.php',
 
-    'curso_turma' => 'curso_turma.php',
+    'form_curso' => 'form_curso.php',
     'lista_curso' => 'lista_curso.php',
     'editar_curso' => 'editar_curso.php',
     'remover_curso' => 'remover_curso.php',
     'salvar_curso' => 'salvar_curso.php',
 
+    'form_turma' => 'form_turma.php',
     'lista_turma' => 'lista_turma.php',
     'editar_turma' => 'editar_turma.php',
     'remover_turma' => 'remover_turma.php',
@@ -88,13 +88,6 @@ $rotas = [
     'detalhe_funcionario' => 'detalhe_funcionario.php',
     'remover_funcionario' => 'remover_funcionario.php',
     'salvar_funcionario' => 'salvar_funcionario.php',
-
-    'salvar_modulo' => 'salvar_modulo.php',
-    'form_modulo' => 'form_modulo.php',
-    'detalhe_modulo' => 'detalhe_modulo.php',
-    'atribuir_mct' => 'atribuir_mct.php',
-    'salvar_atribuir_mct' => 'salvar_atribuir_mct.php',
-
 
     'editar_user' => 'editar_user.php',
     'atualizar_user' => 'atualizar_user.php',
