@@ -14,7 +14,7 @@ if (empty($_SESSION['auth']) || !$_SESSION['auth']) {
     exit;
 }
 
-// Verifica se é ADMIN
+// Verifica se é funcionario
 if (!isset($_SESSION['categoria']) || $_SESSION['categoria'] !== 'funcionario') {
     session_destroy();
     header('Location: ../login.php');
@@ -38,143 +38,146 @@ function isActive(string $page): string
     return $currentPage === $page ? 'active' : '';
 }
 ?>
- <style>
-                #chatWidget {
-                    display: none;
-                    position: fixed;
-                    bottom: 20px;
-                    right: 20px;
-                    width: 360px;
-                    height: 500px;
-                    z-index: 9999;
-                    background: #fff;
-                    border-radius: 16px;
-                    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
-                    flex-direction: column;
-                    overflow: hidden;
-                }
+<style>
+    #chatWidget {
+        display: none;
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 360px;
+        height: 500px;
+        z-index: 9999;
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+        flex-direction: column;
+        overflow: hidden;
+    }
 
-                #chatWidget.open {
-                    display: flex;
-                }
+    #chatWidget.open {
+        display: flex;
+    }
 
-                #chatWidget .cw-header {
-                    background: #0d6efd;
-                    color: #fff;
-                    padding: 12px 16px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    font-weight: 600;
-                    font-size: 15px;
-                }
+    #chatWidget .cw-header {
+        background: #0d6efd;
+        color: #fff;
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-weight: 600;
+        font-size: 15px;
+    }
 
-                #chatWidget .cw-header button {
-                    background: none;
-                    border: none;
-                    color: #fff;
-                    font-size: 18px;
-                    cursor: pointer;
-                    line-height: 1;
-                }
+    #chatWidget .cw-header button {
+        background: none;
+        border: none;
+        color: #fff;
+        font-size: 18px;
+        cursor: pointer;
+        line-height: 1;
+    }
 
-                #chatWidget .cw-messages {
-                    flex: 1;
-                    overflow-y: auto;
-                    padding: 12px;
-                    background: #f8f9fa;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 10px;
-                }
+    #chatWidget .cw-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 12px;
+        background: #f8f9fa;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
 
-                #chatWidget .cw-bubble {
-                    max-width: 85%;
-                    padding: 8px 12px;
-                    border-radius: 12px;
-                    font-size: 14px;
-                    line-height: 1.45;
-                    word-wrap: break-word;
-                    white-space: pre-wrap;
-                }
+    #chatWidget .cw-bubble {
+        max-width: 85%;
+        padding: 8px 12px;
+        border-radius: 12px;
+        font-size: 14px;
+        line-height: 1.45;
+        word-wrap: break-word;
+        white-space: pre-wrap;
+    }
 
-                #chatWidget .cw-user {
-                    align-self: flex-end;
-                    background: #0d6efd;
-                    color: #fff;
-                    border-bottom-right-radius: 3px;
-                }
+    #chatWidget .cw-user {
+        align-self: flex-end;
+        background: #0d6efd;
+        color: #fff;
+        border-bottom-right-radius: 3px;
+    }
 
-                #chatWidget .cw-agent {
-                    align-self: flex-start;
-                    background: #fff;
-                    border: 1px solid #dee2e6;
-                    border-bottom-left-radius: 3px;
-                }
+    #chatWidget .cw-agent {
+        align-self: flex-start;
+        background: #fff;
+        border: 1px solid #dee2e6;
+        border-bottom-left-radius: 3px;
+    }
 
-                #chatWidget .cw-input-row {
-                    display: flex;
-                    gap: 8px;
-                    padding: 10px 12px;
-                    border-top: 1px solid #dee2e6;
-                    background: #fff;
-                }
+    #chatWidget .cw-input-row {
+        display: flex;
+        gap: 8px;
+        padding: 10px 12px;
+        border-top: 1px solid #dee2e6;
+        background: #fff;
+    }
 
-                #chatWidget .cw-input-row textarea {
-                    flex: 1;
-                    border: 1px solid #dee2e6;
-                    border-radius: 8px;
-                    padding: 6px 10px;
-                    font-size: 14px;
-                    resize: none;
-                    outline: none;
-                    max-height: 80px;
-                    overflow-y: auto;
-                }
+    #chatWidget .cw-input-row textarea {
+        flex: 1;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 6px 10px;
+        font-size: 14px;
+        resize: none;
+        outline: none;
+        max-height: 80px;
+        overflow-y: auto;
+    }
 
-                #chatWidget .cw-input-row button {
-                    border: none;
-                    background: #0d6efd;
-                    color: #fff;
-                    border-radius: 8px;
-                    padding: 0 12px;
-                    cursor: pointer;
-                    font-size: 16px;
-                    flex-shrink: 0;
-                }
+    #chatWidget .cw-input-row button {
+        border: none;
+        background: #0d6efd;
+        color: #fff;
+        border-radius: 8px;
+        padding: 0 12px;
+        cursor: pointer;
+        font-size: 16px;
+        flex-shrink: 0;
+    }
 
-                #chatWidget .cw-input-row button:disabled {
-                    background: #aaa;
-                }
+    #chatWidget .cw-input-row button:disabled {
+        background: #aaa;
+    }
 
-                .cw-typing span {
-                    display: inline-block;
-                    width: 6px;
-                    height: 6px;
-                    background: #aaa;
-                    border-radius: 50%;
-                    margin: 0 2px;
-                    animation: cwbounce 1.2s infinite;
-                }
+    .cw-typing span {
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        background: #aaa;
+        border-radius: 50%;
+        margin: 0 2px;
+        animation: cwbounce 1.2s infinite;
+    }
 
-                .cw-typing span:nth-child(2) {
-                    animation-delay: .2s;
-                }
+    .cw-typing span:nth-child(2) {
+        animation-delay: .2s;
+    }
 
-                .cw-typing span:nth-child(3) {
-                    animation-delay: .4s;
-                }
+    .cw-typing span:nth-child(3) {
+        animation-delay: .4s;
+    }
 
-                @keyframes cwbounce {
-                    0%, 80%, 100% {
-                        transform: translateY(0)
-                    }
+    @keyframes cwbounce {
 
-                    40% {
-                        transform: translateY(-5px)
-                    }
-                }
-            </style>
+        0%,
+        80%,
+        100% {
+            transform: translateY(0)
+        }
+
+        40% {
+            transform: translateY(-5px)
+        }
+    }
+</style>
 <!DOCTYPE html>
 <html lang="pt">
 
@@ -303,8 +306,8 @@ function isActive(string $page): string
                             <i class="bi bi-book me-2"></i>Curso
                         </a>
                         <div class="dropdown-menu bg-transparent border-0">
-                            <a href="index.php?page=curso_turma"
-                                class="dropdown-item ps-5 <?= isActive('curso_turma') ? 'active bg-light text-dark shadow' : ''; ?>">
+                            <a href="index.php?page=form_curso"
+                                class="dropdown-item ps-5 <?= isActive('form_curso') ? 'active bg-light text-dark shadow' : ''; ?>">
                                 <i class="fa fa-user-plus me-2 text-primary"></i>Registar
                             </a>
                             <a href="index.php?page=lista_curso"
@@ -319,8 +322,8 @@ function isActive(string $page): string
                             <i class="bi bi-people me-2"></i>Turma
                         </a>
                         <div class="dropdown-menu bg-transparent border-0">
-                            <a href="index.php?page=curso_turma"
-                                class="dropdown-item ps-5 <?= isActive('curso_turma') ? 'active bg-light text-dark shadow' : ''; ?>">
+                            <a href="index.php?page=form_turma"
+                                class="dropdown-item ps-5 <?= isActive('form_turma') ? 'active bg-light text-dark shadow' : ''; ?>">
                                 <i class="fa fa-user-plus me-2 text-primary"></i>Registar
                             </a>
                             <a href="index.php?page=lista_turma"
@@ -330,7 +333,36 @@ function isActive(string $page): string
                         </div>
                     </div>
 
-                 
+                    <!-- <div class="nav-item dropdown">
+                        <a href="#" class="nav-link" data-bs-toggle="dropdown">
+                            <i class="bi bi-people me-2"></i>Modulo
+                        </a>
+                        <div class="dropdown-menu bg-transparent border-0">
+                            <a href="index.php?page=form_modulo"
+                                class="dropdown-item ps-5 <?= isActive('form_modulo') ? 'active bg-light text-dark shadow' : ''; ?>">
+                                <i class="fa fa-user-plus me-2 text-primary"></i>Registar
+                            </a>
+                            <a href="index.php?page=lista_modulo"
+                                class="dropdown-item ps-5 <?= isActive('listar_modulo') ? 'active bg-light text-dark shadow' : ''; ?>">
+                                <i class="fa fa-book-open me-2 text-primary"></i>Listar
+                            </a>
+                        </div>
+                    </div> -->
+                    <!-- <div class="nav-item dropdown">
+                        <a href="#" class="nav-link" data-bs-toggle="dropdown">
+                            <i class="fa fa-user-tie me-2"></i>Funcionário
+                        </a>
+                        <div class="dropdown-menu bg-transparent border-0">
+                            <a href="index.php?page=form_funcionario"
+                                class="dropdown-item ps-5 <?= isActive('form_funcionario') ? 'active bg-light text-dark shadow' : ''; ?>">
+                                <i class="fa fa-user-plus me-2 text-primary"></i>Registar
+                            </a>
+                            <a href="index.php?page=lista_funcionario"
+                                class="dropdown-item ps-5 <?= isActive('lista_funcionario') ? 'active bg-light text-dark shadow' : ''; ?>">
+                                <i class="fa fa-book-open me-2 text-primary"></i>Listar
+                            </a>
+                        </div>
+                    </div> -->
                 </div>
             </nav>
         </div>
@@ -363,8 +395,8 @@ function isActive(string $page): string
                 <div class="navbar-nav align-items-center ms-auto">
                     <div class="nav-item dropdown">
                         <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-                            <img class="rounded-circle" src="<?= htmlspecialchars($fotoPath) ?>" alt="Foto do utilizador"
-                                style="width: 53px; height: 50px;">
+                            <img class="rounded-circle" src="<?= htmlspecialchars($fotoPath) ?>"
+                                alt="Foto do utilizador" style="width: 53px; height: 50px;">
 
                             <span class="d-none d-lg-inline-flex">
                                 <?= htmlspecialchars($_SESSION['username']) ?>
@@ -372,7 +404,8 @@ function isActive(string $page): string
                         </a>
 
                         <div class="dropdown-menu dropdown-menu-end bg-light border-0 rounded-0 rounded-bottom m-0">
-                            <a href="index.php?page=editar_user&id=<?= (int) $_SESSION['user_id'] ?>" class="dropdown-item">
+                            <a href="index.php?page=editar_user&id=<?= (int) $_SESSION['user_id'] ?>"
+                                class="dropdown-item">
                                 Meu perfil
                             </a>
                             <a href="#" class="dropdown-item">Configurações</a>
@@ -384,7 +417,7 @@ function isActive(string $page): string
             <!-- Navbar End -->
 
             <!-- Chat Widget Popup -->
-           
+
 
             <div id="chatWidget">
                 <div class="cw-header">

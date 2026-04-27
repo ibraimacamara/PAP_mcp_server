@@ -17,7 +17,7 @@ function estaAutenticado(): bool
 function eAdmin(): bool
 {
     return isset($_SESSION['categoria']) &&
-           strtolower((string)$_SESSION['categoria']) === 'funcionario';
+        strtolower((string) $_SESSION['categoria']) === 'funcionario';
 }
 
 if (!estaAutenticado() || !eAdmin()) {
@@ -26,6 +26,11 @@ if (!estaAutenticado() || !eAdmin()) {
     redirecionar('../login.php');
 }
 
+/*
+|--------------------------------------------------------------------------
+| PRIMEIRO LOGIN
+|--------------------------------------------------------------------------
+*/
 
 
 /*
@@ -37,38 +42,46 @@ if (!estaAutenticado() || !eAdmin()) {
 $page = $_GET['page'] ?? 'home';
 
 $rotas = [
-    'home'              => 'home.php',
-    'form_aluno'        => 'form_aluno.php',
-    'lista_aluno'       => 'lista_aluno.php',
-    'editar_aluno'      => 'editar_aluno.php',
-    'detalhe_aluno'     => 'detalhe_aluno.php',
-    'remover_aluno'     => 'remover_aluno.php',
+    'home' => 'home.php',
+    'form_aluno' => 'form_aluno.php',
+    'lista_aluno' => 'lista_aluno.php',
+    'editar_aluno' => 'editar_aluno.php',
+    'detalhe_aluno' => 'detalhe_aluno.php',
+    'remover_aluno' => 'remover_aluno.php',
+    'salvar_aluno' => 'salvar_aluno.php',
 
-    'form_encarregado'  => 'form_encarregado.php',
+    'form_encarregado' => 'form_encarregado.php',
     'lista_encarregado' => 'lista_encarregado.php',
-    'editar_encarregado'=> 'editar_encarregado.php',
-    'remover_encarregado'=> 'remover_encarregado.php',
+    'editar_encarregado' => 'editar_encarregado.php',
+    'remover_encarregado' => 'remover_encarregado.php',
+    'salvar_encarregado' => 'salvar_encarregado.php',
 
-    'form_professor'    => 'form_prof.php',
-    'lista_professor'   => 'lista_prof.php',
-    'editar_professor'  => 'editar_prof.php',
+    'form_professor' => 'form_prof.php',
+    'lista_professor' => 'lista_prof.php',
+    'editar_professor' => 'editar_prof.php',
     'detalhe_professor' => 'detalhe_prof.php',
-    'remover_professor'     => 'remover_prof.php',
+    'remover_professor' => 'remover_prof.php',
+    'salvar_professor' => 'salvar_prof.php',
+    'atualizar_professor' => 'atualizar_prof.php',
 
-    'curso_turma'       => 'curso_turma.php',
-    'lista_curso'       => 'lista_curso.php',
-    'editar_curso'      => 'editar_curso.php',
-    'remover_curso'      => 'remover_curso.php',
+    'form_curso' => 'form_curso.php',
+    'lista_curso' => 'lista_curso.php',
+    'editar_curso' => 'editar_curso.php',
+    'remover_curso' => 'remover_curso.php',
+    'salvar_curso' => 'salvar_curso.php',
 
-    'lista_turma'       => 'lista_turma.php',
-    'editar_turma'      => 'editar_turma.php',
-    'remover_turma'      => 'remover_turma.php',
+    'form_turma' => 'form_turma.php',
+    'lista_turma' => 'lista_turma.php',
+    'editar_turma' => 'editar_turma.php',
+    'remover_turma' => 'remover_turma.php',
+    'salvar_turma' => 'salvar_turma.php',
 
 
 
-    'editar_user'       => 'editar_user.php',
-    'atualizar_user'       => 'atualizar_user.php',
-    'logout'            => 'logout.php'
+
+    'editar_user' => 'editar_user.php',
+    'atualizar_user' => 'atualizar_user.php',
+    'logout' => 'logout.php'
 ];
 
 // 1. Verifica se a página existe no array, se não, define como home

@@ -8,7 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== ($_SESSION['csrf_token'] ?? '')) {
-    $_SESSION['alerta_funcionario'] = [
+    $_SESSION['alerta_funcionario_editar'] = [
         'tipo' => 'danger',
         'msg' => 'Token CSRF inválido.'
     ];
@@ -19,7 +19,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== ($_SESSION['csrf_to
 $id = (int) ($_POST['id'] ?? 0);
 
 if ($id <= 0) {
-    $_SESSION['alerta_funcionario'] = [
+    $_SESSION['alerta_funcionario_editar'] = [
         'tipo' => 'danger',
         'msg' => 'ID inválido.'
     ];
@@ -38,7 +38,7 @@ $stmt->execute([$id]);
 $dados = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$dados) {
-    $_SESSION['alerta_funcionario'] = [
+    $_SESSION['alerta_funcionario_editar'] = [
         'tipo' => 'danger',
         'msg' => 'Funcionário não encontrado.'
     ];
@@ -86,7 +86,7 @@ foreach ($camposFuncionario as $campo) {
 }
 
 if (empty($set)) {
-    $_SESSION['alerta_funcionario'] = [
+    $_SESSION['alerta_funcionario_editar'] = [
         'tipo' => 'warning',
         'msg' => 'Nenhum dado para atualizar.'
     ];
@@ -144,7 +144,7 @@ try {
 
     $pdo->commit();
 
-    $_SESSION['alerta_funcionario'] = [
+    $_SESSION['alerta_funcionario_editar'] = [
         'tipo' => 'success',
         'msg'  => 'Funcionário atualizado com sucesso.'
     ];
@@ -157,7 +157,7 @@ try {
         $pdo->rollBack();
     }
 
-    $_SESSION['alerta_funcionario'] = [
+    $_SESSION['alerta_funcionario_editar'] = [
         'tipo' => 'danger',
         'msg'  => 'Erro ao atualizar funcionário: ' . $e->getMessage()
     ];

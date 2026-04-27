@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 // Validação CSRF
 if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
-    $_SESSION['alerta_curso'] = ['tipo' => 'danger', 'msg' => 'Token CSRF inválido.'];
+    $_SESSION['alerta_curso_editar'] = ['tipo' => 'danger', 'msg' => 'Token CSRF inválido.'];
     header('Location: index.php?page=lista_curso');
     exit;
 }
@@ -45,7 +45,7 @@ if (!empty($_FILES['imagem']['name'])) {
     finfo_close($finfo);
 
     if (!in_array($mime, $allowed)) {
-        $_SESSION['alerta_curso'] = ['tipo' => 'danger', 'msg' => 'Tipo de ficheiro não permitido.'];
+        $_SESSION['alerta_curso_editar'] = ['tipo' => 'danger', 'msg' => 'Tipo de ficheiro não permitido.'];
         header("Location: index.php?page=editar_curso&id=$id");
         exit;
     }
@@ -76,7 +76,7 @@ if (!empty($_FILES['imagem']['name'])) {
         }
 
     } else {
-        $_SESSION['alerta_curso'] = ['tipo' => 'danger', 'msg' => 'Erro ao fazer upload da imagem.'];
+        $_SESSION['alerta_curso_editar'] = ['tipo' => 'danger', 'msg' => 'Erro ao fazer upload da imagem.'];
         header("Location: index.php?page=editar_curso&id=$id");
         exit;
     }
@@ -97,11 +97,11 @@ try {
         $id
     ]);
 
-    $_SESSION['alerta_curso'] = ['tipo' => 'success', 'msg' => 'Curso atualizado com sucesso.'];
+    $_SESSION['alerta_curso_editar'] = ['tipo' => 'success', 'msg' => 'Curso atualizado com sucesso.'];
     header('Location: index.php?page=lista_curso');
 
 } catch (Exception $e) {
-    $_SESSION['alerta_curso'] = [
+    $_SESSION['alerta_curso_editar'] = [
         'tipo' => 'danger',
         'msg' => 'Erro ao atualizar: ' . $e->getMessage()
     ];

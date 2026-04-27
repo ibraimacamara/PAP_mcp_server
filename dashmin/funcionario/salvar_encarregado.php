@@ -32,11 +32,11 @@ function logErro(string $mensagem): void
 
 function erroUtilizador(string $mensagem): void
 {
-    $_SESSION['alerta_encarregado'] = [
+    $_SESSION['alerta_encarregado_inserir'] = [
         'tipo' => 'warning',
         'msg' => $mensagem
     ];
-    header('Location: form_encarregado.php');
+    header('Location: index.php?page=form_encarregado');
     exit;
 }
 
@@ -47,12 +47,12 @@ function erroTecnico(string $logMsg, int $httpCode = 500): void
     logErro($logMsg);
     http_response_code($httpCode);
 
-    $_SESSION['alerta_encarregado'] = [
+    $_SESSION['alerta_encarregado_inserir'] = [
         'tipo' => 'danger',
         'msg' => 'Ocorreu um erro interno. Tente novamente mais tarde.'
     ];
 
-    header('Location: form_encarregado.php');
+    header('Location: index.php?page=form_encarregado');
     exit;
 }
 
@@ -136,7 +136,7 @@ try {
         ':freguesia' => $freguesia
     ]);
 
-    $_SESSION['alerta_encarregado'] = [
+    $_SESSION['alerta_encarregado_inserir'] = [
         'tipo' => 'success',
         'msg' => 'Encarregado registado com sucesso.'
     ];
@@ -153,5 +153,5 @@ try {
 
 
 unset($_SESSION['csrf_token_encarregado']);
-header('Location: form_encarregado.php');
+header('Location: index.php?page=form_encarregado');
 exit;

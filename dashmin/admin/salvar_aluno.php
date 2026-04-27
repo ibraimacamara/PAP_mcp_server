@@ -21,7 +21,7 @@ function logErro(string $mensagem): void
 function moodleRequest(string $function, array $params): array
 {
     $moodleUrl = 'https://ibraima.sieno.pt/sgei/webservice/rest/server.php';
-    $token = '';
+    $token = '2e894f0f30032b1222827460a7aa1ef7';
 
     $postFields = array_merge([
         'wstoken' => $token,
@@ -82,8 +82,8 @@ function criarOuObterAlunoMoodle(array $dados): int
     $firstname = $partesNome[0] ?? 'Aluno';
     $lastname = $partesNome[1] ?? 'Sem apelido';
 
-    $biNumerico = preg_replace('/[^0-9]/', '', $dados['bi']);
-    $password = 'Aluno@' . ($biNumerico !== '' ? $biNumerico : time()) . 'a';
+ $telefoneNumerico = preg_replace('/[^0-9]/', '', $dados['contato']);
+$password = 'Aluno@' . $telefoneNumerico;
 
     $criado = moodleRequest('core_user_create_users', [
         'users[0][username]' => $email,
@@ -314,7 +314,10 @@ try {
 
     $pdo->beginTransaction();
 
-    $senhaHash = password_hash($dados['bi'], PASSWORD_DEFAULT);
+    $telefoneNumerico = preg_replace('/[^0-9]/', '', $dados['contato']);
+    $passwordAluno = 'Aluno@' . $telefoneNumerico;
+
+    $senhaHash = password_hash($passwordAluno, PASSWORD_DEFAULT);
 
     $stmt = $pdo->prepare("
         INSERT INTO users 

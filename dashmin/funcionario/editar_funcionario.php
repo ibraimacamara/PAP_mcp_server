@@ -15,16 +15,19 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
 $id = (int) $_GET['id'];
 
 $stmt = $pdo->prepare("
-    SELECT professor.*, users.foto
-    FROM professor
-    JOIN users ON users.id = professor.user_id
-    WHERE professor.id = ?
+    SELECT 
+        f.*,
+        u.foto,
+        u.categoria 
+    FROM funcionario f
+    LEFT JOIN users u ON u.id = f.user_id
+    WHERE f.id = ?
 ");
 $stmt->execute([$id]);
-$professor = $stmt->fetch(PDO::FETCH_ASSOC);
+$funcionario = $stmt->fetch(PDO::FETCH_ASSOC);
 
-if (!$professor) {
-    die("Professor não encontrado.");
+if (!$funcionario) {
+    die("funcionário não encontrado.");
 }
 ?>
 
@@ -32,10 +35,10 @@ if (!$professor) {
     <div class="row g-4">
         <div class="col-12">
             <div class="bg-white shadow rounded p-4">
-                <h6 class="mb-4">Editar Professor — <?= htmlspecialchars($professor['nome']) ?></h6>
+                <h6 class="mb-4">Editar Funcionário — <?= htmlspecialchars($funcionario['nome']) ?></h6>
 
-                <form action="index.php?page=atualizar_professor" method="POST" enctype="multipart/form-data">
-                    <input type="hidden" name="id" value="<?= $professor['id'] ?>">
+                <form action="atualizar_funcionario.php" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="id" value="<?= $funcionario['id'] ?>">
                     <input type="hidden" name="csrf_token"
                         value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
 
@@ -43,12 +46,12 @@ if (!$professor) {
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Nome completo</label>
                             <input type="text" name="nome" class="form-control"
-                                value="<?= htmlspecialchars($professor['nome']) ?>" required>
+                                value="<?= htmlspecialchars($funcionario['nome']) ?>" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Email</label>
                             <input type="email" name="email" class="form-control"
-                                value="<?= htmlspecialchars($professor['email'] ?? '') ?>">
+                                value="<?= htmlspecialchars($funcionario['email'] ?? '') ?>">
                         </div>
                     </div>
 
@@ -56,12 +59,12 @@ if (!$professor) {
                         <div class="col-md-6 mb-3">
                             <label class="form-label">BI</label>
                             <input type="text" name="bi" class="form-control"
-                                value="<?= htmlspecialchars($professor['bi'] ?? '') ?>">
+                                value="<?= htmlspecialchars($funcionario['bi'] ?? '') ?>">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Contato</label>
                             <input type="text" name="contato" class="form-control"
-                                value="<?= htmlspecialchars($professor['contato'] ?? '') ?>">
+                                value="<?= htmlspecialchars($funcionario['contato'] ?? '') ?>">
                         </div>
 
                     </div>
@@ -71,12 +74,12 @@ if (!$professor) {
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Data de Nascimento</label>
                             <input type="date" name="data_nascimento" class="form-control"
-                                value="<?= htmlspecialchars($professor['data_nascimento'] ?? '') ?>">
+                                value="<?= htmlspecialchars($funcionario['data_nascimento'] ?? '') ?>">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Morada</label>
                             <input type="text" name="morada" class="form-control"
-                                value="<?= htmlspecialchars($professor['morada'] ?? '') ?>">
+                                value="<?= htmlspecialchars($funcionario['morada'] ?? '') ?>">
                         </div>
                     </div>
 
@@ -85,24 +88,24 @@ if (!$professor) {
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Nacionalidade</label>
                             <input type="text" name="nacionalidade" class="form-control"
-                                value="<?= htmlspecialchars($professor['nacionalidade'] ?? '') ?>">
+                                value="<?= htmlspecialchars($funcionario['nacionalidade'] ?? '') ?>">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">NIF</label>
                             <input type="text" name="nif" class="form-control"
-                                value="<?= htmlspecialchars($professor['nif'] ?? '') ?>">
+                                value="<?= htmlspecialchars($funcionario['nif'] ?? '') ?>">
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Distrito</label>
                             <input type="text" name="distrito" class="form-control"
-                                value="<?= htmlspecialchars($professor['distrito'] ?? '') ?>">
+                                value="<?= htmlspecialchars($funcionario['distrito'] ?? '') ?>">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Freguesia</label>
                             <input type="text" name="freguesia" class="form-control"
-                                value="<?= htmlspecialchars($professor['freguesia'] ?? '') ?>">
+                                value="<?= htmlspecialchars($funcionario['freguesia'] ?? '') ?>">
                         </div>
 
                     </div>
@@ -112,16 +115,16 @@ if (!$professor) {
                             <label class="form-label">Gênero</label>
                             <select name="genero" class="form-select">
                                 <option value="">Escolha...</option>
-                                <option value="Masculino" <?= ($professor['genero'] ?? '') == 'Masculino' ? 'selected' : '' ?>>Masculino</option>
-                                <option value="Feminino" <?= ($professor['genero'] ?? '') == 'Feminino' ? 'selected' : '' ?>>Feminino</option>
+                                <option value="masculino" <?= ($funcionario['genero'] ?? '') == 'masculino' ? 'selected' : '' ?>>Masculino</option>
+                                <option value="feminino" <?= ($funcionario['genero'] ?? '') == 'feminino' ? 'selected' : '' ?>>Feminino</option>
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Imagem (deixa vazio para manter a atual)</label>
                             <input type="file" name="foto" class="form-control"
                                 accept="image/jpeg, image/jpg, image/png, image/gif">
-                            <?php if (!empty($professor['foto'])): ?>
-                                <small class="text-muted">Atual: <?= htmlspecialchars($professor['foto']) ?></small>
+                            <?php if (!empty($funcionario['foto'])): ?>
+                                <small class="text-muted">Atual: <?= htmlspecialchars($funcionario['foto']) ?></small>
                             <?php endif; ?>
                         </div>
 
@@ -129,14 +132,14 @@ if (!$professor) {
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Grupo Disciplinar</label>
-                            <input type="text" name="grupo_d" class="form-control"
-                                value="<?= htmlspecialchars($professor['grupo_d'] ?? '') ?>">
+                            <label class="form-label">Cargo</label>
+                            <input type="text" name="cargo" class="form-control"
+                                value="<?= htmlspecialchars($funcionario['cargo'] ?? '') ?>">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Tipo de Contrato</label>
                             <input type="text" name="tipo_c" class="form-control"
-                                value="<?= htmlspecialchars($professor['tipo_c'] ?? '') ?>">
+                                value="<?= htmlspecialchars($funcionario['tipo_c'] ?? '') ?>">
                         </div>
 
                     </div>
@@ -144,17 +147,17 @@ if (!$professor) {
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Habilitação Profissional</label>
                             <input type="text" name="h_profissional" class="form-control"
-                                value="<?= htmlspecialchars($professor['h_profissional'] ?? '') ?>">
+                                value="<?= htmlspecialchars($funcionario['h_profissional'] ?? '') ?>">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Habilitação Académica</label>
                             <input type="text" name="h_academica" class="form-control"
-                                value="<?= htmlspecialchars($professor['h_academica'] ?? '') ?>">
+                                value="<?= htmlspecialchars($funcionario['h_academica'] ?? '') ?>">
                         </div>
                     </div>
 
                     <div class="d-flex gap-2 justify-content-center">
-                        <a href="index.php?page=lista_professor" class="btn btn-secondary w-25">Cancelar</a>
+                        <a href="index.php?page=lista_funcionario" class="btn btn-secondary w-25">Cancelar</a>
                         <button type="submit" class="btn btn-primary w-25">Atualizar</button>
                     </div>
                 </form>

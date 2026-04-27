@@ -8,7 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
-    $_SESSION['alerta_turma'] = ['tipo' => 'danger', 'msg' => 'Token CSRF inválido.'];
+    $_SESSION['alerta_turma_editar'] = ['tipo' => 'danger', 'msg' => 'Token CSRF inválido.'];
     header('Location: index.php?page=lista_turma');
     exit;
 }
@@ -39,7 +39,7 @@ $set[] = "`diretor` = ?";
 $valores[] = $diretorId;
 
 if (empty($set)) {
-    $_SESSION['alerta_turma'] = ['tipo' => 'warning', 'msg' => 'Nenhum campo para atualizar.'];
+    $_SESSION['alerta_turma_editar'] = ['tipo' => 'warning', 'msg' => 'Nenhum campo para atualizar.'];
     header("Location: index.php?page=editar_turma&id=$id");
     exit;
 }
@@ -50,10 +50,10 @@ $sql = "UPDATE turma SET " . implode(', ', $set) . " WHERE id = ?";
 try {
     $stmt = $pdo->prepare($sql);
     $stmt->execute($valores);
-    $_SESSION['alerta_turma'] = ['tipo' => 'success', 'msg' => 'Turma atualizada com sucesso.'];
+    $_SESSION['alerta_turma_editar'] = ['tipo' => 'success', 'msg' => 'Turma atualizada com sucesso.'];
     header('Location: index.php?page=lista_turma');
 } catch (Exception $e) {
-    $_SESSION['alerta_turma'] = ['tipo' => 'danger', 'msg' => 'Erro ao atualizar: ' . $e->getMessage()];
+    $_SESSION['alerta_turma_editar'] = ['tipo' => 'danger', 'msg' => 'Erro ao atualizar: ' . $e->getMessage()];
     header("Location: index.php?page=editar_turma&id=$id");
 }
 exit;

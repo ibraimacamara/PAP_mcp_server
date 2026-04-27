@@ -9,11 +9,11 @@ if (empty($_SESSION['csrf_token_aluno'])) {
     $_SESSION['csrf_token_aluno'] = bin2hex(random_bytes(32));
 }
 
-$alertaAluno = $_SESSION['alerta_aluno'] ?? null;
+$alertaAluno = $_SESSION['alerta_aluno_inserir'] ?? null;
 $oldAluno = $_SESSION['old_aluno'] ?? [];
 $tinhaFotoAluno = $_SESSION['tinha_foto_aluno'] ?? false;
 
-unset($_SESSION['alerta_aluno'], $_SESSION['old_aluno'], $_SESSION['tinha_foto_aluno']);
+unset($_SESSION['alerta_aluno_inserir'], $_SESSION['old_aluno'], $_SESSION['tinha_foto_aluno']);
 
 function old_aluno(string $campo): string
 {
@@ -64,7 +64,7 @@ $turma = $pdo->query(
 
             <div class="bg-white shadow rounded  p-4">
                 <h6 class="mb-4">Registar Aluno</h6>
-                <form action="salvar_aluno.php" method="POST" enctype="multipart/form-data">
+                <form action="index.php?page=salvar_aluno" method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="csrf_token_aluno"
                         value="<?= htmlspecialchars($_SESSION['csrf_token_aluno'], ENT_QUOTES, 'UTF-8') ?>">
                     <div class="row">

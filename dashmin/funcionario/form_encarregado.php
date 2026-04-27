@@ -8,8 +8,8 @@ if (empty($_SESSION['csrf_token_encarregado'])) {
     $_SESSION['csrf_token_encarregado'] = bin2hex(random_bytes(32));
 }
 
-$alertaEncarregado = $_SESSION['alerta_encarregado'] ?? null;
-unset($_SESSION['alerta_encarregado']);
+$alertaEncarregado = $_SESSION['alerta_encarregado_inserir'] ?? null;
+unset($_SESSION['alerta_encarregado_inserir']);
 
 ?>
 

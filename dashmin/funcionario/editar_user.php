@@ -40,7 +40,7 @@ if (!$user) {
             <div class="bg-white shadow rounded p-4">
                 <h6 class="mb-4">Editar Meus Dados</h6>
 
-                <form action="index.php?page=atualizar_user" method="POST">
+                <form action="atualizar_user.php" method="POST">
                     <input type="hidden" name="id" value="<?= htmlspecialchars($user['id'], ENT_QUOTES) ?>">
                     <input type="hidden" name="csrf_token"
                         value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
